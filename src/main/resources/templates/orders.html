@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Đơn hàng của tôi</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <section class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">📦 Đơn hàng của tôi</h1>
+                <p class="card-subtitle">Theo dõi và quản lý đơn hàng của bạn</p>
+            </div>
+
+            <div class="card-body">
+                <!-- Debug buttons -->
+                <div class="mb-4 p-3 bg-gray-100 rounded">
+                    <h3 class="text-sm font-semibold mb-2">Debug Tools:</h3>
+                    <button onclick="testAPI()" class="btn btn-sm btn-outline mr-2">Test API</button>
+                    <button onclick="checkAuth()" class="btn btn-sm btn-outline mr-2">Check Auth</button>
+                    <button onclick="clearToken()" class="btn btn-sm btn-danger">Clear Token</button>
+                    <span id="debugInfo" class="text-sm ml-4"></span>
+                </div>
+
+                <div class="tabs mb-4">
+                    <button class="tab active" data-status="all">Tất cả</button>
+                    <button class="tab" data-status="PENDING">Chờ xử lý</button>
+                    <button class="tab" data-status="CONFIRMED">Đã xác nhận</button>
+                    <button class="tab" data-status="SHIPPING">Đang giao</button>
+                    <button class="tab" data-status="DELIVERED">Đã giao</button>
+                    <button class="tab" data-status="CANCELLED">Đã hủy</button>
+                </div>
+
+                <div id="loading" class="text-center p-4">
+                    <div class="loading"></div>
+                    <p class="mt-2">Đang tải đơn hàng...</p>
+                </div>
+
+                <div id="ordersList" class="space-y-4"></div>
+
+                <div id="emptyState" class="text-center p-6" style="display: none;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📦</div>
+                    <h3 class="mb-2">Chưa có đơn hàng nào</h3>
+                    <p class="text-secondary mb-3">Hãy bắt đầu mua sắm và khám phá các cuốn sách thú vị!</p>
+                    <a href="/catalog" class="btn btn-primary">Mua sắm ngay</a>
+                </div>
+
+                <div id="errorState" class="text-center p-4" style="display: none;">
+                    <div class="alert alert-error">
+                        <h4 class="mb-1" id="errorTitle">Không thể tải đơn hàng</h4>
+                        <p id="errorMessage">Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề tiếp diễn.</p>
+                        <button onclick="loadOrders()" class="btn btn-outline mt-2">Thử lại</button>
+                        <button onclick="goToLogin()" class="btn btn-primary mt-2 ml-2">Đăng nhập lại</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let allOrders = [];
+
+        // Debug functions
+        function updateDebugInfo(message) {
+            document.getElementById('debugInfo').textContent = message;
+        }
+
+        async function testAPI() {
+            try {
+                updateDebugInfo('Testing API...');
+
+                // 🚨 Lấy token
+                const token = localStorage.getItem('token');
+                console.log('🧪 Test token:', token);
+
+                if (!token) {
+                    throw new Error('No token found in localStorage');
+                }
+
+                // 🚨 Test với token
+                const res = await fetch('/api/orders/my-orders', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`  // 🚨 THÊM TOKEN
+                    }
+                });
+
+                console.log('🧪 API Test status:', res.status);
+
+                const result = await res.json();
+                console.log('API Test Result:', result);
+                updateDebugInfo(`API Status: ${res.status}, Data: ${result.data?.length || 0} orders`);
+            } catch (error) {
+                console.error('API Test Error:', error);
+                updateDebugInfo('API Test Failed: ' + error.message);
+            }
+        }
+
+        async function checkAuth() {
+            const token = localStorage.getItem('token');
+            updateDebugInfo(`Token: ${token ? 'Exists' : 'Missing'}`);
+            console.log('Token:', token);
+        }
+
+        function clearToken() {
+            localStorage.removeItem('token');
+            updateDebugInfo('Token cleared');
+            window.location.reload();
+        }
+
+        function goToLogin() {
+            window.location.href = '/login';
+        }
+
+        async function loadOrders() {
+            console.log('🔍 Starting loadOrders...');
+
+            const loading = document.getElementById('loading');
+            const emptyState = document.getElementById('emptyState');
+            const errorState = document.getElementById('errorState');
+            const ordersList = document.getElementById('ordersList');
+
+            loading.style.display = 'block';
+            emptyState.style.display = 'none';
+            errorState.style.display = 'none';
+            ordersList.innerHTML = '';
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('Không tìm thấy token');
+                }
+
+                console.log('🔄 Fetching orders list...');
+                const res = await fetch('/api/orders/my-orders', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+                }
+
+                const json = await res.json();
+                console.log('✅ Orders list response:', json);
+
+                const ordersListData = json?.data || [];
+                console.log(`📦 Found ${ordersListData.length} orders in list`);
+
+                // 🚀 FIX: Gọi API chi tiết cho từng order
+                allOrders = [];
+
+                for (const orderSummary of ordersListData) {
+                    try {
+                        console.log(`🔍 Fetching details for order #${orderSummary.id}`);
+                        const detailRes = await fetch(`/api/orders/${orderSummary.id}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (detailRes.ok) {
+                            const detailJson = await detailRes.json();
+                            console.log(`✅ Order #${orderSummary.id} details:`, detailJson.data);
+                            allOrders.push(detailJson.data);
+                        } else {
+                            console.warn(`❌ Cannot get details for order #${orderSummary.id}`);
+                            // Vẫn thêm order summary nếu không lấy được chi tiết
+                            allOrders.push(orderSummary);
+                        }
+                    } catch (detailError) {
+                        console.error(`💥 Error getting details for order #${orderSummary.id}:`, detailError);
+                        allOrders.push(orderSummary);
+                    }
+                }
+
+                console.log(`🎯 Final orders with details:`, allOrders);
+
+                if (allOrders.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    renderOrders(allOrders);
+                }
+
+            } catch (error) {
+                console.error('💥 Load orders error:', error);
+                document.getElementById('errorTitle').textContent = 'Không thể tải đơn hàng';
+                document.getElementById('errorMessage').textContent = error.message;
+                document.getElementById('errorState').style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function renderOrders(orders) {
+            const container = document.getElementById('ordersList');
+
+            if (orders.length === 0) {
+                container.innerHTML = `
+            <div class="text-center p-4">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                <p class="text-secondary">Không tìm thấy đơn hàng nào phù hợp</p>
+            </div>
+        `;
+                return;
+            }
+
+            container.innerHTML = orders.map(order => {
+                // 🚀 XỬ LÝ CẢ 2 TRƯỜNG HỢP: order có items HOẶC orderItems
+                const items = order.items || order.orderItems || [];
+                const itemsCount = items.length;
+
+                console.log(`🎯 Rendering order #${order.id}:`, {
+                    items: items,
+                    itemsCount: itemsCount,
+                    hasItems: !!order.items,
+                    hasOrderItems: !!order.orderItems
+                });
+
+                return `
+        <div class="card order-card">
+            <div class="card-header" style="background: ${getStatusColor(order.status)}10;">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="card-title mb-1">Đơn hàng #${order.id}</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge" style="background: ${getStatusColor(order.status)}">
+                                ${getStatusText(order.status)}
+                            </span>
+                            <span class="text-secondary">• ${formatDate(order.orderDate)}</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-semibold">${formatPrice(order.totalAmount)}</div>
+                        <div class="text-secondary text-sm">${itemsCount} sản phẩm</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                ${itemsCount > 0 ? items.map(item => `
+                    <div class="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
+                        <div class="w-12 h-12 bg-blue-100 rounded flex items-center justify-center">
+                            📖
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-medium">${item.bookTitle || item.book?.title || 'Sách'}</div>
+                            <div class="text-secondary text-sm">
+                                Số lượng: ${item.quantity} × ${formatPrice(item.priceAtOrder || item.price)}
+                            </div>
+                        </div>
+                        <div class="font-semibold">
+                            ${formatPrice((item.priceAtOrder || item.price) * item.quantity)}
+                        </div>
+                    </div>
+                `).join('') : '<p class="text-center text-secondary py-4">Không có sản phẩm</p>'}
+
+                <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
+                    <div>
+                        <div class="text-secondary text-sm">Địa chỉ giao hàng</div>
+                        <div class="font-medium">${order.shippingAddress || 'Chưa có'}</div>
+                    </div>
+                </div>
+
+                <button onclick="toggleOrderDetails(${order.id})" class="btn btn-outline w-full mt-4">
+                    📋 Xem chi tiết
+                </button>
+
+                <div id="orderDetails-${order.id}" class="mt-4 p-3 bg-gray-50 rounded" style="display: none;">
+                    <div class="text-sm text-secondary">
+                        <strong>Thông tin chi tiết đơn hàng #${order.id}:</strong>
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <div><strong>Mã đơn hàng:</strong> #${order.id}</div>
+                            <div><strong>Trạng thái:</strong> ${getStatusText(order.status)}</div>
+                            <div><strong>Tổng tiền:</strong> ${formatPrice(order.totalAmount)}</div>
+                            <div><strong>Số sản phẩm:</strong> ${itemsCount}</div>
+                            <div><strong>Ngày đặt:</strong> ${formatDate(order.orderDate)}</div>
+                            <div><strong>Địa chỉ:</strong> ${order.shippingAddress || 'Chưa có'}</div>
+                        </div>
+
+                        ${order.trackingHistory && order.trackingHistory.length > 0 ? `
+                            <div class="mt-3">
+                                <strong>Lịch sử trạng thái:</strong>
+                                <div class="mt-1 space-y-1">
+                                    ${order.trackingHistory.map(tracking => `
+                                        <div class="flex justify-between text-xs">
+                                            <span>${getStatusText(tracking.status)}</span>
+                                            <span>${formatDate(tracking.timestamp)}</span>
+                                            ${tracking.note ? `<div class="text-xs text-gray-500">${tracking.note}</div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+            }).join('');
+        }
+        // 🚀 Hàm toggle hiển thị chi tiết đơn hàng
+        function toggleOrderDetails(orderId) {
+            console.log('🔍 Toggling order details:', orderId);
+
+            const detailsDiv = document.getElementById(`orderDetails-${orderId}`);
+            const button = event.target;
+
+            if (detailsDiv.style.display === 'none') {
+                // Hiện chi tiết
+                detailsDiv.style.display = 'block';
+                button.textContent = '📋 Ẩn chi tiết';
+                button.classList.add('btn-primary');
+                button.classList.remove('btn-outline');
+            } else {
+                // Ẩn chi tiết
+                detailsDiv.style.display = 'none';
+                button.textContent = '📋 Xem chi tiết';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-outline');
+            }
+        }
+
+        // Utility functions
+        function getStatusColor(status) {
+            const colors = {
+                'PENDING': '#f59e0b',
+                'CONFIRMED': '#3b82f6',
+                'SHIPPING': '#8b5cf6',
+                'DELIVERED': '#10b981',
+                'CANCELLED': '#ef4444'
+            };
+            return colors[status] || '#64748b';
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                'PENDING': 'Chờ xử lý',
+                'CONFIRMED': 'Đã xác nhận',
+                'SHIPPING': 'Đang giao hàng',
+                'DELIVERED': 'Đã giao',
+                'CANCELLED': 'Đã hủy'
+            };
+            return texts[status] || status;
+        }
+
+        function formatPrice(price) {
+            if (!price) return '0₫';
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(price);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Không xác định';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+
+        // Event listeners
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const status = tab.getAttribute('data-status');
+                const filteredOrders = status === 'all'
+                    ? allOrders
+                    : allOrders.filter(order => order.status === status);
+                renderOrders(filteredOrders);
+
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.toggle('active', t.getAttribute('data-status') === status);
+                });
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Orders page loaded');
+            checkAuth();
+            loadOrders();
+        });
+    </script>
+
+    <style>
+        .order-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.2s;
+        }
+        .order-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .loading {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+    </style>
+</div>
+</body>
+</html>

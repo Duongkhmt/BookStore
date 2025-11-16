@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký - BookStore</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="topbar">
+    <div class="topbar-content">
+        <a href="/" class="brand">📚 BookStore</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="grid grid-cols-1" style="max-width: 400px; margin: 4rem auto;">
+        <div class="card">
+            <div class="card-header text-center">
+                <h1 class="card-title">Tạo tài khoản</h1>
+                <p class="card-subtitle">Tham gia cộng đồng BookStore</p>
+            </div>
+            <div class="card-body">
+                <form onsubmit="register(event)" id="registerForm">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Tên đăng nhập *</label>
+                        <input
+                                type="text"
+                                id="username"
+                                class="form-control"
+                                placeholder="Nhập tên đăng nhập"
+                                required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email *</label>
+                        <input
+                                type="email"
+                                id="email"
+                                class="form-control"
+                                placeholder="Nhập email"
+                                required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Mật khẩu *</label>
+                        <input
+                                type="password"
+                                id="password"
+                                class="form-control"
+                                placeholder="Nhập mật khẩu"
+                                required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Xác nhận mật khẩu *</label>
+                        <input
+                                type="password"
+                                id="confirmPassword"
+                                class="form-control"
+                                placeholder="Nhập lại mật khẩu"
+                                required
+                        />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                        <span id="registerText">Đăng ký</span>
+                        <div id="registerLoading" class="loading" style="display: none;"></div>
+                    </button>
+                </form>
+
+                <div id="message" class="mt-2"></div>
+
+                <p class="text-center mt-2" style="color: #64748b; font-size: 0.875rem;">
+                    Đã có tài khoản?
+                    <a href="/login" style="color: #3b82f6; text-decoration: none;">Đăng nhập ngay</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function register(e) {
+        e.preventDefault();
+
+        const registerText = document.getElementById('registerText');
+        const registerLoading = document.getElementById('registerLoading');
+        const messageDiv = document.getElementById('message');
+        const form = document.getElementById('registerForm');
+
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        // Xóa thông báo lỗi cũ
+        messageDiv.innerHTML = '';
+
+        // 1. Kiểm tra mật khẩu khớp
+        if (password !== confirmPassword) {
+            messageDiv.innerHTML = '<div class="alert alert-error">Mật khẩu xác nhận không khớp!</div>';
+            return;
+        }
+
+        // 2. Hiển thị loading
+        registerText.style.display = 'none';
+        registerLoading.style.display = 'inline-block';
+
+        // 3. Chuẩn bị payload
+        const payload = {
+            username: document.getElementById('username').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            password: password,
+            role: 'ROLE_USER' // Mặc định là USER
+        };
+
+        try {
+            // 4. Gọi API (Giả sử bạn có file api.js)
+            // Nếu không có API class, dùng fetch
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            const json = await res.json();
+
+            if (res.ok) {
+                // 5. Thành công
+                messageDiv.innerHTML = '<div class="alert alert-success">Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...</div>';
+
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+
+            } else {
+                // 6. Thất bại
+                messageDiv.innerHTML = `<div class="alert alert-error">${json?.message || 'Đăng ký thất bại'}</div>`;
+            }
+        } catch (error) {
+            console.error('Register error:', error);
+            messageDiv.innerHTML = '<div class="alert alert-error">Lỗi kết nối đến máy chủ</div>';
+        } finally {
+            // 7. Ẩn loading
+            registerText.style.display = 'inline-block';
+            registerLoading.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

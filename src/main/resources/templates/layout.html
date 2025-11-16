@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${pageTitle} ?: 'Bookstore'">Bookstore</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!--<header class="topbar">-->
+<!--    <div class="topbar-content">-->
+<!--        <a href="/" class="brand">📚 BookStore</a>-->
+<!--        <nav class="nav">-->
+<!--            <a href="/catalog">Sách</a>-->
+<!--            <a href="/orders">Đơn hàng</a>-->
+<!--            <a href="/admin">Quản lý</a>-->
+<!--            &lt;!&ndash; Thêm giỏ hàng với badge &ndash;&gt;-->
+<!--            <a href="/cart" class="cart-link">-->
+<!--                🛒 Giỏ hàng-->
+<!--                <span id="cartBadge" class="cart-badge" style="display: none;">0</span>-->
+<!--            </a>-->
+<!--            <a href="/login" id="loginLink" class="btn btn-outline">Đăng nhập</a>-->
+<!--            <button id="logoutBtn" class="btn btn-danger" style="display:none">Đăng xuất</button>-->
+<!--        </nav>-->
+<!--    </div>-->
+<!--</header>-->
+<header class="topbar">
+    <div class="topbar-content">
+        <a href="/" class="brand">📚 BookStore</a>
+        <nav class="nav" id="mainNav">
+            <!-- Menu sẽ được cập nhật động dựa trên role -->
+        </nav>
+        <a href="/login" id="loginLink" class="btn btn-outline">Đăng nhập</a>
+        <button id="logoutBtn" class="btn btn-danger" style="display:none">Đăng xuất</button>
+    </div>
+</header>
+
+<main layout:fragment="content">
+    <!-- Nội dung từng trang con sẽ được Thymeleaf thay thế vào đây -->
+</main>
+<script th:src="@{/js/cart-logic.js}"></script>
+<script th:src="@{/js/auth.js}"></script>
+<script th:src="@{/js/api.js}"></script>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const hasToken = !!localStorage.getItem('token');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginLink = document.getElementById('loginLink');
+        const mainNav = document.getElementById('mainNav');
+
+        // Lấy role
+        const userRole = getUserRole ? getUserRole() : null;
+        console.log('🎯 Current role:', userRole);
+
+        // Cập nhật menu dựa trên role
+        if (mainNav) {
+            if (userRole === 'ADMIN') {
+                // Menu cho ADMIN - CHỈ có admin
+                mainNav.innerHTML = `
+                    <a href="/admin">Quản trị hệ thống</a>
+                `;
+            } else if (userRole === 'USER') {
+                // Menu cho USER - CHỈ có user pages
+                mainNav.innerHTML = `
+                    <a href="/catalog">Sách</a>
+                    <a href="/orders">Đơn hàng</a>
+                    <a href="/cart" class="cart-link">
+                        🛒 Giỏ hàng
+                        <span id="cartBadge" class="cart-badge" style="display: none;">0</span>
+                    </a>
+                `;
+            } else {
+                // Chưa đăng nhập
+                mainNav.innerHTML = `
+                    <a href="/catalog">Sách</a>
+                `;
+            }
+        }
+
+        if (logoutBtn) {
+            logoutBtn.style.display = hasToken ? 'inline-block' : 'none';
+            logoutBtn.onclick = () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('cart');
+                window.location.href = '/login';
+            };
+        }
+
+        if (loginLink) {
+            loginLink.style.display = hasToken ? 'none' : 'inline-block';
+        }
+    });
+</script>
+<th:block layout:fragment="script"></th:block>
+</body>
+</html>

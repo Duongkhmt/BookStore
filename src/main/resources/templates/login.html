@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập - BookStore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .topbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #e5e7eb;
+            color: #374151;
+            width: 100%;
+        }
+
+        .btn-outline:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .loading {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .register-section {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .register-text {
+            color: #6b7280;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+
+            .card-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <div class="topbar-content">
+        <a href="/" class="brand">📚 BookStore</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="login-card">
+        <div class="card-header">
+            <h1 class="card-title">Đăng nhập</h1>
+            <p class="card-subtitle">Chào mừng trở lại</p>
+        </div>
+
+        <form onsubmit="login(event)" id="loginForm">
+            <div class="form-group">
+                <label for="username" class="form-label">Tên đăng nhập</label>
+                <input
+                        type="text"
+                        id="username"
+                        class="form-control"
+                        placeholder="Nhập tên đăng nhập"
+                        required
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <input
+                        type="password"
+                        id="password"
+                        class="form-control"
+                        placeholder="Nhập mật khẩu"
+                        required
+                />
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <span id="loginText">Đăng nhập</span>
+                <div id="loginLoading" class="loading" style="display: none;"></div>
+            </button>
+        </form>
+
+        <div id="message" class="mt-2"></div>
+
+        <div class="register-section">
+            <p class="register-text">Chưa có tài khoản?</p>
+            <a href="/register" class="btn btn-outline">
+                Đăng ký tài khoản mới
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Hàm decode JWT token để lấy role
+    function decodeJWT(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error('Error decoding JWT:', e);
+            return null;
+        }
+    }
+
+    async function login(e) {
+        e.preventDefault();
+
+        const loginText = document.getElementById('loginText');
+        const loginLoading = document.getElementById('loginLoading');
+        const messageDiv = document.getElementById('message');
+        const submitBtn = document.querySelector('#loginForm button[type="submit"]');
+
+        loginText.style.display = 'none';
+        loginLoading.style.display = 'inline-block';
+        messageDiv.innerHTML = '';
+        submitBtn.disabled = true;
+
+        const payload = {
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value
+        };
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            const json = await res.json();
+            console.log('🔑 Login response:', json);
+
+            if (res.ok && json?.data?.token) {
+                const token = json.data.token;
+
+                // 🚨 QUAN TRỌNG: Lưu token vào cả localStorage VÀ sessionStorage
+                localStorage.setItem('token', token);
+                sessionStorage.setItem('token', token);
+
+                // 🚨 THÊM: Lưu token vào cookie để server có thể đọc được
+                document.cookie = `token=${token}; path=/; max-age=3600`; // 1 hour
+
+                console.log('✅ Token saved to storage and cookie');
+
+                // XÁC ĐỊNH ROLE VÀ REDIRECT
+                const decoded = decodeJWT(token);
+                let redirectUrl = '/catalog';
+
+                if (decoded.authorities && decoded.authorities.includes('ROLE_ADMIN')) {
+                    redirectUrl = '/admin';
+                    console.log('🎯 ADMIN -> Redirecting to /admin');
+                } else {
+                    console.log('🎯 USER -> Redirecting to /catalog');
+                }
+
+                messageDiv.innerHTML = '<div class="alert alert-success">Đăng nhập thành công! Đang chuyển hướng...</div>';
+
+                // 🚨 THAY ĐỔI: Redirect ngay lập tức với token trong URL
+                setTimeout(() => {
+                    // Thêm token vào URL để chắc chắn server nhận được
+                    window.location.href = redirectUrl + '?token=' + encodeURIComponent(token);
+                }, 500); // Giảm thời gian chờ
+
+            } else {
+                messageDiv.innerHTML = `<div class="alert alert-error">${json?.message || 'Đăng nhập thất bại'}</div>`;
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            messageDiv.innerHTML = '<div class="alert alert-error">Lỗi kết nối đến máy chủ</div>';
+        } finally {
+            loginText.style.display = 'inline-block';
+            loginLoading.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    }
+
+    // Hàm kiểm tra và tự động thêm token vào request
+    function setupAuth() {
+        const token = localStorage.getItem('token');
+        if (token) {
+            // Tự động thêm token vào tất cả các fetch request
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                const [url, options = {}] = args;
+
+                // Nếu là request đến API của chúng ta, thêm token
+                if (typeof url === 'string' && url.startsWith('/api/')) {
+                    options.headers = {
+                        ...options.headers,
+                        'Authorization': `Bearer ${token}`
+                    };
+                }
+
+                return originalFetch(url, options);
+            };
+
+            console.log('🔐 Auth setup completed');
+        }
+    }
+
+    // Gọi hàm setup khi trang load
+    document.addEventListener('DOMContentLoaded', function() {
+        setupAuth();
+
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+                }
+            });
+        });
+    });
+    // Enter key support
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

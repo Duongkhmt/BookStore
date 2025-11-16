@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Trang chủ - BookStore</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style th:fragment="style">
+        /* === VARIABLES === */
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #8b5cf6;
+            --accent: #f59e0b;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* === HEADER NAVIGATION === */
+        .header-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-nav {
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .btn-nav-login {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-nav-login:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-nav-register {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-nav-register:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            background: var(--primary-dark);
+        }
+
+        /* === HERO SECTION === */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient);
+            position: relative;
+            overflow: hidden;
+            padding: 6rem 1.5rem 4rem;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" opacity="0.1"><polygon fill="white" points="0,1000 1000,0 1000,1000"/></svg>');
+            background-size: cover;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 800px;
+            color: var(--white);
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-hero-primary {
+            background: var(--white);
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            background: var(--bg-light);
+        }
+
+        .btn-hero-outline {
+            border: 2px solid var(--white);
+            color: var(--white);
+            background: transparent;
+        }
+
+        .btn-hero-outline:hover {
+            background: var(--white);
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        /* === MAP SECTION === */
+        .map-section {
+            padding: 6rem 1.5rem;
+            background: var(--white);
+        }
+
+        .map-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .map-content {
+            padding-right: 2rem;
+        }
+
+        .map-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .map-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .map-features {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .map-feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .map-feature:hover {
+            transform: translateX(10px);
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .map-feature-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--white);
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+        }
+
+        .map-feature-text {
+            font-weight: 500;
+        }
+
+        #map {
+            height: 500px;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid #e2e8f0;
+        }
+
+        .location-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-location {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-location-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-location-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-location-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-location-outline:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .location-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .location-text {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        /* === FEATURES SECTION === */
+        .features-section {
+            padding: 6rem 1.5rem;
+            background: var(--bg-light);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.125rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto 4rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--white);
+            padding: 3rem 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .feature-text {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* === STATS SECTION === */
+        .stats-section {
+            padding: 6rem 1.5rem;
+            background: var(--white);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.125rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* === CTA SECTION === */
+        .cta-section {
+            padding: 6rem 1.5rem;
+            background: var(--gradient-primary);
+            color: var(--white);
+            text-align: center;
+        }
+
+        .cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-text {
+            font-size: 1.125rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.95;
+        }
+
+        .btn-cta {
+            background: var(--white);
+            color: var(--primary);
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* === RESPONSIVE DESIGN === */
+        @media (max-width: 968px) {
+            .map-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .map-content {
+                padding-right: 0;
+            }
+
+            #map {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-hero {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .map-title {
+                font-size: 2rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-nav {
+                padding: 1rem;
+            }
+        }
+
+        /* === ANIMATIONS === */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        /* Map Section với Leaflet */
+        #map {
+            height: 500px;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid #e2e8f0;
+            z-index: 1;
+        }
+
+        /* Leaflet custom styles */
+        .leaflet-container {
+            background: #f8fafc;
+            font-family: inherit;
+        }
+
+        .custom-marker {
+            background: var(--primary);
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .bookstore-marker {
+            background: var(--accent);
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .location-error {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #dc2626;
+        }
+
+        .location-success {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            color: #15803d;
+        }
+
+        .feature-card:nth-child(1) { transition-delay: 0.1s; }
+        .feature-card:nth-child(2) { transition-delay: 0.2s; }
+        .feature-card:nth-child(3) { transition-delay: 0.3s; }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <!-- Header Navigation -->
+    <header class="header-nav">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <span class="logo-icon">📚</span>
+                <span>BookStore</span>
+            </a>
+            <div class="auth-buttons">
+                <a th:href="@{/login}" class="btn-nav btn-nav-login">Đăng nhập</a>
+                <a th:href="@{/register}" class="btn-nav btn-nav-register">Đăng ký</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title floating">
+                📚 Thế Giới Sách <br>Trong Tầm Tay Bạn
+            </h1>
+            <p class="hero-subtitle">
+                Khám phá hàng ngàn đầu sách thuộc mọi thể loại. Đọc, học hỏi,
+                và phát triển mỗi ngày với thư viện sách phong phú nhất.
+            </p>
+            <div class="hero-actions">
+                <a th:href="@{/catalog}" class="btn-hero btn-hero-primary">
+                    🚀 Khám phá Ngay
+                </a>
+                <a href="#map-section" class="btn-hero btn-hero-outline">
+                    🗺️ Tìm Cửa Hàng Gần Bạn
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="map-section" id="map-section">
+        <div class="map-container">
+            <div class="map-content">
+                <h2 class="map-title">📍 Tìm Cửa Hàng Sách Gần Bạn</h2>
+                <p class="map-subtitle">
+                    Khám phá các nhà sách, thư viện và cửa hàng sách gần vị trí của bạn.
+                    Chúng tôi sẽ giúp bạn tìm thấy những địa điểm yêu thích nhất.
+                </p>
+
+                <div class="map-features">
+                    <div class="map-feature">
+                        <div class="map-feature-icon">📍</div>
+                        <div class="map-feature-text">Xác định vị trí hiện tại của bạn</div>
+                    </div>
+                    <div class="map-feature">
+                        <div class="map-feature-icon">🏪</div>
+                        <div class="map-feature-text">Tìm cửa hàng sách gần nhất</div>
+                    </div>
+                    <div class="map-feature">
+                        <div class="map-feature-icon">🛣️</div>
+                        <div class="map-feature-text">Chỉ đường chi tiết</div>
+                    </div>
+                    <div class="map-feature">
+                        <div class="map-feature-icon">⭐</div>
+                        <div class="map-feature-text">Đánh giá và nhận xét từ độc giả</div>
+                    </div>
+                </div>
+
+                <div class="location-controls">
+                    <button class="btn-location btn-location-primary" onclick="getCurrentLocation()">
+                        📍 Lấy Vị Trí Của Tôi
+                    </button>
+                    <button class="btn-location btn-location-outline" onclick="findBookstores()">
+                        🏪 Tìm Nhà Sách Gần Đây
+                    </button>
+                    <button class="btn-location btn-location-outline" onclick="useDefaultLocation()">
+                        🎯 Sử dụng Vị trí Mặc định
+                    </button>
+                </div>
+
+                <div class="location-info" id="locationInfo" style="display: none;">
+                    <p class="location-text" id="locationText">Đang xác định vị trí...</p>
+                </div>
+
+                <!-- Hướng dẫn sử dụng -->
+                <div class="location-info location-success" style="margin-top: 1rem;">
+                    <p class="location-text">
+                        <strong>💡 Lưu ý:</strong> Để sử dụng tính năng định vị, hãy:<br>
+                        1. Cho phép trình duyệt truy cập vị trí của bạn<br>
+                        2. Hoặc sử dụng vị trí mặc định (Hà Nội)
+                    </p>
+                </div>
+            </div>
+
+            <div id="map"></div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <h2 class="section-title">Tại sao chọn BookStore?</h2>
+        <p class="section-subtitle">
+            Trải nghiệm mua sách trực tuyến tốt nhất với những ưu điểm vượt trội
+        </p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3 class="feature-title">Thư Viện Đa Dạng</h3>
+                <p class="feature-text">
+                    Hơn 10,000+ đầu sách thuộc mọi thể loại từ kinh tế, văn học,
+                    khoa học đến sách thiếu nhi và giáo trình.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3 class="feature-title">Giao Hàng Siêu Tốc</h3>
+                <p class="feature-text">
+                    Giao hàng toàn quốc trong 2-4 giờ tại nội thành. Miễn phí vận chuyển
+                    cho đơn hàng từ 199K.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3 class="feature-title">Ưu Đãi Đặc Biệt</h3>
+                <p class="feature-text">
+                    Giảm giá lên đến 50% cho thành viên mới. Tích điểm đổi quà
+                    và nhiều chương trình khuyến mãi hấp dẫn.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">10,000+</div>
+                <div class="stat-label">Đầu Sách</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">50,000+</div>
+                <div class="stat-label">Độc Giả</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">99%</div>
+                <div class="stat-label">Hài Lòng</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Hỗ Trợ</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">Sẵn sàng khám phá thế giới sách?</h2>
+            <p class="cta-text">
+                Đăng ký ngay hôm nay để nhận ưu đãi đặc biệt và trải nghiệm
+                thế giới sách tuyệt vời của chúng tôi.
+            </p>
+            <a th:href="@{/register}" class="btn-cta">
+                🎁 Đăng ký Ngay - Nhận Ưu Đãi
+            </a>
+        </div>
+    </section>
+</div>
+
+<!-- Script -->
+<th:block layout:fragment="script">
+    <script>
+        let map;
+        let userMarker;
+        let currentLocation = null;
+        let bookstores = [];
+        let bookstoreLayer;
+
+        // Khởi tạo map với Leaflet
+        function initMap() {
+            // Vị trí mặc định (Hà Nội)
+            const defaultLocation = [21.0278, 105.8342];
+
+            map = L.map('map').setView(defaultLocation, 12);
+
+            // Sử dụng OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 18
+            }).addTo(map);
+
+            // Tạo layer group cho các nhà sách
+            bookstoreLayer = L.layerGroup().addTo(map);
+
+            console.log('🗺️ Leaflet Map đã được khởi tạo với OpenStreetMap');
+
+            // Tự động thử lấy vị trí khi trang load
+            setTimeout(() => {
+                checkGeolocationSupport();
+            }, 1000);
+        }
+
+        // Kiểm tra hỗ trợ geolocation
+        function checkGeolocationSupport() {
+            if (!navigator.geolocation) {
+                updateLocationInfo('❌ Trình duyệt của bạn không hỗ trợ Geolocation', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        // Lấy vị trí hiện tại
+        function getCurrentLocation() {
+            if (!checkGeolocationSupport()) return;
+
+            updateLocationInfo('🔄 Đang xác định vị trí của bạn...', 'loading');
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                // Success callback
+                (position) => {
+                    const pos = [position.coords.latitude, position.coords.longitude];
+                    currentLocation = pos;
+
+                    // Di chuyển map đến vị trí hiện tại
+                    map.setView(pos, 15);
+
+                    // Thêm marker cho vị trí hiện tại
+                    if (userMarker) {
+                        map.removeLayer(userMarker);
+                    }
+
+                    userMarker = L.marker(pos, {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            iconSize: [20, 20]
+                        })
+                    }).addTo(map)
+                        .bindPopup('📍 <strong>Vị trí của bạn</strong>')
+                        .openPopup();
+
+                    // Hiển thị thông tin vị trí
+                    getAddressFromCoordinates(pos[0], pos[1]);
+
+                    console.log('📍 Vị trí đã được xác định:', pos);
+                },
+                // Error callback
+                (error) => {
+                    console.error('❌ Lỗi lấy vị trí:', error);
+                    handleLocationError(error);
+                },
+                options
+            );
+        }
+
+        // Sử dụng vị trí mặc định (Hà Nội)
+        function useDefaultLocation() {
+            const defaultLocation = [21.0278, 105.8342];
+            currentLocation = defaultLocation;
+
+            // Di chuyển map đến vị trí mặc định
+            map.setView(defaultLocation, 13);
+
+            // Thêm marker cho vị trí mặc định
+            if (userMarker) {
+                map.removeLayer(userMarker);
+            }
+
+            userMarker = L.marker(defaultLocation, {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    iconSize: [20, 20]
+                })
+            }).addTo(map)
+                .bindPopup('📍 <strong>Vị trí mặc định (Hà Nội)</strong><br>Vui lòng cho phép truy cập vị trí để sử dụng vị trí thực tế của bạn')
+                .openPopup();
+
+            updateLocationInfo('📍 Đang sử dụng vị trí mặc định: Hà Nội', 'success');
+
+            // Tự động tìm nhà sách quanh vị trí mặc định
+            setTimeout(() => {
+                findBookstores();
+            }, 1000);
+        }
+
+        // Cập nhật thông báo vị trí
+        function updateLocationInfo(message, type = 'info') {
+            const locationInfo = document.getElementById('locationInfo');
+            const locationText = document.getElementById('locationText');
+
+            locationInfo.style.display = 'block';
+            locationText.textContent = message;
+
+            // Reset classes
+            locationInfo.className = 'location-info';
+
+            // Thêm class theo type
+            if (type === 'error') {
+                locationInfo.classList.add('location-error');
+            } else if (type === 'success') {
+                locationInfo.classList.add('location-success');
+            }
+        }
+
+        // Lấy địa chỉ từ tọa độ (sử dụng Nominatim - free)
+        function getAddressFromCoordinates(lat, lng) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        // Giới hạn độ dài địa chỉ
+                        const address = data.display_name.length > 100
+                            ? data.display_name.substring(0, 100) + '...'
+                            : data.display_name;
+                        updateLocationInfo(`📍 Vị trí của bạn: ${address}`, 'success');
+                    } else {
+                        updateLocationInfo(`📍 Vị trí: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy địa chỉ:', error);
+                    updateLocationInfo(`📍 Vị trí: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, 'success');
+                });
+        }
+
+        // Xử lý lỗi location
+        function handleLocationError(error) {
+            let errorMessage = '❌ Lỗi không xác định khi lấy vị trí';
+
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = '❌ Bạn đã từ chối cho phép truy cập vị trí. Vui lòng cấp quyền trong trình duyệt hoặc sử dụng vị trí mặc định.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = '❌ Không thể xác định vị trí. Vui lòng thử lại hoặc sử dụng vị trí mặc định.';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = '❌ Hết thời gian chờ xác định vị trí. Vui lòng thử lại.';
+                    break;
+            }
+
+            updateLocationInfo(errorMessage, 'error');
+
+            // Tự động đề xuất sử dụng vị trí mặc định sau 3 giây
+            setTimeout(() => {
+                if (!currentLocation) {
+                    updateLocationInfo('💡 Đang sử dụng vị trí mặc định (Hà Nội)...', 'info');
+                    setTimeout(() => {
+                        useDefaultLocation();
+                    }, 1000);
+                }
+            }, 3000);
+        }
+
+        // Tìm nhà sách gần đây
+        function findBookstores() {
+            if (!currentLocation) {
+                updateLocationInfo('📍 Vui lòng lấy vị trí của bạn trước hoặc sử dụng vị trí mặc định!', 'error');
+                return;
+            }
+
+            updateLocationInfo('🔍 Đang tìm nhà sách và thư viện gần đây...', 'loading');
+
+            // Dữ liệu nhà sách mẫu cho Hà Nội
+            const hanoiBookstores = [
+                {
+                    name: "Nhà sách Trí Tuệ",
+                    lat: 21.0245,
+                    lng: 105.8417,
+                    address: "52 Lê Thanh Nghị, Hai Bà Trưng",
+                    type: "bookstore",
+                    rating: 4.2
+                },
+                {
+                    name: "Nhà sách Fahasa",
+                    lat: 21.0304,
+                    lng: 105.8521,
+                    address: "341 Trường Chinh, Thanh Xuân",
+                    type: "bookstore",
+                    rating: 4.5
+                },
+                {
+                    name: "Nhà sách Kim Đồng",
+                    lat: 21.0192,
+                    lng: 105.8349,
+                    address: "55 Quang Trung, Hoàn Kiếm",
+                    type: "bookstore",
+                    rating: 4.3
+                },
+                {
+                    name: "Nhà sách Phương Nam",
+                    lat: 21.0351,
+                    lng: 105.8342,
+                    address: "18 Nguyễn Tri Phương, Ba Đình",
+                    type: "bookstore",
+                    rating: 4.4
+                },
+                {
+                    name: "Thư viện Quốc gia",
+                    lat: 21.0223,
+                    lng: 105.8541,
+                    address: "31 Tràng Thi, Hoàn Kiếm",
+                    type: "library",
+                    rating: 4.6
+                },
+                {
+                    name: "Nhà sách Tân Việt",
+                    lat: 21.0286,
+                    lng: 105.8463,
+                    address: "25 Lý Thường Kiệt, Hoàn Kiếm",
+                    type: "bookstore",
+                    rating: 4.1
+                },
+                {
+                    name: "Cửa hàng sách cũ Hà Nội",
+                    lat: 21.0321,
+                    lng: 105.8498,
+                    address: "56 Đường Thành, Hoàn Kiếm",
+                    type: "bookstore",
+                    rating: 4.7
+                }
+            ];
+
+            // Xóa các marker cũ
+            bookstoreLayer.clearLayers();
+
+            // Lọc các nhà sách trong bán kính 5km
+            const nearbyBookstores = hanoiBookstores.filter(store => {
+                const distance = calculateDistance(
+                    currentLocation[0], currentLocation[1],
+                    store.lat, store.lng
+                );
+                return distance <= 5; // 5km
+            });
+
+            // Nếu không tìm thấy nhà sách nào trong bán kính, hiển thị tất cả
+            const storesToShow = nearbyBookstores.length > 0 ? nearbyBookstores : hanoiBookstores;
+
+            // Thêm marker cho mỗi nhà sách
+            storesToShow.forEach(bookstore => {
+                const distance = calculateDistance(
+                    currentLocation[0], currentLocation[1],
+                    bookstore.lat, bookstore.lng
+                );
+
+                const marker = L.marker([bookstore.lat, bookstore.lng], {
+                    icon: L.divIcon({
+                        className: 'bookstore-marker',
+                        iconSize: [16, 16]
+                    })
+                }).addTo(bookstoreLayer);
+
+                const popupContent = `
+                    <div style="padding: 8px; min-width: 200px;">
+                        <h3 style="margin: 0 0 8px 0; color: #1e293b; font-size: 14px; font-weight: 600;">
+                            ${bookstore.name}
+                        </h3>
+                        <p style="margin: 0 0 6px 0; color: #64748b; font-size: 12px;">
+                            📍 ${bookstore.address}
+                        </p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #f59e0b; font-size: 12px;">
+                                ⭐ ${bookstore.rating}/5
+                            </span>
+                            <span style="color: #3b82f6; font-size: 11px; font-weight: 500;">
+                                ${distance.toFixed(1)}km
+                            </span>
+                        </div>
+                        <p style="margin: 6px 0 0 0; color: #8b5cf6; font-size: 11px; text-transform: uppercase;">
+                            ${bookstore.type === 'library' ? '📖 Thư viện' : '📚 Nhà sách'}
+                        </p>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+            });
+
+            updateLocationInfo(
+                `✅ Đã tìm thấy ${storesToShow.length} nhà sách/thư viện gần bạn${
+                    nearbyBookstores.length === 0 ? ' (hiển thị tất cả)' : ''
+                }`,
+                'success'
+            );
+
+            // Zoom map để hiển thị tất cả các marker
+            if (storesToShow.length > 0) {
+                const group = new L.featureGroup(storesToShow.map(store =>
+                    L.marker([store.lat, store.lng])
+                ));
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        }
+
+        // Tính khoảng cách giữa 2 điểm (Haversine formula)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Bán kính Trái đất tính bằng km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a =
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Gọi initMap khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+
+
+            // Smooth scroll
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+            // Scroll animation
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.feature-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+</th:block>
+
+</body>
+</html>
