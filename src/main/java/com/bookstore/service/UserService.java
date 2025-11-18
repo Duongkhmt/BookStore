@@ -6,6 +6,7 @@ import com.bookstore.dto.request.UpdateUserRequest;
 import com.bookstore.dto.response.UserResponse;
 import com.bookstore.entity.User;
 import com.bookstore.entity.UserRole;
+import com.bookstore.entity.UserStatus;
 import com.bookstore.exception.ApplicationException;
 import com.bookstore.exception.ErrorCode;
 import com.bookstore.repository.UserRepository;
@@ -33,6 +34,7 @@ public class UserService {
         response.setUsername(user.getUsername());
         response.setEmail(user.getEmail());
         response.setRole(user.getRole().name());
+        response.setStatus(user.getStatus());
         return response;
     }
 
@@ -79,7 +81,6 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
-
         return toResponse(userRepository.save(user));
     }
 
@@ -115,6 +116,11 @@ public class UserService {
                         "Vai trò không hợp lệ. Chỉ chấp nhận: ROLE_USER, ROLE_ADMIN");
             }
         }
+        // THÊM ĐOẠN NÀY: Cập nhật status nếu có
+        if (request.getStatus() != null) {
+            user.setStatus(request.getStatus()); // KHÔNG CẦN CONVERT NỮA
+        }
+
 
         return toResponse(userRepository.save(user));
     }

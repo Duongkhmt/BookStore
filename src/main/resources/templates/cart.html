@@ -474,7 +474,6 @@
     <script>
         // === CÁC HÀM CŨ (Render giỏ hàng) ===
 
-        // HÀM RENDER CART (PHIÊN BẢN SIÊU AN TOÀN)
         function renderCart() {
             if (!window.CartManager) {
                 console.error('LỖI: CartManager không được nạp!');
@@ -515,7 +514,7 @@
                 const title = item.title || 'Sách không tên';
                 const image = item.image || null;
                 const itemPrice = parseFloat(item.price) || 0;
-                const itemQuantity = parseInt(item.quantity) || 1; // Mặc định là 1 nếu bị null
+                const itemQuantity = parseInt(item.quantity) || 1;
 
                 const itemTotal = itemPrice * itemQuantity;
                 subtotal += itemTotal;
@@ -552,8 +551,6 @@
             checkoutBtn.disabled = false;
         }
 
-        // === CÁC HÀM HỖ TRỢ (CŨ) ===
-
         function formatPrice(price) {
             return new Intl.NumberFormat('vi-VN', {
                 style: 'currency',
@@ -564,25 +561,30 @@
         function handleRemoveItem(bookId) {
             if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
                 window.CartManager.removeFromCart(bookId);
-                renderCart(); // Render lại giỏ hàng
-                window.CartManager.updateCartBadge(); // Cập nhật lại badge
+                renderCart();
+                if (window.CartManager.updateCartBadge) {
+                    window.CartManager.updateCartBadge();
+                }
             }
         }
 
         function handleUpdateQuantity(bookId, newQuantity) {
             if (newQuantity < 1) {
-                handleRemoveItem(bookId); // Nếu giảm xuống 0 -> Xóa
+                handleRemoveItem(bookId);
                 return;
             }
             window.CartManager.updateQuantity(bookId, newQuantity);
-            renderCart(); // Render lại
-            window.CartManager.updateCartBadge(); // Cập nhật lại badge
+            renderCart();
+            if (window.CartManager.updateCartBadge) {
+                window.CartManager.updateCartBadge();
+            }
         }
 
-
-        // === CÁC HÀM MỚI (CHECKOUT) ===
+        // === CÁC HÀM CHECKOUT ===
 
         function openCheckoutModal() {
+            console.log('Mở modal thanh toán...');
+
             const modal = document.getElementById('checkoutModal');
             const cart = window.CartManager.getCart();
 
@@ -592,7 +594,7 @@
             }
 
             // Kiểm tra đăng nhập
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             if (!token) {
                 alert('Vui lòng đăng nhập để tiếp tục thanh toán!');
                 window.location.href = '/login';
@@ -648,22 +650,32 @@
                 const requestBody = {
                     items: items,
                     shippingAddress: shippingAddress,
-                    paymentMethod: paymentMethod // Gửi cả paymentMethod
+                    paymentMethod: paymentMethod
                 };
 
                 console.log('Đang tạo đơn hàng:', requestBody);
 
-                // 4. Gọi API tạo đơn hàng
-                // (Giả sử bạn có file api.js đã được load)
-                if (!window.API || !window.API.post) {
-                    throw new Error('Lỗi: API helper không được nạp.');
-                }
-
-                const response = await window.API.post('/api/orders', requestBody);
+                // 4. Gọi API tạo đơn hàng - SỬA LẠI PHẦN NÀY
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
 
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    const errorMessage = errorData.message || 'Có lỗi xảy ra khi tạo đơn hàng';
+                    const errorText = await response.text();
+                    let errorMessage = 'Có lỗi xảy ra khi tạo đơn hàng';
+
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        errorMessage = errorText || errorMessage;
+                    }
                     throw new Error(errorMessage);
                 }
 
@@ -675,13 +687,12 @@
 
                 // 6. Xóa giỏ hàng
                 window.CartManager.clearCart();
-                // (updateCartBadge sẽ được gọi tự động bởi clearCart)
 
                 // 7. Đóng modal
                 closeCheckoutModal();
 
                 // 8. Hiển thị thông báo thành công và redirect
-                alert('Đặt hàng thành công! Mã đơn hàng: #' + (result.data.id || result.data.orderCode));
+                alert('Đặt hàng thành công! Mã đơn hàng: #' + (result.data?.id || result.data?.orderCode || 'N/A'));
                 window.location.href = '/orders';
 
             } catch (error) {
@@ -692,11 +703,11 @@
             }
         }
 
-        // === KHỞI CHẠY (ĐÃ HỢP NHẤT) ===
+        // === KHỞI CHẠY - ĐÃ XÓA setupDebugTools ===
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Trang giỏ hàng đã load, đang render...');
             renderCart();
-            setupDebugTools(); // Gọi hàm debug tools
+            // ĐÃ XÓA: setupDebugTools(); // Dòng này gây lỗi
 
             // Gắn event listener cho nút checkout
             const checkoutBtn = document.getElementById('checkoutBtn');
@@ -721,7 +732,7 @@
             }
 
             // Cập nhật badge
-            if (window.CartManager) {
+            if (window.CartManager && window.CartManager.updateCartBadge) {
                 window.CartManager.updateCartBadge();
             }
         });

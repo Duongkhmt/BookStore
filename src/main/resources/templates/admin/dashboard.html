@@ -344,6 +344,26 @@
             justify-content: center;
             min-height: 38px;
         }
+
+        /*!* Thêm style cho modal user *!*/
+        /*.form-select {*/
+        /*    width: 100%;*/
+        /*    padding: 0.5rem;*/
+        /*    border: 1px solid #e2e8f0;*/
+        /*    border-radius: 0.25rem;*/
+        /*    font-size: 1rem;*/
+        /*    background-color: white;*/
+        /*}*/
+
+        /*.action-buttons {*/
+        /*    display: flex;*/
+        /*    gap: 8px;*/
+        /*}*/
+
+        /*.action-buttons .btn {*/
+        /*    padding: 6px 12px;*/
+        /*    font-size: 12px;*/
+        /*}*/
     </style>
 </head>
 
@@ -386,10 +406,11 @@
         <button class="tab" data-tab="inventory">📊 Tồn kho</button>
     </div>
 
-    <!-- Tab Contents -->
-    <div id="tabUsers" class="tab-content">
+    <!-- Tab Users Content - ĐÃ SỬA -->
+    <div id="tabUsers" class="tab-content active">
         <div class="content-header">
             <h2>Quản lý Người dùng</h2>
+            <button class="btn btn-primary" onclick="showUserModal()">+ Thêm người dùng</button>
         </div>
         <div class="table-container">
             <table>
@@ -404,7 +425,7 @@
                 </tr>
                 </thead>
                 <tbody id="usersTableBody">
-                <tr><td colspan="5" class="loading">Đang tải...</td></tr>
+                <tr><td colspan="6" class="loading">Đang tải...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -573,7 +594,60 @@
         </div>
     </div>
 
-
+    <!-- User Modal - STATUS CHỈ HIỆN KHI SỬA -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="userModalTitle">Thêm người dùng</h3>
+                <button class="modal-close" onclick="closeModal('userModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="form-group">
+                        <label class="form-label">Tên đăng nhập *</label>
+                        <input type="text" id="username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email *</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div>
+                    <div class="form-group" id="passwordGroup">
+                        <label class="form-label">Mật khẩu *</label>
+                        <input type="password" id="password" class="form-control" required>
+                        <small style="color: #666;">Mật khẩu phải có ít nhất 6 ký tự</small>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Vai trò *</label>
+                            <select id="role" class="form-select" required>
+                                <option value="">Chọn vai trò</option>
+                                <option value="ROLE_USER">Người dùng</option>
+                                <option value="ROLE_ADMIN">Quản trị viên</option>
+                            </select>
+                        </div>
+                        <!-- STATUS CHỈ HIỆN KHI SỬA -->
+                        <div class="form-group" id="statusGroup" style="display: none;">
+                            <label class="form-label">Trạng thái *</label>
+                            <select id="status" class="form-select" required>
+                                <option value="ACTIVE">Đang hoạt động</option>
+                                <option value="INACTIVE">Không hoạt động</option>
+                                <option value="LOCKED">Đã khóa</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+                <!-- Thông báo mặc định khi tạo mới -->
+                <div id="defaultStatusInfo" style="background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                    <small>💡 <strong>Mặc định:</strong> Status = ACTIVE (Đang hoạt động)</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('userModal')">Hủy</button>
+                <button class="btn btn-primary" onclick="saveUser()">Lưu</button>
+            </div>
+        </div>
+    </div>
     <!-- Book Modal -->
     <div id="bookModal" class="modal">
         <div class="modal-content">
@@ -817,49 +891,45 @@
             }
         }
 
-        // ========== USER MANAGEMENT ==========
+        // ========== LOAD USERS - GỌI API BACKEND ==========
         async function loadUsers() {
             try {
-                const res = await API.get('/api/admin/users');
-                const json = await res.json();
-                const users = json?.data || [];
+                const response = await fetch('/api/admin/users');
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+
+                const result = await response.json();
+                const users = result.data; // Lấy data từ ApiResponse
 
                 const tbody = document.getElementById('usersTableBody');
-                if (users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="loading">Không có người dùng nào</td></tr>';
-                    return;
-                }
-
                 tbody.innerHTML = users.map(user => `
-            <tr>
-                <td>#${user.id}</td>
-                <td><strong>${user.username}</strong></td>
-                <td>${user.email || 'N/A'}</td>
-                <td>
-                    <span class="badge ${user.role === 'ROLE_ADMIN' ? 'badge-danger' : 'badge-info'}">
-                        ${user.role === 'ROLE_ADMIN' ? 'Quản trị viên' : 'Người dùng'}
-                    </span>
-                </td>
-                <td>
-                    <span class="badge ${user.status === 'ACTIVE' ? 'badge-success' : user.status === 'LOCKED' ? 'badge-danger' : 'badge-warning'}">
-                        ${getUserStatusText(user.status)}
-                    </span>
-                </td>
-                <td>
-                    ${user.status === 'ACTIVE' ?
-                    `<button class="btn btn-warning" onclick="lockUser(${user.id})" style="margin-right: 0.5rem;">Khóa</button>` :
-                    `<button class="btn btn-success" onclick="unlockUser(${user.id})" style="margin-right: 0.5rem;">Mở khóa</button>`
-                }
-                </td>
-            </tr>
-        `).join('');
+    <tr>
+        <td>${user.id}</td>
+        <td>${user.username}</td>
+        <td>${user.email}</td>
+        <td>
+            <span class="badge ${user.role === 'ROLE_ADMIN' ? 'badge-danger' : 'badge-info'}">
+                ${user.role === 'ROLE_ADMIN' ? 'Quản trị viên' : 'Người dùng'}
+            </span>
+        </td>
+        <td>
+            <span class="badge ${user.status === 'ACTIVE' ? 'badge-success' : user.status === 'LOCKED' ? 'badge-danger' : 'badge-warning'}">
+                ${getStatusText(user.status)}
+            </span>
+        </td>
+        <td>
+            <button class="btn btn-outline" onclick="editUser(${user.id})">Sửa</button>
+            <button class="btn btn-danger" onclick="deleteUser(${user.id})">Xóa</button>
+        </td>
+    </tr>
+`).join('');
             } catch (error) {
-                console.error('Lỗi tải users:', error);
-                showError('usersTableBody', 'Không thể tải danh sách người dùng');
+                document.getElementById('usersTableBody').innerHTML =
+                    '<tr><td colspan="7" class="loading">Lỗi tải dữ liệu</td></tr>';
+                console.error('Lỗi loadUsers:', error);
             }
         }
 
-        function getUserStatusText(status) {
+        function getStatusText(status) {
             const statusMap = {
                 'ACTIVE': 'Đang hoạt động',
                 'LOCKED': 'Đã khóa',
@@ -868,39 +938,215 @@
             return statusMap[status] || status;
         }
 
-        async function lockUser(userId) {
-            if (!confirm('Bạn có chắc muốn khóa tài khoản này? Người dùng sẽ không thể đăng nhập.')) return;
+        // ========== SHOW MODAL - STATUS CHỈ HIỆN KHI SỬA ==========
+        function showUserModal(user = null) {
+            editingId = user?.id || null;
+            const statusGroup = document.getElementById('statusGroup');
+            const defaultStatusInfo = document.getElementById('defaultStatusInfo');
+            const passwordGroup = document.getElementById('passwordGroup');
 
+            document.getElementById('userModalTitle').textContent =
+                user ? 'Sửa người dùng' : 'Thêm người dùng';
+
+            document.getElementById('userForm').reset();
+
+            if (user) {
+                // CHẾ ĐỘ SỬA: Hiện status, ẩn password
+                document.getElementById('userId').value = user.id;
+                document.getElementById('username').value = user.username;
+                document.getElementById('email').value = user.email;
+                document.getElementById('role').value = user.role || 'ROLE_USER';
+                document.getElementById('status').value = user.status || 'ACTIVE';
+
+                statusGroup.style.display = 'block';
+                defaultStatusInfo.style.display = 'none';
+                passwordGroup.style.display = 'none';
+            } else {
+                // CHẾ ĐỘ THÊM MỚI: Ẩn status, hiện password
+                document.getElementById('role').value = 'ROLE_USER'; // Mặc định
+
+                statusGroup.style.display = 'none';
+                defaultStatusInfo.style.display = 'block';
+                passwordGroup.style.display = 'block';
+            }
+
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        // ========== SAVE USER - XỬ LÝ STATUS ==========
+        async function saveUser() {
             try {
-                const res = await API.put(`/api/admin/users/${userId}/lock`);
-                if (res.ok) {
-                    Utils.showNotification('Khóa tài khoản thành công', 'success');
-                    await loadUsers();
-                } else {
-                    const error = await res.json();
-                    alert(error.message || 'Lỗi khi khóa tài khoản');
+                // 1. Lấy và validate dữ liệu
+                const username = document.getElementById('username').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const role = document.getElementById('role').value;
+
+                // Validate cơ bản
+                if (!username) {
+                    alert('Vui lòng nhập tên đăng nhập');
+                    return;
                 }
+                if (!email) {
+                    alert('Vui lòng nhập email');
+                    return;
+                }
+                if (!email.includes('@')) {
+                    alert('Email không hợp lệ');
+                    return;
+                }
+                if (!role) {
+                    alert('Vui lòng chọn vai trò');
+                    return;
+                }
+
+                // 2. Tạo form data
+                const formData = {
+                    username: username,
+                    email: email,
+                    role: role
+                };
+
+                // XỬ LÝ STATUS:
+                // - Khi tạo mới: mặc định ACTIVE
+                // - Khi sửa: lấy từ dropdown
+                if (editingId) {
+                    // CHẾ ĐỘ SỬA: Lấy status từ dropdown
+                    const status = document.getElementById('status').value;
+                    if (!status) {
+                        alert('Vui lòng chọn trạng thái');
+                        return;
+                    }
+                    formData.status = status;
+                } else {
+                    // CHẾ ĐỘ THÊM MỚI: Mặc định ACTIVE
+                    formData.status = 'ACTIVE';
+
+                    // Validate password
+                    const password = document.getElementById('password').value;
+                    if (!password) {
+                        alert('Mật khẩu không được để trống');
+                        return;
+                    }
+                    if (password.length < 6) {
+                        alert('Mật khẩu phải có ít nhất 6 ký tự');
+                        return;
+                    }
+                    formData.password = password;
+                }
+
+                console.log('📤 Dữ liệu gửi lên:', JSON.stringify(formData, null, 2));
+
+                // 3. Gọi API
+                let response;
+
+                if (editingId) {
+                    response = await fetch(`/api/admin/users/${editingId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                } else {
+                    response = await fetch('/api/admin/users', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                }
+
+                console.log('📡 Response status:', response.status);
+
+                // 4. Xử lý response
+                const responseText = await response.text();
+                console.log('📡 Response body:', responseText);
+
+                if (!response.ok) {
+                    let errorMessage = `Lỗi ${response.status}: `;
+
+                    try {
+                        const errorData = JSON.parse(responseText);
+                        errorMessage += errorData.message || errorData.error || 'Unknown error';
+
+                        // Hiển thị validation errors
+                        if (errorData.errors) {
+                            const validationErrors = Object.values(errorData.errors).join('\n');
+                            errorMessage += '\n' + validationErrors;
+                        }
+                    } catch (e) {
+                        errorMessage += responseText || 'Cannot parse error response';
+                    }
+
+                    throw new Error(errorMessage);
+                }
+
+                // 5. Xử lý thành công
+                const result = JSON.parse(responseText);
+                console.log('✅ Thành công:', result);
+
+                alert('✅ ' + result.message);
+                closeModal('userModal');
+                await loadUsers();
+
             } catch (error) {
-                alert('Lỗi: ' + error.message);
+                console.error('🔴 Lỗi saveUser:', error);
+                alert('❌ ' + error.message);
             }
         }
 
-        async function unlockUser(userId) {
-            if (!confirm('Bạn có chắc muốn mở khóa tài khoản này?')) return;
-
+        // ========== EDIT USER - GỌI API GET BY ID ==========
+        async function editUser(id) {
             try {
-                const res = await API.put(`/api/admin/users/${userId}/unlock`);
-                if (res.ok) {
-                    Utils.showNotification('Mở khóa tài khoản thành công', 'success');
-                    await loadUsers();
-                } else {
-                    const error = await res.json();
-                    alert(error.message || 'Lỗi khi mở khóa tài khoản');
-                }
+                const response = await fetch(`/api/admin/users/${id}`);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+
+                const result = await response.json();
+                showUserModal(result.data); // Truyền user data vào modal
+
             } catch (error) {
-                alert('Lỗi: ' + error.message);
+                alert('Lỗi tải thông tin user: ' + error.message);
             }
         }
+
+        // ========== DELETE USER - GỌI API DELETE ==========
+        async function deleteUser(id) {
+            if (!confirm('Bạn có chắc muốn xóa người dùng này?')) return;
+
+            try {
+                const response = await fetch(`/api/admin/users/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+
+                const result = await response.json();
+                alert(result.message);
+                await loadUsers(); // Reload danh sách
+
+            } catch (error) {
+                alert('Lỗi xóa user: ' + error.message);
+            }
+        }
+
+        // ========== UTILITY FUNCTIONS ==========
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            editingId = null;
+        }
+
+        // Đóng modal khi click bên ngoài
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Load users khi trang được mở
+        document.addEventListener('DOMContentLoaded', loadUsers);
 
         // ========== BOOK MANAGEMENT ==========
         async function loadBooks() {
@@ -1904,6 +2150,42 @@
                 }
             });
         });
+
+        // THÊM HÀM NÀY ĐỂ SỬA LỖI "adjustInventory is not defined"
+        function adjustInventory(bookId) {
+            const newStock = prompt('Nhập số lượng tồn kho mới (số nguyên):');
+            if (newStock === null) return;
+            const qty = parseInt(newStock);
+            if (isNaN(qty) || qty < 0) {
+                alert('Vui lòng nhập số nguyên không âm hợp lệ');
+                return;
+            }
+            if (!confirm(`Bạn có chắc muốn điều chỉnh tồn kho sách ID ${bookId} thành ${qty}?`)) return;
+
+            API.put(`/api/books/${bookId}/stock`, { stockQuantity: qty })
+                .then(res => {
+                    if (res.ok) {
+                        Utils.showNotification('Cập nhật tồn kho thành công', 'success');
+                        loadInventory();
+                        loadBooks();
+                        loadStatistics();
+                    } else {
+                        res.json().then(err => alert(err.message || 'Lỗi server'));
+                    }
+                })
+                .catch(err => alert('Lỗi: ' + err.message));
+        }
+
+        // THAY HÀM editCategory BẰNG HÀM NÀY ĐỂ TRÁNH LỖI 500
+        async function editCategory(id) {
+            const category = allCategories.find(c => c.id === id);
+            if (category) {
+                showCategoryModal(category);
+            } else {
+                alert('Không tìm thấy thể loại. Vui lòng tải lại trang.');
+            }
+        }
+
     </script>
 </th:block>
 </body>
