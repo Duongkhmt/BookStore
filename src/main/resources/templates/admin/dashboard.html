@@ -681,22 +681,57 @@
                 </div>
             </div>
 
+            <!-- Inventory Tab Content - ĐÃ RÚT GỌN -->
             <div id="tabInventory" class="tab-content">
                 <div class="content-header">
-                    <h2>Quản lý Tồn kho</h2>
+                    <h2>📊 Quản lý Tồn kho</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="showInventoryAdjustModal()">📝 Điều chỉnh tồn kho</button>
+                        <button class="btn btn-outline" onclick="showInventoryHistoryModal()">📋 Xem lịch sử giao dịch</button>
+                    </div>
                 </div>
+
+                <!-- Thống kê nhanh -->
+                <div class="stats-dashboard" style="margin-bottom: 1.5rem;">
+                    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                        <div class="stat-card blue">
+                            <div class="stat-icon">📚</div>
+                            <div class="stat-label">Tổng sách trong kho</div>
+                            <div class="stat-value" id="totalBooksCount">0</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-icon">⬆️</div>
+                            <div class="stat-label">Giao dịch nhập</div>
+                            <div class="stat-value" id="totalInTransactions">0</div>
+                        </div>
+                        <div class="stat-card orange">
+                            <div class="stat-icon">⬇️</div>
+                            <div class="stat-label">Giao dịch xuất</div>
+                            <div class="stat-value" id="totalOutTransactions">0</div>
+                        </div>
+                        <div class="stat-card purple">
+                            <div class="stat-icon">🔄</div>
+                            <div class="stat-label">Tổng giao dịch</div>
+                            <div class="stat-value" id="totalTransactions">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng tồn kho hiện tại -->
                 <div class="table-container">
+                    <h3 style="padding: 1rem; margin: 0; border-bottom: 1px solid #e2e8f0;">📦 Tồn kho hiện tại</h3>
                     <table>
                         <thead>
                         <tr>
                             <th>Sách</th>
+                            <th>Tác giả</th>
                             <th>Tồn kho</th>
-                            <th>Giá</th>
-                            <th>Thao tác</th>
+                            <th>Giá bán</th>
+                            <th>Trạng thái</th>
                         </tr>
                         </thead>
                         <tbody id="inventoryTableBody">
-                        <tr><td colspan="4" class="loading">Đang tải...</td></tr>
+                        <tr><td colspan="5" class="loading">Đang tải...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -935,7 +970,114 @@
             </div>
         </div>
     </div>
-    <!-- ... (các tab khác giữ nguyên) ... -->
+
+    <!-- Modal điều chỉnh tồn kho -->
+    <div id="inventoryAdjustModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📝 Điều chỉnh tồn kho</h3>
+                <button class="modal-close" onclick="closeModal('inventoryAdjustModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="inventoryAdjustForm">
+                    <div class="form-group">
+                        <label class="form-label">Chọn sách *</label>
+                        <select id="adjustBook" class="form-control" required onchange="onAdjustBookChange()">
+                            <option value="">Chọn sách...</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Tồn kho hiện tại</label>
+                            <input type="text" id="currentStock" class="form-control" readonly style="background: #f8fafc;" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Loại giao dịch *</label>
+                            <select id="adjustType" class="form-control" required onchange="onAdjustTypeChange()">
+                                <option value="IN">Nhập kho</option>
+                                <option value="OUT">Xuất kho</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Số lượng *</label>
+                        <input type="number" id="adjustQuantity" class="form-control" min="1" required />
+                        <small id="stockWarning" style="color: #ef4444; display: none;">⚠️ Số lượng xuất vượt quá tồn kho hiện tại</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Lý do *</label>
+                        <textarea id="adjustReason" class="form-control" rows="3" placeholder="Nhập lý do điều chỉnh..." required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('inventoryAdjustModal')">Hủy</button>
+                <button class="btn btn-primary" onclick="saveInventoryAdjustment()">💾 Lưu điều chỉnh</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal lịch sử giao dịch chi tiết -->
+    <div id="inventoryHistoryModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3>📋 Lịch sử giao dịch tồn kho</h3>
+                <button class="modal-close" onclick="closeModal('inventoryHistoryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <select id="historyFilterType" class="form-control" style="width: auto;" onchange="loadAllInventoryHistory()">
+                            <option value="">Tất cả loại</option>
+                            <option value="IN">Nhập kho</option>
+                            <option value="OUT">Xuất kho</option>
+                        </select>
+                        <input type="date" id="historyFilterDate" class="form-control" style="width: auto;" onchange="loadAllInventoryHistory()" />
+                        <button class="btn btn-outline" onclick="exportInventoryHistory()">📤 Xuất Excel</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Thời gian</th>
+                            <th>Sách</th>
+                            <th>Loại</th>
+                            <th>Số lượng</th>
+                            <th>Lý do</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="allInventoryHistoryTableBody">
+                        <tr><td colspan="7" class="loading">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('inventoryHistoryModal')">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal chi tiết giao dịch -->
+    <div id="inventoryDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📄 Chi tiết giao dịch</h3>
+                <button class="modal-close" onclick="closeModal('inventoryDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="inventoryDetailContent">
+                    <!-- Nội dung chi tiết sẽ được điền bằng JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('inventoryDetailModal')">Đóng</button>
+            </div>
+        </div>
+    </div>
 
 </div>
 </div>
@@ -983,6 +1125,7 @@
         let allCategories = [];
         let allPublishers = [];
         let allSuppliers = [];
+        let allInventoryHistory = [];
 
         // Load tab data
         async function loadTabData(tab) {
@@ -2213,35 +2356,462 @@
             }
         }
 
-        // ========== INVENTORY MANAGEMENT ==========
+        // ========== INVENTORY MANAGEMENT - ĐÃ RÚT GỌN ==========
         async function loadInventory() {
             try {
-                const res = await API.get('/api/books');
-                const json = await res.json();
-                const books = json?.data || [];
+                const booksRes = await API.get('/api/books');
+                const booksJson = await booksRes.json();
+                const books = booksJson?.data || [];
+
+                await loadInventoryStats(books);
 
                 const tbody = document.getElementById('inventoryTableBody');
                 if (books.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="loading">Không có sách nào</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="loading">Không có sách nào</td></tr>';
                     return;
                 }
 
                 tbody.innerHTML = books.map(book => `
-                <tr>
-                    <td><strong>${book.title}</strong><br><small>${book.author || 'N/A'}</small></td>
-                    <td>
-                        <span class="badge ${book.stockQuantity < 10 ? 'badge-danger' : book.stockQuantity < 50 ? 'badge-warning' : 'badge-success'}">
-                            ${book.stockQuantity}
-                        </span>
-                    </td>
-                    <td>${formatPrice(book.price)}</td>
-                    <td>
-                        <button class="btn btn-outline" onclick="adjustInventory(${book.id})">Điều chỉnh</button>
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td>
+                    <strong>${book.title}</strong>
+                    ${book.isbn ? `<br><small style="color: #64748b;">ISBN: ${book.isbn}</small>` : ''}
+                </td>
+                <td>${book.author || 'N/A'}</td>
+                <td>
+                    <span class="badge ${getStockBadgeClass(book.stockQuantity)}">
+                        ${book.stockQuantity}
+                    </span>
+                </td>
+                <td>${formatPrice(book.price)}</td>
+                <td>
+                    <span class="badge ${book.stockQuantity === 0 ? 'badge-danger' : book.stockQuantity < 10 ? 'badge-warning' : 'badge-success'}">
+                        ${getStockStatus(book.stockQuantity)}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+
             } catch (error) {
+                console.error('Lỗi tải tồn kho:', error);
                 showError('inventoryTableBody', 'Không thể tải dữ liệu tồn kho');
+            }
+        }
+
+        async function loadInventoryStats(books) {
+            try {
+                // Load all inventory records for stats
+                const invRes = await API.get('/api/inventory');
+                const invJson = await invRes.json();
+                const allRecords = invJson?.data || [];
+
+                const inTransactions = allRecords.filter(r => r.type === 'IN');
+                const outTransactions = allRecords.filter(r => r.type === 'OUT');
+
+                // Update stats
+                document.getElementById('totalBooksCount').textContent = books.length;
+                document.getElementById('totalInTransactions').textContent = inTransactions.length;
+                document.getElementById('totalOutTransactions').textContent = outTransactions.length;
+                document.getElementById('totalTransactions').textContent = allRecords.length;
+
+            } catch (error) {
+                console.error('Lỗi tải thống kê inventory:', error);
+            }
+        }
+
+        function getStockBadgeClass(stock) {
+            if (stock === 0) return 'badge-danger';
+            if (stock < 10) return 'badge-warning';
+            if (stock < 50) return 'badge-info';
+            return 'badge-success';
+        }
+
+        function getStockStatus(stock) {
+            if (stock === 0) return 'Hết hàng';
+            if (stock < 10) return 'Sắp hết';
+            if (stock < 50) return 'Đủ hàng';
+            return 'Dồi dào';
+        }
+
+        // ========== INVENTORY HISTORY ==========
+        async function loadInventoryHistory() {
+            try {
+                showLoading('inventoryHistoryTableBody');
+
+                const typeFilter = document.getElementById('inventoryFilterType').value;
+                const bookFilter = document.getElementById('inventoryFilterBook').value;
+
+                let url = '/api/inventory';
+                if (typeFilter) {
+                    url = `/api/inventory/type/${typeFilter}`;
+                }
+
+                const res = await API.get(url);
+                const json = await res.json();
+                const records = json?.data || [];
+
+                // Lọc theo sách nếu có
+                const filteredRecords = bookFilter ?
+                    records.filter(r => r.bookId == bookFilter) :
+                    records.slice(0, 20); // Hiển thị 20 bản ghi gần nhất
+
+                const tbody = document.getElementById('inventoryHistoryTableBody');
+                if (filteredRecords.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="loading">Không có giao dịch nào</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = filteredRecords.map(record => `
+            <tr>
+                <td>${formatDateTime(record.timestamp)}</td>
+                <td>
+                    <strong>${record.bookTitle || 'N/A'}</strong>
+                    ${record.bookId ? `<br><small style="color: #64748b;">ID: ${record.bookId}</small>` : ''}
+                </td>
+                <td>
+                    <span class="badge ${record.type === 'IN' ? 'badge-success' : 'badge-danger'}">
+                        ${record.type === 'IN' ? '⬆️ NHẬP' : '⬇️ XUẤT'}
+                    </span>
+                </td>
+                <td>
+                    <span style="color: ${record.type === 'IN' ? '#059669' : '#ef4444'}; font-weight: 500;">
+                        ${record.type === 'IN' ? '+' : '-'}${record.quantityChange}
+                    </span>
+                </td>
+                <td>${record.reason || 'Không có lý do'}</td>
+                <td>
+                    <button class="btn btn-outline" onclick="viewInventoryDetail(${record.id})">
+                        👁️ Chi tiết
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+                // Populate book filter
+                await populateBookFilter();
+
+            } catch (error) {
+                console.error('Lỗi tải lịch sử inventory:', error);
+                showError('inventoryHistoryTableBody', 'Không thể tải lịch sử giao dịch');
+            }
+        }
+
+        async function loadAllInventoryHistory() {
+            try {
+                showLoading('allInventoryHistoryTableBody');
+
+                const typeFilter = document.getElementById('historyFilterType').value;
+                const dateFilter = document.getElementById('historyFilterDate').value;
+
+                let url = '/api/inventory';
+                if (typeFilter) {
+                    url = `/api/inventory/type/${typeFilter}`;
+                }
+
+                const res = await API.get(url);
+                const json = await res.json();
+                allInventoryHistory = json?.data || [];
+
+                // Lọc theo ngày nếu có
+                let filteredRecords = allInventoryHistory;
+                if (dateFilter) {
+                    filteredRecords = allInventoryHistory.filter(record => {
+                        const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+                        return recordDate === dateFilter;
+                    });
+                }
+
+                const tbody = document.getElementById('allInventoryHistoryTableBody');
+                if (filteredRecords.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="loading">Không có giao dịch nào</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = filteredRecords.map(record => `
+            <tr>
+                <td>#${record.id}</td>
+                <td>${formatDateTime(record.timestamp)}</td>
+                <td><strong>${record.bookTitle || 'N/A'}</strong></td>
+                <td>
+                    <span class="badge ${record.type === 'IN' ? 'badge-success' : 'badge-danger'}">
+                        ${record.type === 'IN' ? 'NHẬP' : 'XUẤT'}
+                    </span>
+                </td>
+                <td style="color: ${record.type === 'IN' ? '#059669' : '#ef4444'}; font-weight: 500;">
+                    ${record.type === 'IN' ? '+' : '-'}${record.quantityChange}
+                </td>
+                <td>${record.reason || 'Không có lý do'}</td>
+                <td>
+                    <button class="btn btn-outline" onclick="viewInventoryDetail(${record.id})">
+                        👁️ Chi tiết
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+            } catch (error) {
+                console.error('Lỗi tải toàn bộ lịch sử:', error);
+                showError('allInventoryHistoryTableBody', 'Không thể tải lịch sử');
+            }
+        }
+
+        async function populateBookFilter() {
+            try {
+                const booksRes = await API.get('/api/books');
+                const booksJson = await booksRes.json();
+                const books = booksJson?.data || [];
+
+                const bookSelect = document.getElementById('inventoryFilterBook');
+                bookSelect.innerHTML = '<option value="">Tất cả sách</option>' +
+                    books.map(book => `<option value="${book.id}">${book.title}</option>`).join('');
+
+            } catch (error) {
+                console.error('Lỗi tải danh sách sách:', error);
+            }
+        }
+
+        // ========== INVENTORY ADJUSTMENT ==========
+        async function showInventoryAdjustModal() {
+            try {
+                await loadBooksForAdjustment();
+                document.getElementById('inventoryAdjustForm').reset();
+                document.getElementById('stockWarning').style.display = 'none';
+                document.getElementById('inventoryAdjustModal').classList.add('active');
+            } catch (error) {
+                console.error('Lỗi mở modal điều chỉnh:', error);
+                alert('Lỗi khi mở form điều chỉnh tồn kho');
+            }
+        }
+
+        async function loadBooksForAdjustment() {
+            try {
+                const booksRes = await API.get('/api/books');
+                const booksJson = await booksRes.json();
+                const books = booksJson?.data || [];
+
+                const bookSelect = document.getElementById('adjustBook');
+                bookSelect.innerHTML = '<option value="">Chọn sách...</option>' +
+                    books.map(book =>
+                        `<option value="${book.id}" data-stock="${book.stockQuantity}">
+                    ${book.title} (Tồn: ${book.stockQuantity})
+                </option>`
+                    ).join('');
+
+            } catch (error) {
+                console.error('Lỗi tải sách:', error);
+            }
+        }
+
+        function onAdjustBookChange() {
+            const bookSelect = document.getElementById('adjustBook');
+            const selectedOption = bookSelect.options[bookSelect.selectedIndex];
+            const currentStock = selectedOption ? selectedOption.getAttribute('data-stock') : 0;
+
+            document.getElementById('currentStock').value = currentStock;
+            onAdjustTypeChange(); // Update warning
+        }
+
+        function onAdjustTypeChange() {
+            const type = document.getElementById('adjustType').value;
+            const currentStock = parseInt(document.getElementById('currentStock').value) || 0;
+            const warningElement = document.getElementById('stockWarning');
+
+            if (type === 'OUT' && currentStock === 0) {
+                warningElement.textContent = '⚠️ Sách này đã hết hàng, không thể xuất kho';
+                warningElement.style.display = 'block';
+            } else {
+                warningElement.style.display = 'none';
+            }
+        }
+
+        async function saveInventoryAdjustment() {
+            try {
+                const bookId = document.getElementById('adjustBook').value;
+                const type = document.getElementById('adjustType').value;
+                const quantity = parseInt(document.getElementById('adjustQuantity').value);
+                const reason = document.getElementById('adjustReason').value.trim();
+
+                if (!bookId) {
+                    alert('Vui lòng chọn sách');
+                    return;
+                }
+                if (!quantity || quantity <= 0) {
+                    alert('Số lượng phải lớn hơn 0');
+                    return;
+                }
+                if (!reason) {
+                    alert('Vui lòng nhập lý do điều chỉnh');
+                    return;
+                }
+
+                const data = {
+                    bookId: parseInt(bookId),
+                    quantityChange: quantity,
+                    type: type,
+                    reason: reason
+                };
+
+                const res = await API.post('/api/inventory', data);
+                if (res.ok) {
+                    Utils.showNotification('Điều chỉnh tồn kho thành công', 'success');
+                    closeModal('inventoryAdjustModal');
+                    await loadInventory();
+                    await loadBooks();
+                    await loadStatistics();
+                } else {
+                    const error = await res.json();
+                    alert(error.message || 'Lỗi khi điều chỉnh tồn kho');
+                }
+            } catch (error) {
+                console.error('Lỗi điều chỉnh tồn kho:', error);
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        // ========== INVENTORY DETAILS ==========
+        async function viewInventoryDetail(inventoryId) {
+            try {
+                const res = await API.get(`/api/inventory/${inventoryId}`);
+                const json = await res.json();
+                const record = json?.data;
+
+                if (record) {
+                    const detailContent = document.getElementById('inventoryDetailContent');
+                    detailContent.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label class="form-label"><strong>📚 Sách:</strong></label>
+                        <p>${record.bookTitle || 'N/A'} (ID: ${record.bookId})</p>
+                    </div>
+                    <div>
+                        <label class="form-label"><strong>🆔 Mã giao dịch:</strong></label>
+                        <p>#${record.id}</p>
+                    </div>
+                    <div>
+                        <label class="form-label"><strong>📊 Loại giao dịch:</strong></label>
+                        <p>
+                            <span class="badge ${record.type === 'IN' ? 'badge-success' : 'badge-danger'}">
+                                ${record.type === 'IN' ? '⬆️ NHẬP KHO' : '⬇️ XUẤT KHO'}
+                            </span>
+                        </p>
+                    </div>
+                    <div>
+                        <label class="form-label"><strong>🔢 Số lượng:</strong></label>
+                        <p style="color: ${record.type === 'IN' ? '#059669' : '#ef4444'}; font-weight: bold; font-size: 1.2rem;">
+                            ${record.type === 'IN' ? '+' : '-'}${record.quantityChange}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="form-label"><strong>📅 Thời gian:</strong></label>
+                        <p>${formatDateTime(record.timestamp)}</p>
+                    </div>
+                    <div>
+                        <label class="form-label"><strong>💬 Lý do:</strong></label>
+                        <p style="background: #f8fafc; padding: 0.75rem; border-radius: 0.25rem;">${record.reason || 'Không có lý do'}</p>
+                    </div>
+                </div>
+            `;
+
+                    document.getElementById('inventoryDetailModal').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Lỗi xem chi tiết giao dịch:', error);
+                alert('Lỗi khi tải chi tiết giao dịch');
+            }
+        }
+
+        async function viewBookInventoryHistory(bookId) {
+            try {
+                const res = await API.get(`/api/inventory/book/${bookId}`);
+                const json = await res.json();
+                const history = json?.data || [];
+
+                const detailContent = document.getElementById('inventoryDetailContent');
+                detailContent.innerHTML = `
+            <h4 style="margin-bottom: 1rem;">📊 Lịch sử tồn kho sách</h4>
+            ${history.length === 0 ?
+                    '<p>Không có lịch sử giao dịch cho sách này</p>' :
+                    `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Loại</th>
+                                <th>Số lượng</th>
+                                <th>Lý do</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${history.map(record => `
+                                <tr>
+                                    <td>${formatDateTime(record.timestamp)}</td>
+                                    <td>
+                                        <span class="badge ${record.type === 'IN' ? 'badge-success' : 'badge-danger'}">
+                                            ${record.type === 'IN' ? 'NHẬP' : 'XUẤT'}
+                                        </span>
+                                    </td>
+                                    <td style="color: ${record.type === 'IN' ? '#059669' : '#ef4444'};">
+                                        ${record.type === 'IN' ? '+' : '-'}${record.quantityChange}
+                                    </td>
+                                    <td>${record.reason || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                `
+                }
+        `;
+
+                document.getElementById('inventoryDetailModal').classList.add('active');
+            } catch (error) {
+                console.error('Lỗi xem lịch sử sách:', error);
+                alert('Lỗi khi tải lịch sử sách');
+            }
+        }
+
+        function showInventoryHistoryModal() {
+            document.getElementById('inventoryHistoryModal').classList.add('active');
+            loadAllInventoryHistory();
+        }
+
+        function exportInventoryHistory() {
+            // TODO: Implement export to Excel
+            alert('📤 Tính năng xuất Excel đang được phát triển');
+        }
+
+        // ========== UPDATE loadTabData FUNCTION ==========
+        // Thêm case 'inventory' vào hàm loadTabData hiện có:
+        async function loadTabData(tab) {
+            switch(tab) {
+                case 'dashboard':
+                    await loadStatistics();
+                    break;
+                case 'users':
+                    await loadUsers();
+                    break;
+                case 'books':
+                    await loadBooks();
+                    break;
+                case 'categories':
+                    await loadCategories();
+                    break;
+                case 'publishers':
+                    await loadPublishers();
+                    break;
+                case 'suppliers':
+                    await loadSuppliersTable();
+                    break;
+                case 'orders':
+                    await loadOrders();
+                    break;
+                case 'receipts':
+                    await loadReceipts();
+                    break;
+                case 'inventory':
+                    await loadInventory(); // ĐÃ CẬP NHẬT
+                    break;
             }
         }
 
@@ -2302,30 +2872,6 @@
             });
         });
 
-        // THÊM HÀM NÀY ĐỂ SỬA LỖI "adjustInventory is not defined"
-        function adjustInventory(bookId) {
-            const newStock = prompt('Nhập số lượng tồn kho mới (số nguyên):');
-            if (newStock === null) return;
-            const qty = parseInt(newStock);
-            if (isNaN(qty) || qty < 0) {
-                alert('Vui lòng nhập số nguyên không âm hợp lệ');
-                return;
-            }
-            if (!confirm(`Bạn có chắc muốn điều chỉnh tồn kho sách ID ${bookId} thành ${qty}?`)) return;
-
-            API.put(`/api/books/${bookId}/stock`, { stockQuantity: qty })
-                .then(res => {
-                    if (res.ok) {
-                        Utils.showNotification('Cập nhật tồn kho thành công', 'success');
-                        loadInventory();
-                        loadBooks();
-                        loadStatistics();
-                    } else {
-                        res.json().then(err => alert(err.message || 'Lỗi server'));
-                    }
-                })
-                .catch(err => alert('Lỗi: ' + err.message));
-        }
 
         // THAY HÀM editCategory BẰNG HÀM NÀY ĐỂ TRÁNH LỖI 500
         async function editCategory(id) {
