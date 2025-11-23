@@ -7,4 +7,5 @@ import lombok.Data;
 public class UpdateCategoryRequest {
     @NotBlank(message = "Tên thể loại không được để trống")
     private String name;
+    private String description;
 }

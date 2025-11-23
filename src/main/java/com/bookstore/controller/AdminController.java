@@ -27,16 +27,7 @@ import java.util.Map;
 public class AdminController {
 
     private final ReportService reportService;
-//    private final BookRepository bookRepository;
-//    private final OrderRepository orderRepository;
-//    private final UserRepository userRepository;
 
-//    public AdminController(ReportService reportService, BookRepository bookRepository, OrderRepository orderRepository, UserRepository userRepository) {
-//        this.reportService = reportService;
-//        this.bookRepository = bookRepository;
-//        this.orderRepository = orderRepository;
-//        this.userRepository = userRepository;
-//    }
     public AdminController(ReportService reportService) {
         this.reportService = reportService;
     }
@@ -50,27 +41,4 @@ public class AdminController {
         ApiResponse<RevenueReportResponse> response = new ApiResponse<>(true, "Lấy báo cáo doanh thu thành công", report);
         return ResponseEntity.ok(response);
     }
-
-//    // Thêm vào AdminController
-//    @GetMapping("/stats")
-//    public ResponseEntity<ApiResponse<Map<String, Object>>> getAdminStats() {
-//        Map<String, Object> stats = new HashMap<>();
-//
-//        // Lấy số liệu từ các service
-//        long totalBooks = bookRepository.count();
-//        long totalUsers = userRepository.count();
-//        long totalOrders = orderRepository.count();
-//
-//        // Tính doanh thu (cần implement logic tính doanh thu)
-//        BigDecimal totalRevenue = orderRepository.sumTotalAmountByStatus(OrderStatus.DELIVERED);
-//
-//        stats.put("totalBooks", totalBooks);
-//        stats.put("totalUsers", totalUsers);
-//        stats.put("totalOrders", totalOrders);
-//        stats.put("totalRevenue", totalRevenue != null ? totalRevenue : BigDecimal.ZERO);
-//
-//        ApiResponse<Map<String, Object>> response = new ApiResponse<>(
-//                true, "Lấy thống kê thành công", stats);
-//        return ResponseEntity.ok(response);
-//    }
 }

@@ -26,6 +26,7 @@ public class CategoryService {
         CategoryResponse response = new CategoryResponse();
         response.setId(category.getId());
         response.setName(category.getName());
+        response.setDescription(category.getDescription());
         return response;
     }
 
@@ -74,6 +75,7 @@ public class CategoryService {
         }
 
         category.setName(newName);
+        category.setDescription(request.getDescription());
         return toResponse(categoryRepository.save(category));
     }
 }

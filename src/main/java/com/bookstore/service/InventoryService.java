@@ -51,4 +51,25 @@ public class InventoryService {
                 .map(mapper::toInventoryResponse)
                 .collect(Collectors.toList());
     }
+    // Thêm các method này vào InventoryService
+    @Transactional(readOnly = true)
+    public List<InventoryResponse> getAllInventoryRecords() {
+        return invRepo.findAllByOrderByTimestampDesc().stream()
+                .map(mapper::toInventoryResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public InventoryResponse getInventoryRecordById(Long id) {
+        Inventory inventory = invRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bản ghi tồn kho với ID: " + id));
+        return mapper.toInventoryResponse(inventory);
+    }
+
+    @Transactional(readOnly = true)
+    public List<InventoryResponse> getInventoryRecordsByType(InventoryType type) {
+        return invRepo.findByTypeOrderByTimestampDesc(type).stream()
+                .map(mapper::toInventoryResponse)
+                .collect(Collectors.toList());
+    }
 }

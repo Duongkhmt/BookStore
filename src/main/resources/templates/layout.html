@@ -10,31 +10,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<!--<header class="topbar">-->
-<!--    <div class="topbar-content">-->
-<!--        <a href="/" class="brand">📚 BookStore</a>-->
-<!--        <nav class="nav">-->
-<!--            <a href="/catalog">Sách</a>-->
-<!--            <a href="/orders">Đơn hàng</a>-->
-<!--            <a href="/admin">Quản lý</a>-->
-<!--            &lt;!&ndash; Thêm giỏ hàng với badge &ndash;&gt;-->
-<!--            <a href="/cart" class="cart-link">-->
-<!--                🛒 Giỏ hàng-->
-<!--                <span id="cartBadge" class="cart-badge" style="display: none;">0</span>-->
-<!--            </a>-->
-<!--            <a href="/login" id="loginLink" class="btn btn-outline">Đăng nhập</a>-->
-<!--            <button id="logoutBtn" class="btn btn-danger" style="display:none">Đăng xuất</button>-->
-<!--        </nav>-->
-<!--    </div>-->
-<!--</header>-->
+
 <header class="topbar">
     <div class="topbar-content">
         <a href="/" class="brand">📚 BookStore</a>
         <nav class="nav" id="mainNav">
-            <!-- Menu sẽ được cập nhật động dựa trên role -->
         </nav>
+
         <a href="/login" id="loginLink" class="btn btn-outline">Đăng nhập</a>
-        <button id="logoutBtn" class="btn btn-danger" style="display:none">Đăng xuất</button>
+
+        <div id="userSection" style="display: none; align-items: center; gap: 15px;">
+            <span id="displayUsername" style="color: #fff; font-weight: 600; font-size: 14px;"></span>
+
+            <button id="logoutBtn" class="btn btn-danger">Đăng xuất</button>
+        </div>
     </div>
 </header>
 
@@ -45,43 +34,43 @@
 <script th:src="@{/js/auth.js}"></script>
 <script th:src="@{/js/api.js}"></script>
 <script>
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
         const hasToken = !!localStorage.getItem('token');
-        const logoutBtn = document.getElementById('logoutBtn');
         const loginLink = document.getElementById('loginLink');
+        const userSection = document.getElementById('userSection'); // Div bao quanh User + Logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        const displayUsername = document.getElementById('displayUsername'); // Span hiển thị tên
         const mainNav = document.getElementById('mainNav');
 
-        // Lấy role
-        const userRole = getUserRole ? getUserRole() : null;
-        console.log('🎯 Current role:', userRole);
+        // 1. Xử lý hiển thị Login / Logout + User Name
+        if (hasToken) {
+            if (loginLink) loginLink.style.display = 'none';
+            if (userSection) userSection.style.display = 'flex'; // Hiện cả tên và nút logout
 
-        // Cập nhật menu dựa trên role
-        if (mainNav) {
-            if (userRole === 'ADMIN') {
-                // Menu cho ADMIN - CHỈ có admin
-                mainNav.innerHTML = `
-                    <a href="/admin">Quản trị hệ thống</a>
-                `;
-            } else if (userRole === 'USER') {
-                // Menu cho USER - CHỈ có user pages
-                mainNav.innerHTML = `
-                    <a href="/catalog">Sách</a>
-                    <a href="/orders">Đơn hàng</a>
-                    <a href="/cart" class="cart-link">
-                        🛒 Giỏ hàng
-                        <span id="cartBadge" class="cart-badge" style="display: none;">0</span>
-                    </a>
-                `;
-            } else {
-                // Chưa đăng nhập
-                mainNav.innerHTML = `
-                    <a href="/catalog">Sách</a>
-                `;
+            // GỌI API LẤY TÊN NGƯỜI DÙNG
+            try {
+                // Dùng fetch hoặc API.get nếu file api.js của bạn đã define nó
+                // Ở đây mình dùng fetch native cho chắc chắn chạy được ngay
+                const response = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const json = await response.json();
+
+                if (json.success && json.data) {
+                    // Hiển thị tên: Ví dụ "👤 admin"
+                    if (displayUsername) displayUsername.innerText = `👤 ${json.data.username}`;
+                }
+            } catch (e) {
+                console.error("Lỗi lấy thông tin user", e);
             }
+
+        } else {
+            if (loginLink) loginLink.style.display = 'inline-block';
+            if (userSection) userSection.style.display = 'none';
         }
 
+        // 2. Xử lý Đăng xuất
         if (logoutBtn) {
-            logoutBtn.style.display = hasToken ? 'inline-block' : 'none';
             logoutBtn.onclick = () => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('cart');
@@ -89,8 +78,23 @@
             };
         }
 
-        if (loginLink) {
-            loginLink.style.display = hasToken ? 'none' : 'inline-block';
+        // 3. Xử lý Menu theo Role (Giữ nguyên logic cũ của bạn)
+        const userRole = typeof getUserRole === 'function' ? getUserRole() : null;
+        console.log('🎯 Current role:', userRole);
+
+        if (mainNav) {
+            if (userRole === 'ADMIN') {
+                mainNav.innerHTML = `<a href="/admin">Quản trị hệ thống</a>`;
+            } else if (userRole === 'USER') {
+                mainNav.innerHTML = `
+                    <a href="/catalog">Sách</a>
+                    <a href="/orders">Đơn hàng</a>
+                    <a href="/cart" class="cart-link">
+                        🛒 Giỏ hàng <span id="cartBadge" class="cart-badge" style="display: none;">0</span>
+                    </a>`;
+            } else {
+                mainNav.innerHTML = `<a href="/catalog">Sách</a>`;
+            }
         }
     });
 </script>

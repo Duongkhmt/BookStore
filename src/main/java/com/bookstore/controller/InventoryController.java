@@ -3,6 +3,7 @@ package com.bookstore.controller;
 import com.bookstore.dto.request.CreateInventoryRequest;
 import com.bookstore.dto.response.ApiResponse;
 import com.bookstore.dto.response.InventoryResponse;
+import com.bookstore.entity.InventoryType;
 import com.bookstore.service.InventoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,29 @@ public class InventoryController {
     public ResponseEntity<ApiResponse<List<InventoryResponse>>> getInventoryHistoryByBook(@PathVariable Long bookId) {
         List<InventoryResponse> history = inventoryService.getInventoryHistoryByBook(bookId);
         ApiResponse<List<InventoryResponse>> response = new ApiResponse<>(true, "Lấy lịch sử tồn kho thành công", history);
+        return ResponseEntity.ok(response);
+    }
+    // API: Lấy tất cả records inventory tracking
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<InventoryResponse>>> getAllInventoryRecords() {
+        List<InventoryResponse> records = inventoryService.getAllInventoryRecords();
+        ApiResponse<List<InventoryResponse>> response = new ApiResponse<>(true, "Lấy danh sách giao dịch tồn kho thành công", records);
+        return ResponseEntity.ok(response);
+    }
+
+    // API: Lấy chi tiết 1 record inventory tracking
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<InventoryResponse>> getInventoryRecordById(@PathVariable Long id) {
+        InventoryResponse record = inventoryService.getInventoryRecordById(id);
+        ApiResponse<InventoryResponse> response = new ApiResponse<>(true, "Lấy chi tiết giao dịch tồn kho thành công", record);
+        return ResponseEntity.ok(response);
+    }
+
+    // API: Lấy inventory records theo type (IN/OUT)
+    @GetMapping("/type/{type}")
+    public ResponseEntity<ApiResponse<List<InventoryResponse>>> getInventoryRecordsByType(@PathVariable InventoryType type) {
+        List<InventoryResponse> records = inventoryService.getInventoryRecordsByType(type);
+        ApiResponse<List<InventoryResponse>> response = new ApiResponse<>(true, "Lấy giao dịch tồn kho theo loại thành công", records);
         return ResponseEntity.ok(response);
     }
 }

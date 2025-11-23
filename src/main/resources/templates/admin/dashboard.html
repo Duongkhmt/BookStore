@@ -21,65 +21,153 @@
             margin-bottom: 0.5rem;
         }
 
+        /* Statistics Dashboard */
+        .stats-dashboard {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stats-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 2rem;
         }
 
         .stat-card {
-            background: white;
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .stat-card.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
-        .stat-card.green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
-        .stat-card.purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; }
-        .stat-card.orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.blue {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+        .stat-card.green {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .stat-card.purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+        .stat-card.orange {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
 
         .stat-value {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 700;
-            margin-top: 0.5rem;
         }
 
-        .tabs {
+        /* Main Content Layout - ĐÃ SỬA */
+        .admin-content-wrapper {
             display: flex;
-            gap: 0.5rem;
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 2rem;
-            overflow-x: auto;
+            gap: 2rem;
+            min-height: 600px;
         }
 
-        .tab {
-            padding: 0.75rem 1.5rem;
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
+        .admin-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .admin-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Sidebar Menu Styles - ĐÃ SỬA */
+        .sidebar-menu {
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
             cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 0.375rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .menu-item:hover {
+            background: #f8fafc;
+        }
+
+        .menu-item.active {
+            background: #eff6ff;
+            color: #3b82f6;
             font-weight: 500;
-            color: #64748b;
-            white-space: nowrap;
         }
 
-        .tab:hover {
-            color: #3b82f6;
+        .menu-item i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
         }
 
-        .tab.active {
-            color: #3b82f6;
-            border-bottom-color: #3b82f6;
-        }
-
+        /* Tab Content Styles */
         .tab-content {
             display: none;
         }
 
         .tab-content.active {
             display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .content-header {
@@ -87,6 +175,12 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
+        }
+
+        .content-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
         }
 
         .btn {
@@ -273,54 +367,6 @@
             gap: 0.5rem;
             align-items: end;
             margin-bottom: 0.5rem;
-            padding: 0.5rem;
-            background: #f8fafc;
-            border-radius: 0.25rem;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #64748b;
-        }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 0.25rem;
-            margin-bottom: 1rem;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-        .receipt-item {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr auto;
-            gap: 0.5rem;
-            align-items: end;
-            margin-bottom: 0.5rem;
             padding: 0.75rem;
             background: #f8fafc;
             border-radius: 0.375rem;
@@ -345,256 +391,321 @@
             min-height: 38px;
         }
 
-        /*!* Thêm style cho modal user *!*/
-        /*.form-select {*/
-        /*    width: 100%;*/
-        /*    padding: 0.5rem;*/
-        /*    border: 1px solid #e2e8f0;*/
-        /*    border-radius: 0.25rem;*/
-        /*    font-size: 1rem;*/
-        /*    background-color: white;*/
-        /*}*/
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
 
-        /*.action-buttons {*/
-        /*    display: flex;*/
-        /*    gap: 8px;*/
-        /*}*/
+        .alert {
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+        }
 
-        /*.action-buttons .btn {*/
-        /*    padding: 6px 12px;*/
-        /*    font-size: 12px;*/
-        /*}*/
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .admin-content-wrapper {
+                flex-direction: column;
+            }
+
+            .admin-sidebar {
+                width: 100%;
+                position: static;
+            }
+        }
     </style>
 </head>
 
 <body>
 <div layout:fragment="content" class="admin-container">
+    <!-- Header -->
     <div class="admin-header">
         <h1 class="admin-title">🎯 Quản trị hệ thống</h1>
         <p>Quản lý toàn bộ cửa hàng sách</p>
     </div>
 
-    <!-- Statistics -->
-    <div class="stats-grid">
-        <div class="stat-card blue">
-            <div>📚 Tổng sách</div>
-            <div class="stat-value" id="statBooks">0</div>
+    <!-- Main Content -->
+    <div class="admin-content-wrapper">
+        <!-- Sidebar Menu - ĐÃ SỬA: Luôn hiển thị -->
+        <div class="admin-sidebar">
+            <h3 style="margin-top: 0; margin-bottom: 1rem; color: #1e293b;">📋 Menu Quản lý</h3>
+
+            <div class="sidebar-menu">
+                <div class="menu-item active" data-tab="dashboard">
+                    <i>🏠</i> Tổng quan
+                </div>
+                <div class="menu-item" data-tab="users">
+                    <i>👥</i> Người dùng
+                </div>
+                <div class="menu-item" data-tab="books">
+                    <i>📚</i> Sách
+                </div>
+                <div class="menu-item" data-tab="categories">
+                    <i>🏷️</i> Thể loại
+                </div>
+                <div class="menu-item" data-tab="publishers">
+                    <i>🏢</i> Nhà xuất bản
+                </div>
+                <div class="menu-item" data-tab="suppliers">
+                    <i>🚚</i> Nhà cung cấp
+                </div>
+                <div class="menu-item" data-tab="orders">
+                    <i>📦</i> Đơn hàng
+                </div>
+                <div class="menu-item" data-tab="receipts">
+                    <i>📋</i> Phiếu nhập kho
+                </div>
+                <div class="menu-item" data-tab="inventory">
+                    <i>📊</i> Tồn kho
+                </div>
+            </div>
         </div>
-        <div class="stat-card green">
-            <div>📦 Đơn hàng</div>
-            <div class="stat-value" id="statOrders">0</div>
-        </div>
-        <div class="stat-card purple">
-            <div>👥 Người dùng</div>
-            <div class="stat-value" id="statUsers">0</div>
-        </div>
-        <div class="stat-card orange">
-            <div>💰 Doanh thu</div>
-            <div class="stat-value" id="statRevenue">0₫</div>
+
+        <!-- Content Area -->
+        <div class="admin-content">
+            <!-- Statistics Dashboard - ĐÃ SỬA: Hiển thị trong tab Dashboard -->
+            <div id="statsDashboard" class="stats-dashboard">
+                <h2 class="stats-title">📊 Tổng quan hệ thống</h2>
+                <div class="stats-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-label">Tổng sách</div>
+                        <div class="stat-value" id="statBooks">0</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-label">Đơn hàng</div>
+                        <div class="stat-value" id="statOrders">0</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-label">Người dùng</div>
+                        <div class="stat-value" id="statUsers">0</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-label">Doanh thu</div>
+                        <div class="stat-value" id="statRevenue">0₫</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab Content -->
+            <div id="tabDashboard" class="tab-content active">
+                <div class="content-header">
+                </div>
+                <div class="table-container">
+                    <div style="padding: 2rem; text-align: center; color: #64748b;">
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Users Content -->
+            <div id="tabUsers" class="tab-content">
+                <div class="content-header">
+                    <h2>Quản lý Người dùng</h2>
+                    <button class="btn btn-primary" onclick="showUserModal()">+ Thêm người dùng</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Email</th>
+                            <th>Vai trò</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                        <tr><td colspan="6" class="loading">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Other Tab Contents (hidden by default) -->
+            <div id="tabBooks" class="tab-content">
+                <div class="content-header">
+                    <h2>Quản lý Sách</h2>
+                    <button class="btn btn-primary" onclick="showBookModal()">+ Thêm sách</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tiêu đề</th>
+                            <th>Tác giả</th>
+                            <th>Thể loại</th>
+                            <th>Giá</th>
+                            <th>Tồn kho</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="booksTableBody">
+                        <tr><td colspan="7" class="loading">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Các tab khác giữ nguyên như trước -->
+            <div id="tabCategories" class="tab-content">
+                <div class="content-header">
+                    <h2>Quản lý Thể loại</h2>
+                    <button class="btn btn-primary" onclick="showCategoryModal()">+ Thêm thể loại</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên</th>
+                            <th>Mô tả</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="categoriesTableBody">
+                        <tr><td colspan="4" class="loading">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabPublishers" class="tab-content">
+                <div class="content-header">
+                    <h2>Quản lý Nhà xuất bản</h2>
+                    <button class="btn btn-primary" onclick="showPublisherModal()">+ Thêm NXB</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên</th>
+                            <th>Địa chỉ</th>
+                            <th>SĐT</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="publishersTableBody">
+                        <tr><td colspan="5" class="loading">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabSuppliers" class="tab-content">
+                <div class="content-header">
+                    <h2>Quản lý Nhà cung cấp</h2>
+                    <button class="btn btn-primary" onclick="showSupplierModal()">+ Thêm NCC</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên</th>
+                            <th>Địa chỉ</th>
+                            <th>SĐT</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="suppliersTableBody">
+                        <tr><td colspan="5" class="loading">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabOrders" class="tab-content">
+                <div class="content-header">
+                    <h2>Quản lý Đơn hàng</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Địa chỉ</th>
+                            <th>Trạng thái</th>
+                            <th>Tổng tiền</th>
+                            <th>Ngày đặt</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                        <tr><td colspan="7" class="loading">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabReceipts" class="tab-content">
+                <div class="content-header">
+                    <h2>Quản lý Phiếu nhập kho</h2>
+                    <button class="btn btn-primary" onclick="showReceiptModal()">+ Tạo phiếu nhập</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Mã phiếu</th>
+                            <th>Nhà cung cấp</th>
+                            <th>Số lượng sách</th>
+                            <th>Tổng tiền</th>
+                            <th>Ngày nhập</th>
+                            <th>Người tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="receiptsTableBody">
+                        <tr><td colspan="7" class="loading">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabInventory" class="tab-content">
+                <div class="content-header">
+                    <h2>Quản lý Tồn kho</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Sách</th>
+                            <th>Tồn kho</th>
+                            <th>Giá</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                        <tr><td colspan="4" class="loading">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab active" data-tab="users">👥 Người dùng</button>
-        <button class="tab" data-tab="books">📚 Sách</button>
-        <button class="tab" data-tab="categories">🏷️ Thể loại</button>
-        <button class="tab" data-tab="publishers">🏢 Nhà xuất bản</button>
-        <button class="tab" data-tab="suppliers">🚚 Nhà cung cấp</button>
-        <button class="tab" data-tab="orders">📦 Đơn hàng</button>
-        <button class="tab" data-tab="receipts">📋 Phiếu nhập kho</button>
-        <button class="tab" data-tab="inventory">📊 Tồn kho</button>
-    </div>
-
-    <!-- Tab Users Content - ĐÃ SỬA -->
-    <div id="tabUsers" class="tab-content active">
-        <div class="content-header">
-            <h2>Quản lý Người dùng</h2>
-            <button class="btn btn-primary" onclick="showUserModal()">+ Thêm người dùng</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tên đăng nhập</th>
-                    <th>Email</th>
-                    <th>Vai trò</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                <tr><td colspan="6" class="loading">Đang tải...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="tabBooks" class="tab-content">
-        <div class="content-header">
-            <h2>Quản lý Sách</h2>
-            <button class="btn btn-primary" onclick="showBookModal()">+ Thêm sách</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tiêu đề</th>
-                    <th>Tác giả</th>
-                    <th>Thể loại</th>
-                    <th>Giá</th>
-                    <th>Tồn kho</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-                <tbody id="booksTableBody">
-                <tr><td colspan="7" class="loading">Đang tải...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="tabCategories" class="tab-content">
-        <div class="content-header">
-            <h2>Quản lý Thể loại</h2>
-            <button class="btn btn-primary" onclick="showCategoryModal()">+ Thêm thể loại</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tên</th>
-                    <th>Mô tả</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-                <tbody id="categoriesTableBody">
-                <tr><td colspan="4" class="loading">Đang tải...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="tabPublishers" class="tab-content">
-        <div class="content-header">
-            <h2>Quản lý Nhà xuất bản</h2>
-            <button class="btn btn-primary" onclick="showPublisherModal()">+ Thêm NXB</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tên</th>
-                    <th>Địa chỉ</th>
-                    <th>SĐT</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-                <tbody id="publishersTableBody">
-                <tr><td colspan="5" class="loading">Đang tải...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="tabSuppliers" class="tab-content">
-        <div class="content-header">
-            <h2>Quản lý Nhà cung cấp</h2>
-            <button class="btn btn-primary" onclick="showSupplierModal()">+ Thêm NCC</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tên</th>
-                    <th>Địa chỉ</th>
-                    <th>SĐT</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-                <tbody id="suppliersTableBody">
-                <tr><td colspan="5" class="loading">Đang tải...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="tabOrders" class="tab-content">
-        <div class="content-header">
-            <h2>Quản lý Đơn hàng</h2>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>Mã đơn</th>
-                    <th>Khách hàng</th>
-                    <th>Địa chỉ</th>
-                    <th>Trạng thái</th>
-                    <th>Tổng tiền</th>
-                    <th>Ngày đặt</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-                <tbody id="ordersTableBody">
-                <tr><td colspan="7" class="loading">Đang tải...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="tabReceipts" class="tab-content">
-        <div class="content-header">
-            <h2>Quản lý Phiếu nhập kho</h2>
-            <button class="btn btn-primary" onclick="showReceiptModal()">+ Tạo phiếu nhập</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>Mã phiếu</th>
-                    <th>Nhà cung cấp</th>
-                    <th>Số lượng sách</th>
-                    <th>Tổng tiền</th>
-                    <th>Ngày nhập</th>
-                    <th>Người tạo</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-                <tbody id="receiptsTableBody">
-                <tr><td colspan="7" class="loading">Đang tải...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="tabInventory" class="tab-content">
-        <div class="content-header">
-            <h2>Quản lý Tồn kho</h2>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>Sách</th>
-                    <th>Tồn kho</th>
-                    <th>Giá</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-                <tbody id="inventoryTableBody">
-                <tr><td colspan="4" class="loading">Đang tải...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- User Modal - STATUS CHỈ HIỆN KHI SỬA -->
+    <!-- Các modal giữ nguyên -->
+    <!-- User Modal -->
     <div id="userModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -620,16 +731,15 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Vai trò *</label>
-                            <select id="role" class="form-select" required>
+                            <select id="role" class="form-control" required>
                                 <option value="">Chọn vai trò</option>
                                 <option value="ROLE_USER">Người dùng</option>
                                 <option value="ROLE_ADMIN">Quản trị viên</option>
                             </select>
                         </div>
-                        <!-- STATUS CHỈ HIỆN KHI SỬA -->
                         <div class="form-group" id="statusGroup" style="display: none;">
                             <label class="form-label">Trạng thái *</label>
-                            <select id="status" class="form-select" required>
+                            <select id="status" class="form-control" required>
                                 <option value="ACTIVE">Đang hoạt động</option>
                                 <option value="INACTIVE">Không hoạt động</option>
                                 <option value="LOCKED">Đã khóa</option>
@@ -637,7 +747,6 @@
                         </div>
                     </div>
                 </form>
-                <!-- Thông báo mặc định khi tạo mới -->
                 <div id="defaultStatusInfo" style="background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 10px;">
                     <small>💡 <strong>Mặc định:</strong> Status = ACTIVE (Đang hoạt động)</small>
                 </div>
@@ -826,52 +935,95 @@
             </div>
         </div>
     </div>
+    <!-- ... (các tab khác giữ nguyên) ... -->
+
+</div>
 </div>
 
 <th:block layout:fragment="script">
     <script>
-        let currentTab = 'users';
+        // Menu item click handler
+        const menuItems = document.querySelectorAll('.menu-item');
+        const statsDashboard = document.getElementById('statsDashboard');
+
+        // Menu item click handler
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all items
+                menuItems.forEach(i => i.classList.remove('active'));
+
+                // Add active class to clicked item
+                this.classList.add('active');
+
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Show selected tab content
+                const tabId = 'tab' + this.getAttribute('data-tab').charAt(0).toUpperCase() + this.getAttribute('data-tab').slice(1);
+                document.getElementById(tabId).classList.add('active');
+
+                // Hiển thị/ẩn dashboard thống kê
+                if (this.getAttribute('data-tab') === 'dashboard') {
+                    statsDashboard.style.display = 'block';
+                } else {
+                    statsDashboard.style.display = 'none';
+                }
+
+                // Load data for the selected tab
+                loadTabData(this.getAttribute('data-tab'));
+            });
+        });
+
+        // Các hàm JavaScript khác giữ nguyên
+        let currentTab = 'dashboard';
         let editingId = null;
         let allBooks = [];
         let allCategories = [];
         let allPublishers = [];
         let allSuppliers = [];
 
-        // Tab switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-                tab.classList.add('active');
-                currentTab = tab.getAttribute('data-tab');
-                document.getElementById(`tab${currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}`).classList.add('active');
-
-                loadTabData(currentTab);
-            });
-        });
-
         // Load tab data
         async function loadTabData(tab) {
             switch(tab) {
-                case 'users': await loadUsers(); break;
-                case 'books': await loadBooks(); break;
-                case 'categories': await loadCategories(); break;
-                case 'publishers': await loadPublishers(); break;
-                // 👇 THÊM DÒNG NÀY VÀO
-                case 'suppliers': await loadSuppliersTable(); break;
-                case 'orders': await loadOrders(); break;
-                case 'receipts': await loadReceipts(); break;
-                case 'inventory': await loadInventory(); break;
+                case 'dashboard':
+                    await loadStatistics();
+                    break;
+                case 'users':
+                    await loadUsers();
+                    break;
+                case 'books':
+                    await loadBooks();
+                    break;
+                case 'categories':
+                    await loadCategories();
+                    break;
+                case 'publishers':
+                    await loadPublishers();
+                    break;
+                case 'suppliers':
+                    await loadSuppliersTable();
+                    break;
+                case 'orders':
+                    await loadOrders();
+                    break;
+                case 'receipts':
+                    await loadReceipts();
+                    break;
+                case 'inventory':
+                    await loadInventory();
+                    break;
             }
         }
 
+        // Load statistics
         async function loadStatistics() {
             try {
                 const [booksRes, ordersRes, usersRes] = await Promise.all([
-                    API.get('/api/books'),
-                    API.get('/api/orders'),
-                    API.get('/api/admin/users')
+                    fetch('/api/books'),
+                    fetch('/api/orders'),
+                    fetch('/api/admin/users')
                 ]);
 
                 const books = (await booksRes.json())?.data || [];
@@ -887,7 +1039,10 @@
 
             } catch (error) {
                 console.error('Lỗi tải thống kê:', error);
+                document.getElementById('statBooks').textContent = '?';
+                document.getElementById('statOrders').textContent = '?';
                 document.getElementById('statUsers').textContent = '?';
+                document.getElementById('statRevenue').textContent = '?₫';
             }
         }
 
@@ -1900,8 +2055,6 @@
             }
         }
 
-
-
         async function viewReceipt(id) {
             try {
                 const existingModal = document.getElementById('receiptDetailModal');
@@ -2060,8 +2213,6 @@
             }
         }
 
-
-
         // ========== INVENTORY MANAGEMENT ==========
         async function loadInventory() {
             try {
@@ -2186,7 +2337,749 @@
             }
         }
 
+        // Khởi tạo
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+        });
     </script>
 </th:block>
 </body>
 </html>
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="vi">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Quản lý Sách - BookStore</title>-->
+<!--    <style>-->
+<!--        /* Giữ nguyên CSS như trước */-->
+<!--        * {-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            box-sizing: border-box;-->
+<!--            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;-->
+<!--        }-->
+
+<!--        body {-->
+<!--            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);-->
+<!--            min-height: 100vh;-->
+<!--            padding: 20px;-->
+<!--        }-->
+
+<!--        .container {-->
+<!--            max-width: 1400px;-->
+<!--            margin: 0 auto;-->
+<!--            background: white;-->
+<!--            border-radius: 15px;-->
+<!--            box-shadow: 0 20px 40px rgba(0,0,0,0.1);-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        .header {-->
+<!--            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);-->
+<!--            color: white;-->
+<!--            padding: 30px;-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        .header h1 {-->
+<!--            font-size: 2.5rem;-->
+<!--            margin-bottom: 10px;-->
+<!--        }-->
+
+<!--        .header p {-->
+<!--            font-size: 1.1rem;-->
+<!--            opacity: 0.9;-->
+<!--        }-->
+
+<!--        .main-content {-->
+<!--            padding: 30px;-->
+<!--        }-->
+
+<!--        .action-bar {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--            margin-bottom: 30px;-->
+<!--            padding: 20px;-->
+<!--            background: #f8f9fa;-->
+<!--            border-radius: 10px;-->
+<!--        }-->
+
+<!--        .btn {-->
+<!--            padding: 12px 25px;-->
+<!--            border: none;-->
+<!--            border-radius: 8px;-->
+<!--            font-size: 1rem;-->
+<!--            font-weight: 600;-->
+<!--            cursor: pointer;-->
+<!--            transition: all 0.3s;-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 8px;-->
+<!--        }-->
+
+<!--        .btn-primary {-->
+<!--            background: #3498db;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .btn-primary:hover {-->
+<!--            background: #2980b9;-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);-->
+<!--        }-->
+
+<!--        .btn-danger {-->
+<!--            background: #e74c3c;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .btn-danger:hover {-->
+<!--            background: #c0392b;-->
+<!--        }-->
+
+<!--        .btn-outline {-->
+<!--            background: white;-->
+<!--            color: #3498db;-->
+<!--            border: 2px solid #3498db;-->
+<!--        }-->
+
+<!--        .btn-outline:hover {-->
+<!--            background: #3498db;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .table-container {-->
+<!--            background: white;-->
+<!--            border-radius: 0.5rem;-->
+<!--            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);-->
+<!--            overflow: hidden;-->
+<!--            margin-bottom: 30px;-->
+<!--        }-->
+
+<!--        table {-->
+<!--            width: 100%;-->
+<!--            border-collapse: collapse;-->
+<!--        }-->
+
+<!--        th {-->
+<!--            background: #f8fafc;-->
+<!--            padding: 1rem;-->
+<!--            text-align: left;-->
+<!--            font-weight: 600;-->
+<!--            color: #1e293b;-->
+<!--            border-bottom: 2px solid #e2e8f0;-->
+<!--        }-->
+
+<!--        td {-->
+<!--            padding: 1rem;-->
+<!--            border-bottom: 1px solid #e2e8f0;-->
+<!--        }-->
+
+<!--        tr:hover {-->
+<!--            background: #f8fafc;-->
+<!--        }-->
+
+<!--        .badge {-->
+<!--            display: inline-block;-->
+<!--            padding: 0.25rem 0.75rem;-->
+<!--            border-radius: 9999px;-->
+<!--            font-size: 0.875rem;-->
+<!--            font-weight: 500;-->
+<!--        }-->
+
+<!--        .badge-success {-->
+<!--            background: #d1fae5;-->
+<!--            color: #065f46;-->
+<!--        }-->
+<!--        .badge-warning {-->
+<!--            background: #fef3c7;-->
+<!--            color: #92400e;-->
+<!--        }-->
+<!--        .badge-danger {-->
+<!--            background: #fee2e2;-->
+<!--            color: #991b1b;-->
+<!--        }-->
+
+<!--        .modal {-->
+<!--            display: none;-->
+<!--            position: fixed;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            background: rgba(0,0,0,0.5);-->
+<!--            z-index: 1000;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            backdrop-filter: blur(5px);-->
+<!--        }-->
+
+<!--        .modal.active {-->
+<!--            display: flex;-->
+<!--        }-->
+
+<!--        .modal-content {-->
+<!--            background: white;-->
+<!--            border-radius: 15px;-->
+<!--            width: 90%;-->
+<!--            max-width: 600px;-->
+<!--            max-height: 90vh;-->
+<!--            overflow-y: auto;-->
+<!--            box-shadow: 0 25px 50px rgba(0,0,0,0.25);-->
+<!--            animation: modalSlideIn 0.3s ease;-->
+<!--        }-->
+
+<!--        @keyframes modalSlideIn {-->
+<!--            from {-->
+<!--                opacity: 0;-->
+<!--                transform: translateY(-50px);-->
+<!--            }-->
+<!--            to {-->
+<!--                opacity: 1;-->
+<!--                transform: translateY(0);-->
+<!--            }-->
+<!--        }-->
+
+<!--        .modal-header {-->
+<!--            padding: 25px;-->
+<!--            border-bottom: 1px solid #e9ecef;-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);-->
+<!--            color: white;-->
+<!--            border-radius: 15px 15px 0 0;-->
+<!--        }-->
+
+<!--        .modal-header h3 {-->
+<!--            margin: 0;-->
+<!--            font-size: 1.5rem;-->
+<!--        }-->
+
+<!--        .modal-close {-->
+<!--            background: none;-->
+<!--            border: none;-->
+<!--            font-size: 1.5rem;-->
+<!--            cursor: pointer;-->
+<!--            color: white;-->
+<!--            padding: 5px;-->
+<!--            border-radius: 50%;-->
+<!--            width: 35px;-->
+<!--            height: 35px;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            transition: background 0.3s;-->
+<!--        }-->
+
+<!--        .modal-close:hover {-->
+<!--            background: rgba(255,255,255,0.2);-->
+<!--        }-->
+
+<!--        .modal-body {-->
+<!--            padding: 25px;-->
+<!--        }-->
+
+<!--        .modal-footer {-->
+<!--            padding: 20px 25px;-->
+<!--            border-top: 1px solid #e9ecef;-->
+<!--            display: flex;-->
+<!--            justify-content: flex-end;-->
+<!--            gap: 15px;-->
+<!--        }-->
+
+<!--        .form-group {-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+
+<!--        .form-label {-->
+<!--            display: block;-->
+<!--            margin-bottom: 8px;-->
+<!--            font-weight: 600;-->
+<!--            color: #2c3e50;-->
+<!--        }-->
+
+<!--        .form-control {-->
+<!--            width: 100%;-->
+<!--            padding: 12px 15px;-->
+<!--            border: 2px solid #e9ecef;-->
+<!--            border-radius: 8px;-->
+<!--            font-size: 1rem;-->
+<!--            transition: all 0.3s;-->
+<!--        }-->
+
+<!--        .form-control:focus {-->
+<!--            outline: none;-->
+<!--            border-color: #3498db;-->
+<!--            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);-->
+<!--        }-->
+
+<!--        .form-row {-->
+<!--            display: grid;-->
+<!--            grid-template-columns: 1fr 1fr;-->
+<!--            gap: 15px;-->
+<!--        }-->
+
+<!--        .loading {-->
+<!--            text-align: center;-->
+<!--            padding: 40px;-->
+<!--            color: #7f8c8d;-->
+<!--            font-size: 1.1rem;-->
+<!--        }-->
+
+<!--        @media (max-width: 768px) {-->
+<!--            .action-bar {-->
+<!--                flex-direction: column;-->
+<!--                gap: 15px;-->
+<!--            }-->
+<!--            .form-row {-->
+<!--                grid-template-columns: 1fr;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <div class="header">-->
+<!--        <h1>📚 Quản lý Sách</h1>-->
+<!--        <p>Hệ thống quản lý kho sách và thông tin sản phẩm</p>-->
+<!--    </div>-->
+
+<!--    <div class="main-content">-->
+<!--        <div class="action-bar">-->
+<!--            <button class="btn btn-primary" onclick="showBookModal()">-->
+<!--                <span>➕</span> Thêm sách mới-->
+<!--            </button>-->
+<!--        </div>-->
+
+<!--        <div class="table-container">-->
+<!--            <table>-->
+<!--                <thead>-->
+<!--                <tr>-->
+<!--                    <th>ID</th>-->
+<!--                    <th>Tiêu đề</th>-->
+<!--                    <th>Tác giả</th>-->
+<!--                    <th>Thể loại</th>-->
+<!--                    <th>Giá</th>-->
+<!--                    <th>Tồn kho</th>-->
+<!--                    <th>Thao tác</th>-->
+<!--                </tr>-->
+<!--                </thead>-->
+<!--                <tbody id="booksTableBody">-->
+<!--                <tr>-->
+<!--                    <td colspan="7" class="loading">Đang tải dữ liệu sách...</td>-->
+<!--                </tr>-->
+<!--                </tbody>-->
+<!--            </table>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Book Modal &ndash;&gt;-->
+<!--<div id="bookModal" class="modal">-->
+<!--    <div class="modal-content">-->
+<!--        <div class="modal-header">-->
+<!--            <h3 id="bookModalTitle">Thêm sách mới</h3>-->
+<!--            <button class="modal-close" onclick="closeModal('bookModal')">&times;</button>-->
+<!--        </div>-->
+<!--        <div class="modal-body">-->
+<!--            <form id="bookForm">-->
+<!--                <div class="form-row">-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="form-label">Tiêu đề *</label>-->
+<!--                        <input type="text" id="bookTitle" class="form-control" required />-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="form-label">Tác giả *</label>-->
+<!--                        <input type="text" id="bookAuthor" class="form-control" required />-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="form-row">-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="form-label">ISBN *</label>-->
+<!--                        <input type="text" id="bookIsbn" class="form-control" required />-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="form-label">Giá *</label>-->
+<!--                        <input type="number" id="bookPrice" class="form-control" step="0.01" required />-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="form-row">-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="form-label">Số lượng tồn kho *</label>-->
+<!--                        <input type="number" id="bookStock" class="form-control" required />-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="form-label">Thể loại *</label>-->
+<!--                        <select id="bookCategory" class="form-control" required>-->
+<!--                            <option value="">Chọn thể loại</option>-->
+<!--                            &lt;!&ndash; Categories sẽ được load từ API &ndash;&gt;-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="form-group">-->
+<!--                    <label class="form-label">Nhà xuất bản *</label>-->
+<!--                    <select id="bookPublisher" class="form-control" required>-->
+<!--                        <option value="">Chọn nhà xuất bản</option>-->
+<!--                        &lt;!&ndash; Publishers sẽ được load từ API &ndash;&gt;-->
+<!--                    </select>-->
+<!--                </div>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--        <div class="modal-footer">-->
+<!--            <button class="btn btn-outline" onclick="closeModal('bookModal')">Hủy</button>-->
+<!--            <button class="btn btn-primary" onclick="saveBook()">Lưu sách</button>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--    // Lấy dữ liệu thực tế từ API-->
+<!--    let allBooks = [];-->
+<!--    let allCategories = [];-->
+<!--    let allPublishers = [];-->
+<!--    let editingId = null;-->
+
+<!--    // Hàm lấy danh sách thể loại từ API-->
+<!--    async function loadCategories() {-->
+<!--        try {-->
+<!--            const response = await fetch('/api/categories');-->
+<!--            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);-->
+
+<!--            const result = await response.json();-->
+<!--            allCategories = result.data || result || [];-->
+
+<!--            // Cập nhật dropdown thể loại-->
+<!--            const categorySelect = document.getElementById('bookCategory');-->
+<!--            categorySelect.innerHTML = '<option value="">Chọn thể loại</option>' +-->
+<!--                allCategories.map(cat =>-->
+<!--                    `<option value="${cat.id}">${cat.name}</option>`-->
+<!--                ).join('');-->
+
+<!--        } catch (error) {-->
+<!--            console.error('Lỗi khi tải danh sách thể loại:', error);-->
+<!--            // Fallback: sử dụng danh sách mặc định-->
+<!--            const categorySelect = document.getElementById('bookCategory');-->
+<!--            categorySelect.innerHTML = `-->
+<!--                    <option value="">Chọn thể loại</option>-->
+<!--                    <option value="1">Tiểu thuyết</option>-->
+<!--                    <option value="2">Khoa học</option>-->
+<!--                    <option value="3">Lập trình</option>-->
+<!--                    <option value="4">Kinh tế</option>-->
+<!--                    <option value="5">Văn học</option>-->
+<!--                `;-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Hàm lấy danh sách nhà xuất bản từ API-->
+<!--    async function loadPublishers() {-->
+<!--        try {-->
+<!--            const response = await fetch('/api/publishers');-->
+<!--            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);-->
+
+<!--            const result = await response.json();-->
+<!--            allPublishers = result.data || result || [];-->
+
+<!--            // Cập nhật dropdown nhà xuất bản-->
+<!--            const publisherSelect = document.getElementById('bookPublisher');-->
+<!--            publisherSelect.innerHTML = '<option value="">Chọn nhà xuất bản</option>' +-->
+<!--                allPublishers.map(pub =>-->
+<!--                    `<option value="${pub.id}">${pub.name}</option>`-->
+<!--                ).join('');-->
+
+<!--        } catch (error) {-->
+<!--            console.error('Lỗi khi tải danh sách nhà xuất bản:', error);-->
+<!--            // Fallback: sử dụng danh sách mặc định-->
+<!--            const publisherSelect = document.getElementById('bookPublisher');-->
+<!--            publisherSelect.innerHTML = `-->
+<!--                    <option value="">Chọn nhà xuất bản</option>-->
+<!--                    <option value="1">NXB Kim Đồng</option>-->
+<!--                    <option value="2">NXB Trẻ</option>-->
+<!--                    <option value="3">NXB Giáo Dục</option>-->
+<!--                    <option value="4">NXB Văn Học</option>-->
+<!--                `;-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Hàm lấy dữ liệu sách từ API-->
+<!--    async function loadBooksFromAPI() {-->
+<!--        try {-->
+<!--            const response = await fetch('/api/books');-->
+
+<!--            if (!response.ok) {-->
+<!--                throw new Error(`HTTP error! status: ${response.status}`);-->
+<!--            }-->
+
+<!--            const result = await response.json();-->
+
+<!--            // Xử lý cấu trúc response khác nhau-->
+<!--            if (result.data) {-->
+<!--                allBooks = result.data;-->
+<!--            } else if (Array.isArray(result)) {-->
+<!--                allBooks = result;-->
+<!--            } else if (result.content) {-->
+<!--                allBooks = result.content;-->
+<!--            } else {-->
+<!--                console.error('Cấu trúc response không xác định:', result);-->
+<!--                allBooks = [];-->
+<!--            }-->
+
+<!--            console.log('Dữ liệu sách từ API:', allBooks);-->
+<!--            displayBooks();-->
+
+<!--        } catch (error) {-->
+<!--            console.error('Lỗi khi tải dữ liệu sách:', error);-->
+
+<!--            const tbody = document.getElementById('booksTableBody');-->
+<!--            tbody.innerHTML = `-->
+<!--                    <tr>-->
+<!--                        <td colspan="7" class="loading" style="color: #e74c3c;">-->
+<!--                            ❌ Lỗi tải dữ liệu: ${error.message}-->
+<!--                            <br>-->
+<!--                            <button class="btn btn-outline" onclick="loadBooksFromAPI()" style="margin-top: 10px;">-->
+<!--                                Thử lại-->
+<!--                            </button>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                `;-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Hiển thị danh sách sách-->
+<!--    function displayBooks() {-->
+<!--        const tbody = document.getElementById('booksTableBody');-->
+
+<!--        if (allBooks.length === 0) {-->
+<!--            tbody.innerHTML = `-->
+<!--                    <tr>-->
+<!--                        <td colspan="7" class="loading">-->
+<!--                            📚 Không có sách nào trong hệ thống-->
+<!--                            <br>-->
+<!--                            <button class="btn btn-primary" onclick="showBookModal()" style="margin-top: 10px;">-->
+<!--                                Thêm sách đầu tiên-->
+<!--                            </button>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                `;-->
+<!--            return;-->
+<!--        }-->
+
+<!--        tbody.innerHTML = allBooks.map(book => `-->
+<!--                <tr>-->
+<!--                    <td>#${book.id}</td>-->
+<!--                    <td>-->
+<!--                        <strong>${book.title || 'Chưa có tiêu đề'}</strong>-->
+<!--                        ${book.isbn ? `<br><small style="color: #666;">ISBN: ${book.isbn}</small>` : ''}-->
+<!--                    </td>-->
+<!--                    <td>${book.author || 'N/A'}</td>-->
+<!--                    <td>${book.categoryName || book.category?.name || 'N/A'}</td>-->
+<!--                    <td>${formatPrice(book.price)}</td>-->
+<!--                    <td>-->
+<!--                        <span class="badge ${getStockBadgeClass(book.stockQuantity || book.quantity || 0)}">-->
+<!--                            ${book.stockQuantity || book.quantity || 0}-->
+<!--                        </span>-->
+<!--                    </td>-->
+<!--                    <td>-->
+<!--                        <button class="btn btn-outline" onclick="editBook(${book.id})" style="margin-right: 0.5rem;">-->
+<!--                            ✏️ Sửa-->
+<!--                        </button>-->
+<!--                        <button class="btn btn-danger" onclick="deleteBookAPI(${book.id})">-->
+<!--                            🗑️ Xóa-->
+<!--                        </button>-->
+<!--                    </td>-->
+<!--                </tr>-->
+<!--            `).join('');-->
+<!--    }-->
+
+<!--    // Hàm xác định class cho badge tồn kho-->
+<!--    function getStockBadgeClass(stockQuantity) {-->
+<!--        if (stockQuantity >= 10) return 'badge-success';-->
+<!--        if (stockQuantity >= 5) return 'badge-warning';-->
+<!--        return 'badge-danger';-->
+<!--    }-->
+
+<!--    // Hiển thị modal thêm/sửa sách-->
+<!--    async function showBookModal(book = null) {-->
+<!--        editingId = book ? book.id : null;-->
+
+<!--        // Load danh sách thể loại và nhà xuất bản trước khi hiển thị modal-->
+<!--        await Promise.all([loadCategories(), loadPublishers()]);-->
+
+<!--        document.getElementById('bookModalTitle').textContent =-->
+<!--            book ? 'Chỉnh sửa thông tin sách' : 'Thêm sách mới';-->
+
+<!--        document.getElementById('bookForm').reset();-->
+
+<!--        if (book) {-->
+<!--            document.getElementById('bookTitle').value = book.title || '';-->
+<!--            document.getElementById('bookAuthor').value = book.author || '';-->
+<!--            document.getElementById('bookIsbn').value = book.isbn || '';-->
+<!--            document.getElementById('bookPrice').value = book.price || '';-->
+<!--            document.getElementById('bookStock').value = book.stockQuantity || 0;-->
+
+<!--            if (book.categoryId) {-->
+<!--                document.getElementById('bookCategory').value = book.categoryId;-->
+<!--            }-->
+<!--            if (book.publisherId) {-->
+<!--                document.getElementById('bookPublisher').value = book.publisherId;-->
+<!--            }-->
+
+<!--            const isbnField = document.getElementById('bookIsbn');-->
+<!--            if (isbnField) isbnField.disabled = true;-->
+<!--        } else {-->
+<!--            const isbnField = document.getElementById('bookIsbn');-->
+<!--            if (isbnField) isbnField.disabled = false;-->
+<!--        }-->
+
+<!--        document.getElementById('bookModal').classList.add('active');-->
+<!--    }-->
+
+<!--    // Lấy chi tiết sách để sửa-->
+<!--    async function editBook(id) {-->
+<!--        try {-->
+<!--            const response = await fetch(`/api/books/${id}`);-->
+
+<!--            if (!response.ok) {-->
+<!--                throw new Error(`HTTP error! status: ${response.status}`);-->
+<!--            }-->
+
+<!--            const result = await response.json();-->
+<!--            const book = result.data || result;-->
+
+<!--            showBookModal(book);-->
+
+<!--        } catch (error) {-->
+<!--            console.error('Lỗi khi lấy thông tin sách:', error);-->
+<!--            alert('Lỗi khi tải thông tin sách: ' + error.message);-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Xóa sách qua API-->
+<!--    async function deleteBookAPI(id) {-->
+<!--        if (!confirm('Bạn có chắc muốn xóa sách này?')) return;-->
+
+<!--        try {-->
+<!--            const response = await fetch(`/api/books/${id}`, {-->
+<!--                method: 'DELETE'-->
+<!--            });-->
+
+<!--            if (!response.ok) {-->
+<!--                const errorText = await response.text();-->
+<!--                throw new Error(`HTTP error! status: ${response.status}. ${errorText}`);-->
+<!--            }-->
+
+<!--            const result = await response.json();-->
+<!--            alert(result.message || 'Xóa sách thành công!');-->
+
+<!--            // Load lại danh sách-->
+<!--            await loadBooksFromAPI();-->
+
+<!--        } catch (error) {-->
+<!--            console.error('Lỗi khi xóa sách:', error);-->
+<!--            alert('Lỗi khi xóa sách: ' + error.message);-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Lưu sách (thêm mới hoặc cập nhật)-->
+<!--    async function saveBook() {-->
+<!--        try {-->
+<!--            const data = {-->
+<!--                title: document.getElementById('bookTitle').value.trim(),-->
+<!--                author: document.getElementById('bookAuthor').value.trim(),-->
+<!--                price: parseFloat(document.getElementById('bookPrice').value),-->
+<!--                stockQuantity: parseInt(document.getElementById('bookStock').value),-->
+<!--                categoryId: parseInt(document.getElementById('bookCategory').value),-->
+<!--                publisherId: parseInt(document.getElementById('bookPublisher').value)-->
+<!--            };-->
+
+<!--            // Validate-->
+<!--            if (!data.title || !data.author || !data.price || !data.categoryId || !data.publisherId) {-->
+<!--                alert('Vui lòng điền đầy đủ thông tin bắt buộc');-->
+<!--                return;-->
+<!--            }-->
+
+<!--            if (data.price <= 0 || data.stockQuantity < 0) {-->
+<!--                alert('Giá phải lớn hơn 0 và số lượng không được âm');-->
+<!--                return;-->
+<!--            }-->
+
+<!--            let response;-->
+<!--            let url = '/api/books';-->
+<!--            let method = 'POST';-->
+
+<!--            if (editingId) {-->
+<!--                // Cập nhật sách-->
+<!--                url = `/api/books/${editingId}`;-->
+<!--                method = 'PUT';-->
+<!--            } else {-->
+<!--                // Thêm ISBN cho sách mới-->
+<!--                data.isbn = document.getElementById('bookIsbn').value.trim();-->
+<!--                if (!data.isbn) {-->
+<!--                    alert('Vui lòng nhập ISBN');-->
+<!--                    return;-->
+<!--                }-->
+<!--            }-->
+
+<!--            console.log('Gửi dữ liệu:', data);-->
+
+<!--            response = await fetch(url, {-->
+<!--                method: method,-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/json',-->
+<!--                },-->
+<!--                body: JSON.stringify(data)-->
+<!--            });-->
+
+<!--            if (!response.ok) {-->
+<!--                const errorText = await response.text();-->
+<!--                throw new Error(`HTTP error! status: ${response.status}. ${errorText}`);-->
+<!--            }-->
+
+<!--            const result = await response.json();-->
+<!--            alert(result.message || (editingId ? 'Cập nhật sách thành công!' : 'Thêm sách thành công!'));-->
+
+<!--            closeModal('bookModal');-->
+<!--            await loadBooksFromAPI();-->
+
+<!--        } catch (error) {-->
+<!--            console.error('Lỗi khi lưu sách:', error);-->
+<!--            alert('Lỗi khi lưu sách: ' + error.message);-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Utility functions-->
+<!--    function formatPrice(price) {-->
+<!--        if (!price && price !== 0) return 'N/A';-->
+<!--        return new Intl.NumberFormat('vi-VN', {-->
+<!--            style: 'currency',-->
+<!--            currency: 'VND'-->
+<!--        }).format(price);-->
+<!--    }-->
+
+<!--    function closeModal(modalId) {-->
+<!--        document.getElementById(modalId).classList.remove('active');-->
+<!--        editingId = null;-->
+<!--    }-->
+
+<!--    // Tải dữ liệu khi trang được mở-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        loadBooksFromAPI();-->
+<!--        // Preload categories và publishers-->
+<!--        loadCategories();-->
+<!--        loadPublishers();-->
+<!--    });-->
+
+<!--    // Đóng modal khi click bên ngoài-->
+<!--    document.addEventListener('click', function(e) {-->
+<!--        if (e.target.classList.contains('modal')) {-->
+<!--            e.target.classList.remove('active');-->
+<!--        }-->
+<!--    });-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+

@@ -4,7 +4,9 @@ import com.bookstore.dto.request.AuthRequest;
 import com.bookstore.dto.request.RegisterRequest;
 import com.bookstore.dto.response.ApiResponse;
 import com.bookstore.dto.response.AuthResponse;
+import com.bookstore.dto.response.UserResponse;
 import com.bookstore.service.AuthService;
+import com.bookstore.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserService userService) {
         this.authService = authService;
+        this.userService = userService;
     }
 
     @PostMapping("/login")
@@ -33,6 +37,13 @@ public class AuthController {
         authService.register(registerRequest);
         ApiResponse<?> response = new ApiResponse<>(true, "Đăng ký người dùng thành công", null);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(Authentication authentication) {
+        String username = authentication.getName();
+        UserResponse userResponse = userService.getCurrentUser(username);
+        ApiResponse<UserResponse> response = new ApiResponse<>(true, "Lấy thông tin người dùng thành công", userResponse);
+        return ResponseEntity.ok(response);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.bookstore.repository;
 
 import com.bookstore.entity.Inventory;
+import com.bookstore.entity.InventoryType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,4 +11,7 @@ import java.util.List;
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     // Có thể thêm các phương thức tìm kiếm theo Book
      List<Inventory> findByBookIdOrderByTimestampDesc(Long bookId);
+    // Thêm các method này vào InventoryRepository
+    List<Inventory> findAllByOrderByTimestampDesc();
+    List<Inventory> findByTypeOrderByTimestampDesc(InventoryType type);
 }

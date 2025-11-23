@@ -34,4 +34,10 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Order> orders;
+
+    private String name;     // tên hiển thị từ Google
+    private String avatar;   // ảnh đại diện Google
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
+
 }

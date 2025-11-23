@@ -94,23 +94,6 @@ public class BookService {
 
     // ------------------- WRITE Operations -------------------
 
-//    @Transactional
-//    public BookResponse createBook(CreateBookRequest request) {
-//        // Kiểm tra ISBN đã tồn tại
-//        if (bookRepository.existsByIsbn(request.getIsbn())) {
-//            throw new ApplicationException(ErrorCode.INVALID_INPUT_DATA, "Mã ISBN đã tồn tại.");
-//        }
-//
-//        // GỌN GÀNG: Logic tìm kiếm đã được đóng gói
-//        Category category = entityFinder.findCategoryById(request.getCategoryId());
-//        Publisher publisher = entityFinder.findPublisherById(request.getPublisherId());
-//
-//        // GỌN GÀNG: Logic ánh xạ đã được đóng gói
-//        Book book = entityMapper.toBookEntity(request, category, publisher);
-//
-//        return entityMapper.toBookResponse(bookRepository.save(book));
-//    }
-
     @Transactional
     public BookResponse createBook(CreateBookRequest request) {
         log.info("=== CREATE BOOK START ===");

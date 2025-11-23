@@ -1,5 +1,6 @@
 package com.bookstore.security;
 
+import com.bookstore.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -81,4 +82,20 @@ public class JwtTokenProvider {
                 .getBody()
                 .get("authorities", String.class); // Lấy claim "authorities"
     }
+
+    public String generateTokenFromUser(User user) {
+
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("authorities", user.getRole().name())
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+
 }
