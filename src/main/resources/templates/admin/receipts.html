@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>📋 Quản lý phiếu nhập kho - BookStore Admin</title>
+
+    <style layout:fragment="styles">
+        :root {
+            /* Palette màu Dark Mode */
+            --dark-bg-main: #111827;
+            --dark-bg-card: #1f2937;
+            --dark-bg-input: #374151;
+            --dark-border: #4b5563;
+            --text-light: #f9fafb;
+            --text-gray: #9ca3af;
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --info-color: #0ea5e9;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        /* Bảng dữ liệu */
+        .table-container {
+            background: var(--dark-bg-card);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--dark-border);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th {
+            background: rgba(255,255,255,0.05);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 1px solid var(--dark-border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--dark-border);
+            color: var(--text-gray);
+            vertical-align: middle;
+        }
+
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* Custom cell content */
+        .receipt-info { font-size: 0.85rem; color: var(--text-gray); margin-top: 0.25rem; }
+
+        .receipt-items { max-height: 150px; overflow-y: auto; margin-top: 0.5rem; font-size: 0.85rem; }
+        .receipt-item {
+            display: flex; justify-content: space-between;
+            padding: 0.3rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-light);
+        }
+        .receipt-item:last-child { border-bottom: none; }
+        .receipt-item span:last-child { color: var(--text-gray); }
+
+        /* Buttons */
+        .action-buttons { display: flex; gap: 0.5rem; }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none; border-radius: 0.5rem;
+            font-weight: 600; cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444;
+        }
+        .btn-danger:hover { background: #ef4444; color: white; }
+
+        .btn-outline {
+            background: transparent; color: var(--text-light);
+            border: 1px solid var(--dark-border);
+        }
+        .btn-outline:hover {
+            background: var(--dark-bg-input); border-color: var(--text-gray);
+        }
+
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.75rem; }
+
+        .loading { text-align: center; padding: 3rem; color: var(--text-gray); }
+
+        /* MODAL STYLES (Dark Mode) */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+            z-index: 1000; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal.active { display: flex; opacity: 1; }
+
+        .modal-content {
+            background: var(--dark-bg-card); border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--dark-border);
+            width: 95%; max-width: 900px; max-height: 90vh;
+            transform: scale(0.95); transition: transform 0.3s ease;
+            display: flex; flex-direction: column;
+        }
+        .modal.active .modal-content { transform: scale(1); }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--dark-border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.03); flex-shrink: 0;
+        }
+        .modal-header h3 { margin: 0; color: var(--text-light); font-size: 1.25rem; }
+
+        .modal-close {
+            background: transparent; border: none; color: var(--text-gray);
+            font-size: 1.5rem; cursor: pointer; width: 36px; height: 36px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-close:hover { background-color: var(--dark-bg-input); color: var(--text-light); }
+
+        .modal-body { padding: 1.5rem; overflow-y: auto; flex-grow: 1; }
+
+        .form-group { margin-bottom: 1.25rem; }
+
+        .form-label {
+            display: block; margin-bottom: 0.5rem;
+            font-weight: 500; color: var(--text-light); font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%; padding: 0.6rem 1rem;
+            background-color: var(--dark-bg-input);
+            border: 1px solid var(--dark-border);
+            color: var(--text-light);
+            border-radius: 0.5rem;
+            font-size: 0.95rem; transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            outline: none; border-color: var(--primary-color);
+            background-color: #404a5a;
+        }
+
+        /* Vùng nhập danh sách sách trong Modal */
+        .receipt-items-container {
+            max-height: 300px; overflow-y: auto;
+            padding: 1rem; border: 1px solid var(--dark-border);
+            border-radius: 0.5rem; background: rgba(0,0,0,0.2);
+        }
+
+        .receipt-item-form {
+            background: var(--dark-bg-card);
+            border: 1px solid var(--dark-border);
+            padding: 0.75rem; border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .receipt-total-display {
+            display: flex; align-items: center; justify-content: center;
+            background: var(--dark-bg-input); border: 1px solid var(--dark-border);
+            border-radius: 0.5rem; height: 100%; color: var(--success-color);
+            font-weight: 600; min-width: 120px;
+        }
+
+        .modal-footer {
+            padding: 1.25rem 1.5rem; border-top: 1px solid var(--dark-border);
+            display: flex; justify-content: flex-end; gap: 1rem;
+            background: var(--dark-bg-main); flex-shrink: 0; border-radius: 0 0 1rem 1rem;
+        }
+
+        h4 { color: var(--text-light); margin-top: 0; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div class="page-header">
+        <h2 class="page-title">
+            <i class="fas fa-clipboard-list"></i> Quản lý phiếu nhập kho
+        </h2>
+        <button class="btn btn-primary" onclick="showReceiptModal()">
+            <i class="fas fa-plus"></i> Tạo phiếu nhập
+        </button>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Mã phiếu</th>
+                <th>Nhà cung cấp</th>
+                <th>Sách nhập</th>
+                <th>Tổng tiền</th>
+                <th>Ngày nhập</th>
+                <th>Người tạo</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody id="receiptsTableBody">
+            <tr><td colspan="7" class="loading">Đang tải dữ liệu...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="receiptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📋 Tạo phiếu nhập kho</h3>
+                <button class="modal-close" onclick="closeModal('receiptModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="receiptForm">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">🏢 Nhà cung cấp *</label>
+                            <select id="receiptSupplier" class="form-control" required>
+                                <option value="">Chọn nhà cung cấp...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">📝 Ghi chú</label>
+                            <textarea id="receiptNote" class="form-control" rows="1" placeholder="Ghi chú cho phiếu nhập..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">📚 Danh sách sách nhập kho *</label>
+                        <div id="receiptItems" class="receipt-items-container">
+                        </div>
+                        <button type="button" class="btn btn-outline" onclick="addReceiptItem()" style="margin-top: 1rem; width: 100%; border-style: dashed;">
+                            <i class="fas fa-plus"></i> Thêm sách mới
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-weight: 600; font-size: 1.1rem; color: var(--text-light);">Tổng tiền thanh toán:</div>
+                            <div id="receiptTotal" style="font-size: 1.75rem; font-weight: bold; color: var(--success-color);">0₫</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('receiptModal')">Hủy bỏ</button>
+                <button class="btn btn-primary" onclick="saveReceipt()">
+                    <i class="fas fa-save"></i> Lưu phiếu nhập
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="receiptDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="receiptDetailTitle">Chi tiết phiếu nhập</h3>
+                <button class="modal-close" onclick="closeModal('receiptDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="receiptDetailBody">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('receiptDetailModal')">Đóng</button>
+                <button class="btn btn-primary" onclick="printReceipt()">
+                    <i class="fas fa-print"></i> In phiếu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="scripts" th:inline="none">
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadReceipts();
+        await loadSuppliersForReceipt();
+        await loadBooksForReceipt();
+    });
+
+    let receipts = [];
+    let suppliers = [];
+    let books = [];
+    let currentReceiptId = null;
+
+    // 1. Load danh sách phiếu nhập
+    async function loadReceipts() {
+        try {
+            const response = await API.get('/api/receipts');
+            if (!response.ok) throw new Error('Lỗi tải dữ liệu');
+            const result = await response.json();
+            receipts = result.data || [];
+            displayReceipts();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    // 2. Load Nhà cung cấp
+    async function loadSuppliersForReceipt() {
+        try {
+            const response = await API.get('/api/suppliers');
+            if (response.ok) {
+                const result = await response.json();
+                suppliers = result.data || [];
+                const select = document.getElementById('receiptSupplier');
+                select.innerHTML = '<option value="">Chọn nhà cung cấp...</option>' +
+                    suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    // 3. Load Sách (Để chọn trong dropdown)
+    async function loadBooksForReceipt() {
+        try {
+            const response = await API.get('/api/books');
+            if (response.ok) {
+                const result = await response.json();
+                books = result.data || [];
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    // --- HIỂN THỊ DANH SÁCH ---
+    function displayReceipts() {
+        const tbody = document.getElementById('receiptsTableBody');
+        if (receipts.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="loading">Chưa có phiếu nhập nào</td></tr>';
+            return;
+        }
+        tbody.innerHTML = receipts.map(receipt => {
+            const itemCount = receipt.items ? receipt.items.length : 0;
+            return `
+                <tr>
+                    <td>
+                        <div style="font-weight: 500; color: var(--text-light);">${receipt.receiptCode || 'PH' + receipt.id}</div>
+                    </td>
+                    <td>${receipt.supplier || 'N/A'}</td>
+                    <td>${itemCount} cuốn</td>
+                    <td style="color: var(--success-color); font-weight: 600;">${Utils.formatPrice(receipt.totalAmount)}</td>
+                    <td style="color: var(--text-gray);">${Utils.formatDate(receipt.receiptDate)}</td>
+                    <td>${receipt.createdByUsername || 'N/A'}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="viewReceiptDetail(${receipt.id})">
+                            <i class="fas fa-eye"></i> Xem
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // --- LOGIC MODAL TẠO PHIẾU ---
+    function showReceiptModal() {
+        document.getElementById('receiptForm').reset();
+        document.getElementById('receiptItems').innerHTML = '';
+        document.getElementById('receiptTotal').textContent = '0₫';
+
+        addReceiptItem(); // Thêm sẵn 1 dòng
+        document.getElementById('receiptModal').classList.add('active');
+    }
+
+    // Thêm một dòng nhập sách mới
+    function addReceiptItem() {
+        const container = document.getElementById('receiptItems');
+        const div = document.createElement('div');
+        div.className = 'receipt-item-form';
+
+        // Tạo options sách
+        const options = '<option value="">Chọn sách...</option>' +
+            books.map(b => `<option value="${b.id}" data-price="${b.price}">${b.title}</option>`).join('');
+
+        div.innerHTML = `
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.75rem; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;">Tên sách</label>
+                    <select class="form-control receipt-book" required onchange="onBookSelectChange(this)">
+                        ${options}
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;">Số lượng</label>
+                    <input type="number" class="form-control receipt-quantity" value="1" min="1" oninput="calculateRowTotal(this)">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;">Giá nhập</label>
+                    <input type="number" class="form-control receipt-price" value="0" min="0" step="1000" oninput="calculateRowTotal(this)">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.8rem;">Thành tiền</label>
+                    <div class="receipt-total-display">0₫</div>
+                </div>
+                <button type="button" class="btn btn-danger" onclick="removeRow(this)" style="height: 42px; margin-bottom: 1px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    // Khi chọn sách -> Tự điền giá
+    function onBookSelectChange(select) {
+        const option = select.options[select.selectedIndex];
+        const price = option.getAttribute('data-price') || 0;
+
+        // Tìm ô giá nhập trong cùng dòng và điền giá vào
+        const row = select.closest('.receipt-item-form');
+        const priceInput = row.querySelector('.receipt-price');
+        priceInput.value = price;
+
+        // Tính lại tiền
+        calculateRowTotal(select);
+    }
+
+    // Tính tiền từng dòng
+    function calculateRowTotal(element) {
+        const row = element.closest('.receipt-item-form');
+        const qty = parseFloat(row.querySelector('.receipt-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.receipt-price').value) || 0;
+
+        const total = qty * price;
+
+        // Hiển thị thành tiền dòng đó
+        row.querySelector('.receipt-total-display').textContent = Utils.formatPrice(total);
+
+        // Tính tổng cả phiếu
+        updateGrandTotal();
+    }
+
+    // Tính tổng toàn bộ phiếu
+    function updateGrandTotal() {
+        let grandTotal = 0;
+        document.querySelectorAll('.receipt-item-form').forEach(row => {
+            const qty = parseFloat(row.querySelector('.receipt-quantity').value) || 0;
+            const price = parseFloat(row.querySelector('.receipt-price').value) || 0;
+            grandTotal += (qty * price);
+        });
+        document.getElementById('receiptTotal').textContent = Utils.formatPrice(grandTotal);
+    }
+
+    // Xóa dòng
+    function removeRow(btn) {
+        const rows = document.querySelectorAll('.receipt-item-form');
+        if (rows.length > 1) {
+            btn.closest('.receipt-item-form').remove();
+            updateGrandTotal();
+        } else {
+            alert('Phải có ít nhất 1 sách!');
+        }
+    }
+
+    // Lưu phiếu
+    async function saveReceipt() {
+        try {
+            const supplierId = document.getElementById('receiptSupplier').value;
+            const note = document.getElementById('receiptNote').value;
+
+            if (!supplierId) { alert('Chọn nhà cung cấp!'); return; }
+
+            const items = [];
+            let isValid = true;
+
+            document.querySelectorAll('.receipt-item-form').forEach(row => {
+                const bookId = row.querySelector('.receipt-book').value;
+                const qty = parseFloat(row.querySelector('.receipt-quantity').value);
+                const price = parseFloat(row.querySelector('.receipt-price').value);
+
+                if (!bookId || qty <= 0 || price <= 0) {
+                    isValid = false;
+                    row.style.border = '1px solid var(--danger-color)';
+                } else {
+                    row.style.border = '1px solid var(--dark-border)';
+                    items.push({
+                        bookId: parseInt(bookId),
+                        quantity: qty,
+                        importPrice: price
+                    });
+                }
+            });
+
+            if (!isValid) {
+                alert('Vui lòng kiểm tra lại thông tin sách (Số lượng, Giá nhập phải > 0)');
+                return;
+            }
+
+            const data = {
+                supplierId: parseInt(supplierId),
+                note: note,
+                items: items
+            };
+
+            const res = await API.post('/api/receipts', data);
+            if (res.ok) {
+                const result = await res.json();
+                if (typeof Utils !== 'undefined' && Utils.showNotification) {
+                    Utils.showNotification(result.message, 'success');
+                } else {
+                    alert('Lưu phiếu thành công!');
+                }
+                closeModal('receiptModal');
+                loadReceipts();
+            } else {
+                const err = await res.json();
+                alert('Lỗi: ' + err.message);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Có lỗi xảy ra!');
+        }
+    }
+
+    // Xem chi tiết
+    async function viewReceiptDetail(id) {
+        try {
+            const res = await API.get(`/api/receipts/${id}`);
+            if(!res.ok) throw new Error("Lỗi tải chi tiết");
+            const result = await res.json();
+            const receipt = result.data;
+            currentReceiptId = id;
+
+            // Render HTML chi tiết (Giữ nguyên logic cũ nhưng cập nhật style nếu cần)
+            const detailHtml = `
+                <div style="margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem;">
+                        <div style="color: var(--text-gray);">Mã phiếu: <strong style="color: var(--text-light);">${receipt.receiptCode}</strong></div>
+                        <div style="color: var(--text-gray);">Nhà cung cấp: <strong style="color: var(--text-light);">${receipt.supplier}</strong></div>
+                        <div style="color: var(--text-gray);">Người tạo: <strong style="color: var(--text-light);">${receipt.createdByUsername}</strong></div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; text-align: right;">
+                        <div style="color: var(--text-gray);">Tổng tiền</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--success-color);">${Utils.formatPrice(receipt.totalAmount)}</div>
+                        <div style="color: var(--text-gray); font-size: 0.9rem;">${Utils.formatDateTime(receipt.receiptDate)}</div>
+                    </div>
+                </div>
+
+                <h4 style="margin-bottom: 0.5rem; color: var(--text-light);">Chi tiết sản phẩm</h4>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sách</th>
+                                <th>SL</th>
+                                <th>Giá nhập</th>
+                                <th style="text-align: right;">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${receipt.items.map(item => `
+                                <tr>
+                                    <td>${item.bookTitle}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>${Utils.formatPrice(item.importPrice)}</td>
+                                    <td style="text-align: right; color: var(--success-color); font-weight: 500;">
+                                        ${Utils.formatPrice(item.subtotal)}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('receiptDetailBody').innerHTML = detailHtml;
+            document.getElementById('receiptDetailModal').classList.add('active');
+        } catch(e) { alert(e.message); }
+    }
+
+    function printReceipt() {
+        if(currentReceiptId) window.open(`/api/receipts/${currentReceiptId}/print`, '_blank');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    // Đóng modal khi click ra ngoài
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.classList.remove('active');
+        }
+    }
+</script>
+</body>
+</html>

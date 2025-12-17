@@ -1,8 +1,12 @@
 package com.bookstore.dto.request;
 
+import com.bookstore.entity.DifficultyLevel;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+
 import java.math.BigDecimal;
+import java.util.List;
+
 @Data
 public class CreateBookRequest {
     @NotBlank(message = "Tiêu đề không được để trống")
@@ -25,8 +29,14 @@ public class CreateBookRequest {
     @NotNull(message = "ID danh mục không được để trống")
     private Long categoryId;
 
-    // THÊM: ID Nhà xuất bản
     @NotNull(message = "ID nhà xuất bản không được để trống")
     private Long publisherId;
 
+    // MỚI
+    private DifficultyLevel difficultyLevel;
+    private String summary;
+    private Integer publicationYear;
+    private Integer pageCount;
+    private List<Long> tagIds;
+    private List<Long> topicIds;
 }

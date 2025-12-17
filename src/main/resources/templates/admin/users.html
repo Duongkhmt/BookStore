@@ -1,0 +1,1005 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org"-->
+<!--      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"-->
+<!--      layout:decorate="~{admin/layout}">-->
+<!--<head>-->
+<!--    <title>👥 Quản lý người dùng - BookStore Admin</title>-->
+<!--    <style layout:fragment="styles">-->
+<!--        .page-header {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--        }-->
+
+<!--        .page-title {-->
+<!--            font-size: 1.5rem;-->
+<!--            font-weight: 600;-->
+<!--            color: #1e293b;-->
+<!--        }-->
+
+<!--        .table-container {-->
+<!--            background: white;-->
+<!--            border-radius: 0.75rem;-->
+<!--            overflow: hidden;-->
+<!--            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);-->
+<!--            border: 1px solid #e2e8f0;-->
+<!--        }-->
+
+<!--        table {-->
+<!--            width: 100%;-->
+<!--            border-collapse: collapse;-->
+<!--        }-->
+
+<!--        th {-->
+<!--            background: #f8fafc;-->
+<!--            padding: 1rem;-->
+<!--            text-align: left;-->
+<!--            font-weight: 600;-->
+<!--            color: #1e293b;-->
+<!--            border-bottom: 2px solid #e2e8f0;-->
+<!--            white-space: nowrap;-->
+<!--        }-->
+
+<!--        td {-->
+<!--            padding: 1rem;-->
+<!--            border-bottom: 1px solid #e2e8f0;-->
+<!--        }-->
+
+<!--        tr:hover {-->
+<!--            background: #f8fafc;-->
+<!--        }-->
+
+<!--        .action-buttons {-->
+<!--            display: flex;-->
+<!--            gap: 0.5rem;-->
+<!--        }-->
+
+<!--        .btn {-->
+<!--            padding: 0.5rem 1rem;-->
+<!--            border: none;-->
+<!--            border-radius: 0.25rem;-->
+<!--            font-weight: 500;-->
+<!--            cursor: pointer;-->
+<!--            transition: all 0.2s;-->
+<!--            font-size: 0.875rem;-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--        }-->
+
+<!--        .btn-primary {-->
+<!--            background: #3b82f6;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .btn-primary:hover {-->
+<!--            background: #2563eb;-->
+<!--        }-->
+
+<!--        .btn-danger {-->
+<!--            background: #ef4444;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .btn-danger:hover {-->
+<!--            background: #dc2626;-->
+<!--        }-->
+
+<!--        .btn-outline {-->
+<!--            background: white;-->
+<!--            color: #3b82f6;-->
+<!--            border: 1px solid #3b82f6;-->
+<!--        }-->
+
+<!--        .btn-outline:hover {-->
+<!--            background: #eff6ff;-->
+<!--        }-->
+
+<!--        .btn-sm {-->
+<!--            padding: 0.25rem 0.75rem;-->
+<!--            font-size: 0.75rem;-->
+<!--        }-->
+
+<!--        .badge {-->
+<!--            display: inline-block;-->
+<!--            padding: 0.25rem 0.75rem;-->
+<!--            border-radius: 9999px;-->
+<!--            font-size: 0.875rem;-->
+<!--            font-weight: 500;-->
+<!--        }-->
+
+<!--        .badge-success { background: #d1fae5; color: #065f46; }-->
+<!--        .badge-warning { background: #fef3c7; color: #92400e; }-->
+<!--        .badge-danger { background: #fee2e2; color: #991b1b; }-->
+<!--        .badge-info { background: #dbeafe; color: #1e40af; }-->
+
+<!--        /* Modal styles */-->
+<!--        .modal {-->
+<!--            display: none;-->
+<!--            position: fixed;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            background: rgba(0, 0, 0, 0.5);-->
+<!--            z-index: 1000;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--        }-->
+
+<!--        .modal.active {-->
+<!--            display: flex;-->
+<!--        }-->
+
+<!--        .modal-content {-->
+<!--            background: white;-->
+<!--            border-radius: 0.5rem;-->
+<!--            width: 90%;-->
+<!--            max-width: 500px;-->
+<!--            max-height: 90vh;-->
+<!--            overflow-y: auto;-->
+<!--            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+
+<!--        .modal-header {-->
+<!--            padding: 1.5rem;-->
+<!--            border-bottom: 1px solid #e2e8f0;-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--        }-->
+
+<!--        .modal-header h3 {-->
+<!--            margin: 0;-->
+<!--            font-size: 1.25rem;-->
+<!--            font-weight: 600;-->
+<!--        }-->
+
+<!--        .modal-close {-->
+<!--            background: none;-->
+<!--            border: none;-->
+<!--            font-size: 1.5rem;-->
+<!--            cursor: pointer;-->
+<!--            color: #64748b;-->
+<!--            padding: 0;-->
+<!--            width: 32px;-->
+<!--            height: 32px;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--        }-->
+
+<!--        .modal-body {-->
+<!--            padding: 1.5rem;-->
+<!--        }-->
+
+<!--        .modal-footer {-->
+<!--            padding: 1.5rem;-->
+<!--            border-top: 1px solid #e2e8f0;-->
+<!--            display: flex;-->
+<!--            justify-content: flex-end;-->
+<!--            gap: 0.5rem;-->
+<!--        }-->
+
+<!--        .form-group {-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        .form-label {-->
+<!--            display: block;-->
+<!--            margin-bottom: 0.5rem;-->
+<!--            font-weight: 500;-->
+<!--            color: #1e293b;-->
+<!--        }-->
+
+<!--        .form-control {-->
+<!--            width: 100%;-->
+<!--            padding: 0.5rem;-->
+<!--            border: 1px solid #e2e8f0;-->
+<!--            border-radius: 0.25rem;-->
+<!--            font-size: 1rem;-->
+<!--        }-->
+
+<!--        .form-control:focus {-->
+<!--            outline: none;-->
+<!--            border-color: #3b82f6;-->
+<!--            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);-->
+<!--        }-->
+
+<!--        .form-row {-->
+<!--            display: grid;-->
+<!--            grid-template-columns: 1fr 1fr;-->
+<!--            gap: 1rem;-->
+<!--        }-->
+
+<!--        .loading {-->
+<!--            text-align: center;-->
+<!--            padding: 3rem;-->
+<!--            color: #64748b;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div layout:fragment="content">-->
+<!--    <div class="page-header">-->
+<!--        <h2 class="page-title">-->
+<!--            <i class="fas fa-users"></i> Quản lý người dùng-->
+<!--        </h2>-->
+<!--        <button class="btn btn-primary" onclick="showUserModal()">-->
+<!--            <i class="fas fa-plus"></i> Thêm người dùng-->
+<!--        </button>-->
+<!--    </div>-->
+
+<!--    <div class="table-container">-->
+<!--        <table>-->
+<!--            <thead>-->
+<!--            </thead>-->
+<!--            <tbody id="usersTableBody">-->
+<!--            <tr><td colspan="6" class="loading">Đang tải...</td></tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </div>-->
+
+<!--    <div id="userModal" class="modal">-->
+<!--        <div class="modal-content">-->
+<!--            <div class="modal-header">-->
+<!--                <h3 id="userModalTitle">Thêm người dùng</h3>-->
+<!--                <button class="modal-close" onclick="closeModal('userModal')">&times;</button>-->
+<!--            </div>-->
+<!--            <div class="modal-body">-->
+<!--                <form id="userForm">-->
+<!--                    <input type="hidden" id="userId">-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="form-label">Tên đăng nhập *</label>-->
+<!--                        <input type="text" id="username" class="form-control" required>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label class="form-label">Email *</label>-->
+<!--                        <input type="email" id="email" class="form-control" required>-->
+<!--                    </div>-->
+<!--                    <div class="form-group" id="passwordGroup">-->
+<!--                        <label class="form-label">Mật khẩu *</label>-->
+<!--                        <input type="password" id="password" class="form-control" required>-->
+<!--                        <small style="color: #666;">Mật khẩu phải có ít nhất 6 ký tự</small>-->
+<!--                    </div>-->
+<!--                    <div class="form-row">-->
+<!--                        <div class="form-group">-->
+<!--                            <label class="form-label">Vai trò *</label>-->
+<!--                            <select id="role" class="form-control" required>-->
+<!--                                <option value="">Chọn vai trò</option>-->
+<!--                                <option value="ROLE_USER">Người dùng</option>-->
+<!--                                <option value="ROLE_ADMIN">Quản trị viên</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div class="form-group" id="statusGroup" style="display: none;">-->
+<!--                            <label class="form-label">Trạng thái *</label>-->
+<!--                            <select id="status" class="form-control" required>-->
+<!--                                <option value="ACTIVE">Đang hoạt động</option>-->
+<!--                                <option value="INACTIVE">Không hoạt động</option>-->
+<!--                                <option value="LOCKED">Đã khóa</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </form>-->
+<!--                <div id="defaultStatusInfo" style="background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 10px; display: none;">-->
+<!--                    <small>💡 <strong>Mặc định:</strong> Status = ACTIVE (Đang hoạt động)</small>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="modal-footer">-->
+<!--                <button class="btn btn-outline" onclick="closeModal('userModal')">Hủy</button>-->
+<!--                <button class="btn btn-primary" onclick="saveUser()">Lưu</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<script layout:fragment="scripts" th:inline="none">-->
+<!--    document.addEventListener('DOMContentLoaded', loadUsers);-->
+
+<!--    let editingUserId = null;-->
+
+<!--    async function loadUsers() {-->
+<!--        try {-->
+<!--            const response = await API.get('/api/admin/users');-->
+<!--            if (!response.ok) throw new Error('HTTP ' + response.status);-->
+
+<!--            const result = await response.json();-->
+<!--            const users = result.data;-->
+
+<!--            const tbody = document.getElementById('usersTableBody');-->
+<!--            tbody.innerHTML = users.map(user => `-->
+<!--                <tr>-->
+<!--                    <td>${user.id}</td>-->
+<!--                    <td>${user.username}</td>-->
+<!--                    <td>${user.email}</td>-->
+<!--                    <td>-->
+<!--                        <span class="badge ${user.role === 'ROLE_ADMIN' ? 'badge-danger' : 'badge-info'}">-->
+<!--                            ${user.role === 'ROLE_ADMIN' ? 'Quản trị viên' : 'Người dùng'}-->
+<!--                        </span>-->
+<!--                    </td>-->
+<!--                    <td>-->
+<!--                        <span class="badge ${user.status === 'ACTIVE' ? 'badge-success' : user.status === 'LOCKED' ? 'badge-danger' : 'badge-warning'}">-->
+<!--                            ${getStatusText(user.status)}-->
+<!--                        </span>-->
+<!--                    </td>-->
+<!--                    <td>-->
+<!--                        <div class="action-buttons">-->
+<!--                            <button class="btn btn-outline btn-sm" onclick="editUser(${user.id})">-->
+<!--                                <i class="fas fa-edit"></i> Sửa-->
+<!--                            </button>-->
+<!--                            <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">-->
+<!--                                <i class="fas fa-trash"></i> Xóa-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                    </td>-->
+<!--                </tr>-->
+<!--            `).join('');-->
+<!--        } catch (error) {-->
+<!--            document.getElementById('usersTableBody').innerHTML =-->
+<!--                '<tr><td colspan="6" class="loading" style="color: #ef4444;">Lỗi tải dữ liệu</td></tr>';-->
+<!--            console.error('Lỗi loadUsers:', error);-->
+<!--        }-->
+<!--    }-->
+
+<!--    function getStatusText(status) {-->
+<!--        const statusMap = {-->
+<!--            'ACTIVE': 'Đang hoạt động',-->
+<!--            'LOCKED': 'Đã khóa',-->
+<!--            'INACTIVE': 'Không hoạt động'-->
+<!--        };-->
+<!--        return statusMap[status] || status;-->
+<!--    }-->
+
+<!--    function showUserModal(user = null) {-->
+<!--        editingUserId = user?.id || null;-->
+<!--        const statusGroup = document.getElementById('statusGroup');-->
+<!--        const defaultStatusInfo = document.getElementById('defaultStatusInfo');-->
+<!--        const passwordGroup = document.getElementById('passwordGroup');-->
+
+<!--        document.getElementById('userModalTitle').textContent =-->
+<!--            user ? 'Sửa người dùng' : 'Thêm người dùng';-->
+
+<!--        document.getElementById('userForm').reset();-->
+
+<!--        if (user) {-->
+<!--            document.getElementById('userId').value = user.id;-->
+<!--            document.getElementById('username').value = user.username;-->
+<!--            document.getElementById('email').value = user.email;-->
+<!--            document.getElementById('role').value = user.role || 'ROLE_USER';-->
+<!--            document.getElementById('status').value = user.status || 'ACTIVE';-->
+
+<!--            statusGroup.style.display = 'block';-->
+<!--            defaultStatusInfo.style.display = 'none';-->
+<!--            passwordGroup.style.display = 'none';-->
+<!--        } else {-->
+<!--            document.getElementById('role').value = 'ROLE_USER';-->
+
+<!--            statusGroup.style.display = 'none';-->
+<!--            defaultStatusInfo.style.display = 'block';-->
+<!--            passwordGroup.style.display = 'block';-->
+<!--        }-->
+
+<!--        document.getElementById('userModal').classList.add('active');-->
+<!--    }-->
+
+<!--    async function saveUser() {-->
+<!--        try {-->
+<!--            const username = document.getElementById('username').value.trim();-->
+<!--            const email = document.getElementById('email').value.trim();-->
+<!--            const role = document.getElementById('role').value;-->
+
+<!--            if (!username) {-->
+<!--                alert('Vui lòng nhập tên đăng nhập');-->
+<!--                return;-->
+<!--            }-->
+<!--            if (!email) {-->
+<!--                alert('Vui lòng nhập email');-->
+<!--                return;-->
+<!--            }-->
+<!--            if (!email.includes('@')) {-->
+<!--                alert('Email không hợp lệ');-->
+<!--                return;-->
+<!--            }-->
+<!--            if (!role) {-->
+<!--                alert('Vui lòng chọn vai trò');-->
+<!--                return;-->
+<!--            }-->
+
+<!--            const formData = {-->
+<!--                username: username,-->
+<!--                email: email,-->
+<!--                role: role-->
+<!--            };-->
+
+<!--            if (editingUserId) {-->
+<!--                const status = document.getElementById('status').value;-->
+<!--                if (!status) {-->
+<!--                    alert('Vui lòng chọn trạng thái');-->
+<!--                    return;-->
+<!--                }-->
+<!--                formData.status = status;-->
+<!--            } else {-->
+<!--                formData.status = 'ACTIVE';-->
+
+<!--                const password = document.getElementById('password').value;-->
+<!--                if (!password) {-->
+<!--                    alert('Mật khẩu không được để trống');-->
+<!--                    return;-->
+<!--                }-->
+<!--                if (password.length < 6) {-->
+<!--                    alert('Mật khẩu phải có ít nhất 6 ký tự');-->
+<!--                    return;-->
+<!--                }-->
+<!--                formData.password = password;-->
+<!--            }-->
+
+<!--            let response;-->
+
+<!--            if (editingUserId) {-->
+<!--                response = await API.put(`/api/admin/users/${editingUserId}`, formData);-->
+<!--            } else {-->
+<!--                response = await API.post('/api/admin/users', formData);-->
+<!--            }-->
+
+<!--            if (!response.ok) {-->
+<!--                const error = await response.json();-->
+<!--                throw new Error(error.message || 'Lỗi khi lưu người dùng');-->
+<!--            }-->
+
+<!--            const result = await response.json();-->
+<!--            Utils.showNotification(result.message, 'success');-->
+<!--            closeModal('userModal');-->
+<!--            await loadUsers();-->
+
+<!--        } catch (error) {-->
+<!--            console.error('Lỗi saveUser:', error);-->
+<!--            alert('❌ ' + error.message);-->
+<!--        }-->
+<!--    }-->
+
+<!--    async function editUser(id) {-->
+<!--        try {-->
+<!--            const response = await API.get(`/api/admin/users/${id}`);-->
+<!--            if (!response.ok) throw new Error('HTTP ' + response.status);-->
+
+<!--            const result = await response.json();-->
+<!--            showUserModal(result.data);-->
+
+<!--        } catch (error) {-->
+<!--            alert('Lỗi tải thông tin user: ' + error.message);-->
+<!--        }-->
+<!--    }-->
+
+<!--    async function deleteUser(id) {-->
+<!--        if (!confirm('Bạn có chắc muốn xóa người dùng này?')) return;-->
+
+<!--        try {-->
+<!--            const response = await API.delete(`/api/admin/users/${id}`);-->
+<!--            if (!response.ok) throw new Error('HTTP ' + response.status);-->
+
+<!--            const result = await response.json();-->
+<!--            Utils.showNotification(result.message, 'success');-->
+<!--            await loadUsers();-->
+
+<!--        } catch (error) {-->
+<!--            alert('Lỗi xóa user: ' + error.message);-->
+<!--        }-->
+<!--    }-->
+
+<!--    function closeModal(modalId) {-->
+<!--        document.getElementById(modalId).classList.remove('active');-->
+<!--        editingUserId = null;-->
+<!--    }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>👥 Quản lý người dùng - BookStore Admin</title>
+    <style layout:fragment="styles">
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+        }
+
+        .btn-outline:hover {
+            background: #eff6ff;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 600px; /* Tăng chiều rộng một chút để đẹp hơn */
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="page-header">
+        <h2 class="page-title">
+            <i class="fas fa-users"></i> Quản lý người dùng
+        </h2>
+        <button class="btn btn-primary" onclick="showUserModal()">
+            <i class="fas fa-plus"></i> Thêm người dùng
+        </button>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên đăng nhập</th>
+                <th>Email</th>
+                <th>Số điện thoại</th> <th>Địa chỉ</th>       <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody id="usersTableBody">
+            <tr><td colspan="8" class="loading">Đang tải...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="userModalTitle">Thêm người dùng</h3>
+                <button class="modal-close" onclick="closeModal('userModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="form-group">
+                        <label class="form-label">Tên đăng nhập *</label>
+                        <input type="text" id="username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email *</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="text" id="phoneNumber" class="form-control" placeholder="VD: 098...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Địa chỉ</label>
+                            <input type="text" id="address" class="form-control" placeholder="VD: Hà Nội">
+                        </div>
+                    </div>
+                    <div class="form-group" id="passwordGroup">
+                        <label class="form-label">Mật khẩu *</label>
+                        <input type="password" id="password" class="form-control" required>
+                        <small style="color: #666;">Mật khẩu phải có ít nhất 6 ký tự</small>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Vai trò *</label>
+                            <select id="role" class="form-control" required>
+                                <option value="">Chọn vai trò</option>
+                                <option value="ROLE_USER">Người dùng</option>
+                                <option value="ROLE_ADMIN">Quản trị viên</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="statusGroup" style="display: none;">
+                            <label class="form-label">Trạng thái *</label>
+                            <select id="status" class="form-control" required>
+                                <option value="ACTIVE">Đang hoạt động</option>
+                                <option value="INACTIVE">Không hoạt động</option>
+                                <option value="LOCKED">Đã khóa</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+                <div id="defaultStatusInfo" style="background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 10px; display: none;">
+                    <small>💡 <strong>Mặc định:</strong> Status = ACTIVE (Đang hoạt động)</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('userModal')">Hủy</button>
+                <button class="btn btn-primary" onclick="saveUser()">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script layout:fragment="scripts" th:inline="none">
+    document.addEventListener('DOMContentLoaded', loadUsers);
+
+    let editingUserId = null;
+
+    async function loadUsers() {
+        try {
+            const response = await API.get('/api/admin/users');
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+
+            const result = await response.json();
+            const users = result.data;
+
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phoneNumber || '-'}</td>
+                    <td>${user.address || '-'}</td>
+                    <td>
+                        <span class="badge ${user.role === 'ROLE_ADMIN' ? 'badge-danger' : 'badge-info'}">
+                            ${user.role === 'ROLE_ADMIN' ? 'Quản trị viên' : 'Người dùng'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${user.status === 'ACTIVE' ? 'badge-success' : user.status === 'LOCKED' ? 'badge-danger' : 'badge-warning'}">
+                            ${getStatusText(user.status)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-outline btn-sm" onclick="editUser(${user.id})">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            document.getElementById('usersTableBody').innerHTML =
+                '<tr><td colspan="8" class="loading" style="color: #ef4444;">Lỗi tải dữ liệu</td></tr>';
+            console.error('Lỗi loadUsers:', error);
+        }
+    }
+
+    function getStatusText(status) {
+        const statusMap = {
+            'ACTIVE': 'Đang hoạt động',
+            'LOCKED': 'Đã khóa',
+            'INACTIVE': 'Không hoạt động'
+        };
+        return statusMap[status] || status;
+    }
+
+    function showUserModal(user = null) {
+        editingUserId = user?.id || null;
+        const statusGroup = document.getElementById('statusGroup');
+        const defaultStatusInfo = document.getElementById('defaultStatusInfo');
+        const passwordGroup = document.getElementById('passwordGroup');
+
+        document.getElementById('userModalTitle').textContent =
+            user ? 'Sửa người dùng' : 'Thêm người dùng';
+
+        // Reset form trước khi điền dữ liệu mới
+        document.getElementById('userForm').reset();
+
+        if (user) {
+            document.getElementById('userId').value = user.id;
+            document.getElementById('username').value = user.username;
+            document.getElementById('email').value = user.email;
+
+            // ĐIỀN DỮ LIỆU VÀO INPUT
+            document.getElementById('phoneNumber').value = user.phoneNumber || '';
+            document.getElementById('address').value = user.address || '';
+
+            document.getElementById('role').value = user.role || 'ROLE_USER';
+            document.getElementById('status').value = user.status || 'ACTIVE';
+
+            statusGroup.style.display = 'block';
+            defaultStatusInfo.style.display = 'none';
+            passwordGroup.style.display = 'none';
+        } else {
+            // Mặc định cho tạo mới
+            document.getElementById('role').value = 'ROLE_USER';
+
+            statusGroup.style.display = 'none';
+            defaultStatusInfo.style.display = 'block';
+            passwordGroup.style.display = 'block';
+        }
+
+        document.getElementById('userModal').classList.add('active');
+    }
+
+    async function saveUser() {
+        try {
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const role = document.getElementById('role').value;
+
+            // LẤY DỮ LIỆU TỪ INPUT
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const address = document.getElementById('address').value.trim();
+
+            if (!username) { alert('Vui lòng nhập tên đăng nhập'); return; }
+            if (!email) { alert('Vui lòng nhập email'); return; }
+            if (!email.includes('@')) { alert('Email không hợp lệ'); return; }
+            if (!role) { alert('Vui lòng chọn vai trò'); return; }
+
+            const formData = {
+                username: username,
+                email: email,
+                role: role,
+                // THÊM VÀO PAYLOAD
+                phoneNumber: phoneNumber,
+                address: address
+            };
+
+            if (editingUserId) {
+                const status = document.getElementById('status').value;
+                if (!status) { alert('Vui lòng chọn trạng thái'); return; }
+                formData.status = status;
+            } else {
+                formData.status = 'ACTIVE';
+
+                const password = document.getElementById('password').value;
+                if (!password) { alert('Mật khẩu không được để trống'); return; }
+                if (password.length < 6) { alert('Mật khẩu phải có ít nhất 6 ký tự'); return; }
+                formData.password = password;
+            }
+
+            let response;
+            if (editingUserId) {
+                response = await API.put(`/api/admin/users/${editingUserId}`, formData);
+            } else {
+                response = await API.post('/api/admin/users', formData);
+            }
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Lỗi khi lưu người dùng');
+            }
+
+            const result = await response.json();
+            Utils.showNotification(result.message, 'success');
+            closeModal('userModal');
+            await loadUsers();
+
+        } catch (error) {
+            console.error('Lỗi saveUser:', error);
+            alert('❌ ' + error.message);
+        }
+    }
+
+    async function editUser(id) {
+        try {
+            const response = await API.get(`/api/admin/users/${id}`);
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+
+            const result = await response.json();
+            showUserModal(result.data);
+
+        } catch (error) {
+            alert('Lỗi tải thông tin user: ' + error.message);
+        }
+    }
+
+    async function deleteUser(id) {
+        if (!confirm('Bạn có chắc muốn xóa người dùng này?')) return;
+
+        try {
+            const response = await API.delete(`/api/admin/users/${id}`);
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+
+            const result = await response.json();
+            Utils.showNotification(result.message, 'success');
+            await loadUsers();
+
+        } catch (error) {
+            alert('Lỗi xóa user: ' + error.message);
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+        editingUserId = null;
+    }
+</script>
+</body>
+</html>

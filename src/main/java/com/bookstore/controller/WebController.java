@@ -23,11 +23,11 @@ public class WebController {
         model.addAttribute("pageTitle", "Đơn hàng của tôi");
         return "orders"; // Thymeleaf sẽ render layout.html + orders.html
     }
-    @GetMapping({"/admin", "/admin/dashboard"})
-    public String adminPage(Model model) {
-        model.addAttribute("pageTitle", "Quản trị hệ thống");
-        return "admin/dashboard";
-    }
+//    @GetMapping({"/admin", "/admin/dashboard"})
+//    public String adminPage(Model model) {
+//        model.addAttribute("pageTitle", "Quản trị hệ thống");
+//        return "dashboard1";
+//    }
 
     @GetMapping("/catalog")
     public String catalogPage(Model model) {

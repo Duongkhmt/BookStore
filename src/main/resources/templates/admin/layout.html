@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <title layout:title-pattern="$CONTENT_TITLE - BookStore Admin">BookStore Admin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .admin-sidebar {
+            width: 280px;
+            background: #1e293b;
+            color: white;
+            padding: 1.5rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo i {
+            color: #3b82f6;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-section {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .menu-section:first-child {
+            margin-top: 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .menu-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: white;
+            border-left-color: #3b82f6;
+        }
+
+        .menu-item i {
+            width: 24px;
+            font-size: 1.1rem;
+            margin-right: 0.75rem;
+        }
+
+        /* Main Content */
+        .admin-main {
+            flex: 1;
+            margin-left: 280px;
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .admin-content {
+            padding: 2rem;
+        }
+
+        /* Stats Dashboard */
+        .stats-dashboard {
+            margin-bottom: 2rem;
+        }
+
+        .stats-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.blue {
+            border-left: 4px solid #3b82f6;
+        }
+        .stat-card.green {
+            border-left: 4px solid #10b981;
+        }
+        .stat-card.purple {
+            border-left: 4px solid #8b5cf6;
+        }
+        .stat-card.orange {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .admin-sidebar {
+                width: 240px;
+                margin-left: -240px;
+                transition: margin-left 0.3s;
+            }
+
+            .admin-sidebar.open {
+                margin-left: 0;
+            }
+
+            .admin-main {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #1e293b;
+            cursor: pointer;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        /* Modal styles (giữ nguyên) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        /* Các style khác giữ nguyên từ code cũ */
+    </style>
+    <th:block layout:fragment="styles">
+        <!-- Các style riêng của từng trang sẽ được chèn vào đây -->
+    </th:block>
+</head>
+<body>
+<div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-book"></i>
+                <span>BookStore Admin</span>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="menu-section">Quản lý tổng quan</div>
+            <a href="/admin/dashboard" class="menu-item" th:classappend="${requestURI == '/admin/dashboard'} ? 'active' : ''">
+                <i class="fas fa-home"></i>
+                <span>Tổng quan</span>
+            </a>
+
+            <div class="menu-section">Quản lý người dùng</div>
+            <a href="/admin/users" class="menu-item" th:classappend="${requestURI == '/admin/users'} ? 'active' : ''">
+                <i class="fas fa-users"></i>
+                <span>Người dùng</span>
+            </a>
+
+            <div class="menu-section">Quản lý sản phẩm</div>
+            <a href="/admin/books" class="menu-item" th:classappend="${requestURI  == '/admin/books'} ? 'active' : ''">
+                <i class="fas fa-book"></i>
+                <span>Sách</span>
+            </a>
+            <a href="/admin/categories" class="menu-item" th:classappend="${requestURI  == '/admin/categories'} ? 'active' : ''">
+                <i class="fas fa-tags"></i>
+                <span>Thể loại</span>
+            </a>
+            <a href="/admin/publishers" class="menu-item" th:classappend="${requestURI  == '/admin/publishers'} ? 'active' : ''">
+                <i class="fas fa-building"></i>
+                <span>Nhà xuất bản</span>
+            </a>
+
+            <div class="menu-section">Quản lý kho</div>
+            <a href="/admin/suppliers" class="menu-item" th:classappend="${requestURI  == '/admin/suppliers'} ? 'active' : ''">
+                <i class="fas fa-truck"></i>
+                <span>Nhà cung cấp</span>
+            </a>
+            <a href="/admin/receipts" class="menu-item" th:classappend="${requestURI  == '/admin/receipts'} ? 'active' : ''">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Phiếu nhập kho</span>
+            </a>
+            <a href="/admin/inventory" class="menu-item" th:classappend="${requestURI  == '/admin/inventory'} ? 'active' : ''">
+                <i class="fas fa-boxes"></i>
+                <span>Tồn kho</span>
+            </a>
+
+            <div class="menu-section">Quản lý bán hàng</div>
+            <a href="/admin/orders" class="menu-item" th:classappend="${requestURI  == '/admin/orders'} ? 'active' : ''">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Đơn hàng</span>
+            </a>
+        </div>
+
+        <!-- Logout -->
+        <div style="padding: 1.5rem; margin-top: auto;">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="menu-item" style="width: 100%; border: none; background: none; text-align: left; cursor: pointer;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng xuất</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <header class="admin-header">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="header-title">
+                <h1 layout:fragment="page-title">Trang quản trị</h1>
+            </div>
+            <div class="header-actions">
+                <div class="user-menu">
+                    <div class="user-avatar">
+                        <span sec:authorize="isAuthenticated()"
+                              th:text="${#authentication.name.substring(0, 1)}">
+      U
+</span>
+                    </div>
+                    <div>
+                        <div th:text="${#authentication.name}">Admin</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Quản trị viên</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <th:block layout:fragment="content">
+                <!-- Nội dung trang sẽ được chèn vào đây -->
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                </div>
+            </th:block>
+        </div>
+    </main>
+</div>
+
+<!-- Các modal chung -->
+<div id="globalModal" class="modal"></div>
+
+<script>
+    // Toggle sidebar trên mobile
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.admin-sidebar');
+        sidebar.classList.toggle('open');
+    }
+
+    // Đóng sidebar khi click ra ngoài (mobile)
+    document.addEventListener('click', (e) => {
+        const sidebar = document.querySelector('.admin-sidebar');
+        if (window.innerWidth <= 1024 &&
+            !sidebar.contains(e.target) &&
+            !e.target.closest('.menu-toggle')) {
+            sidebar.classList.remove('open');
+        }
+    });
+</script>
+
+<!-- Các script chung -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script th:inline="none">
+    /*<![CDATA[*/
+    // API Utilities
+    const API = {
+        async request(url, options = {}) {
+            const token = localStorage.getItem('token');
+            const headers = {
+                'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` }),
+                ...options.headers
+            };
+
+            try {
+                const response = await fetch(url, { ...options, headers });
+                return response;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        },
+
+        get(url) {
+            return this.request(url, { method: 'GET' });
+        },
+
+        post(url, data) {
+            return this.request(url, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+        },
+
+        put(url, data) {
+            return this.request(url, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+        },
+
+        delete(url) {
+            return this.request(url, { method: 'DELETE' });
+        }
+    };
+
+    // Utility functions
+    const Utils = {
+        formatPrice(price) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(price || 0);
+        },
+
+        formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString('vi-VN');
+        },
+
+        formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleString('vi-VN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        },
+
+        showNotification(message, type = 'success') {
+            // Tạo notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">&times;</button>
+            `;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? '#10b981' : '#ef4444'};
+                color: white;
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+
+            document.body.appendChild(notification);
+
+            // Tự động xóa sau 5 giây
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    };
+
+    // Định nghĩa keyframes cho animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    /*]]>*/
+</script>
+
+<!-- Script riêng của từng trang -->
+<th:block layout:fragment="scripts"></th:block>
+
+</body>
+</html>

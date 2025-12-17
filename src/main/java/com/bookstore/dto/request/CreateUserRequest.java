@@ -19,4 +19,10 @@ public class CreateUserRequest {
 
     @NotNull(message = "Vai trò không được để trống")
     private String role; // "ROLE_USER" hoặc "ROLE_ADMIN"
+
+    @NotNull(message = "Địa chỉ không được để trống")
+    private String address;
+
+    private String phoneNumber;
+
 }

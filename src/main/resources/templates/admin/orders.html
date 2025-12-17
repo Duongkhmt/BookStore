@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>📦 Quản lý đơn hàng - BookStore Admin</title>
+    <style layout:fragment="styles">
+        :root {
+            --dark-bg-card: #1f2937;
+            --dark-bg-input: #374151;
+            --dark-border: #4b5563;
+            --text-light: #f9fafb;
+            --text-gray: #9ca3af;
+            --primary-color: #3b82f6;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--dark-bg-card); border-radius: 1rem;
+            width: 95%; max-width: 800px; max-height: 90vh;
+            display: flex; flex-direction: column; border: 1px solid var(--dark-border);
+        }
+        .modal-header, .modal-footer { padding: 1.25rem; border-color: var(--dark-border); }
+        .modal-body { padding: 1.5rem; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--dark-border); }
+        .modal-footer { border-top: 1px solid var(--dark-border); justify-content: flex-end; display: flex;}
+        .modal-header h3 { color: var(--text-light); margin: 0; }
+        .modal-close { background: none; border: none; color: var(--text-gray); font-size: 1.5rem; cursor: pointer; }
+
+        /* General Styles */
+        .page-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+        .page-title { font-size: 1.5rem; font-weight: 600; color: var(--text-light); }
+        .table-container { background: var(--dark-bg-card); border-radius: 1rem; overflow: hidden; border: 1px solid var(--dark-border); }
+        table { width: 100%; border-collapse: collapse; color: var(--text-light); }
+        th, td { padding: 1rem; border-bottom: 1px solid var(--dark-border); text-align: left; }
+        th { background: rgba(255,255,255,0.05); }
+        .badge { padding: 0.3rem 0.7rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
+        .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .badge-info { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+
+        .detail-box { background: var(--dark-bg-input); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .detail-row { margin-bottom: 0.5rem; color: var(--text-gray); font-size: 0.95rem; }
+        .detail-row strong { color: var(--text-light); }
+
+        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: 500; }
+        .btn-outline { background: transparent; border: 1px solid var(--dark-border); color: var(--text-light); }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.85rem; }
+
+        /* Filter Styles */
+        .filters { display: flex; gap: 1rem; margin-bottom: 1rem; background: var(--dark-bg-card); padding: 1rem; border-radius: 0.75rem; border: 1px solid var(--dark-border); }
+        .form-control { background: var(--dark-bg-input); border: 1px solid var(--dark-border); color: var(--text-light); padding: 0.5rem; border-radius: 0.5rem; }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="page-header">
+        <h2 class="page-title"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</h2>
+    </div>
+
+    <div class="filters">
+        <select id="statusFilter" class="form-control" onchange="filterOrders()">
+            <option value="">Tất cả trạng thái</option>
+            <option value="PENDING">Chờ xử lý</option>
+            <option value="SHIPPED">Đang giao</option>
+            <option value="DELIVERED">Đã giao</option>
+            <option value="CANCELLED">Đã hủy</option>
+        </select>
+        <input type="text" id="searchOrder" class="form-control" placeholder="Tìm kiếm..." onkeyup="searchOrder(this.value)">
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Trạng thái</th>
+                <th>Tổng tiền</th>
+                <th>Ngày đặt</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+            <tr><td colspan="6" style="text-align: center; padding: 2rem;">Đang tải dữ liệu...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="orderDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="orderDetailTitle">Chi tiết đơn hàng</h3>
+                <button class="modal-close" onclick="closeModal('orderDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="orderDetailBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('orderDetailModal')">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script layout:fragment="scripts" th:inline="none">
+    document.addEventListener('DOMContentLoaded', loadOrders);
+
+    let allOrders = [];
+
+    // Format tiền tệ
+    const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    // Format ngày giờ
+    const formatDate = (dateString) => {
+        if(!dateString) return '';
+        return new Date(dateString).toLocaleString('vi-VN');
+    };
+
+    async function loadOrders() {
+        try {
+            const response = await API.get('/api/orders'); // Đảm bảo API client đã được cấu hình
+            if (!response.ok) throw new Error('Lỗi tải dữ liệu');
+            const result = await response.json();
+            allOrders = result.data || [];
+            renderTable(allOrders);
+        } catch (error) {
+            console.error(error);
+            document.getElementById('ordersTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color: #ef4444;">${error.message}</td></tr>`;
+        }
+    }
+
+    function renderTable(orders) {
+        const tbody = document.getElementById('ordersTableBody');
+        if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Không có đơn hàng nào</td></tr>';
+            return;
+        }
+        tbody.innerHTML = orders.map(order => `
+            <tr>
+                <td>#${order.id}</td>
+                <td>
+                    <div>${order.username || 'Khách'}</div>
+                    <small style="color: var(--text-gray)">${order.phone || ''}</small>
+                </td>
+                <td><span class="badge ${getBadgeClass(order.status)}">${getStatusText(order.status)}</span></td>
+                <td style="color: #34d399; font-weight: bold;">${formatPrice(order.totalAmount)}</td>
+                <td>${formatDate(order.orderDate)}</td>
+                <td>
+                    <button class="btn btn-outline btn-sm" onclick="viewOrderDetail(${order.id})"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-outline btn-sm" onclick="updateStatus(${order.id}, '${order.status}')"><i class="fas fa-edit"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // --- LOGIC QUAN TRỌNG: XỬ LÝ GIÁ ---
+    async function viewOrderDetail(id) {
+        try {
+            const res = await API.get(`/api/orders/${id}`);
+            const order = (await res.json()).data;
+
+            const itemsHtml = order.items.map(item => {
+                // Sửa lỗi giá 0đ: Kiểm tra nhiều trường hợp tên biến
+                const price = item.priceAtOrder || item.price || item.unitPrice || 0;
+                const subtotal = item.subtotal || (price * item.quantity);
+
+                return `
+                <tr>
+                    <td>${item.bookTitle || item.productName || 'Sản phẩm'}</td>
+                    <td>${formatPrice(price)}</td>
+                    <td>${item.quantity}</td>
+                    <td style="text-align: right; color: #34d399;">${formatPrice(subtotal)}</td>
+                </tr>`;
+            }).join('');
+
+            const html = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="detail-box">
+                        <h4>Thông tin đơn hàng</h4>
+                        <div class="detail-row"><strong>Mã:</strong> #${order.id}</div>
+                        <div class="detail-row"><strong>Ngày:</strong> ${formatDate(order.orderDate)}</div>
+                        <div class="detail-row"><strong>Tổng tiền:</strong> <span style="color:#34d399; font-weight:bold">${formatPrice(order.totalAmount)}</span></div>
+                    </div>
+                    <div class="detail-box">
+                        <h4>Người nhận</h4>
+                        <div class="detail-row"><strong>Tên:</strong> ${order.username || order.fullName}</div>
+                        <div class="detail-row"><strong>SĐT:</strong> ${order.phoneNumber || '---'}</div>
+                        <div class="detail-row"><strong>Địa chỉ:</strong> ${order.shippingAddress || '---'}</div>
+                    </div>
+                </div>
+                <h4>Chi tiết sản phẩm</h4>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Sản phẩm</th><th>Đơn giá</th><th>SL</th><th style="text-align: right;">Thành tiền</th></tr></thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('orderDetailBody').innerHTML = html;
+            document.getElementById('orderDetailModal').classList.add('active');
+        } catch (e) { alert('Lỗi tải chi tiết: ' + e.message); }
+    }
+
+    async function updateStatus(id, currentStatus) {
+        const newStatus = prompt("Nhập trạng thái mới (PENDING, SHIPPED, DELIVERED, CANCELLED):", currentStatus);
+        if(newStatus && newStatus !== currentStatus) {
+            try {
+                await API.put(`/api/orders/${id}/status`, { newStatus: newStatus.toUpperCase() });
+                alert("Cập nhật thành công");
+                loadOrders();
+            } catch(e) { alert("Lỗi cập nhật"); }
+        }
+    }
+
+    function filterOrders() {
+        const status = document.getElementById('statusFilter').value;
+        const filtered = status ? allOrders.filter(o => o.status === status) : allOrders;
+        renderTable(filtered);
+    }
+
+    function searchOrder(keyword) {
+        const lower = keyword.toLowerCase();
+        const filtered = allOrders.filter(o => o.id.toString().includes(lower) || (o.username && o.username.toLowerCase().includes(lower)));
+        renderTable(filtered);
+    }
+
+    function getBadgeClass(status) {
+        return {'PENDING':'badge-warning','SHIPPED':'badge-info','DELIVERED':'badge-success','CANCELLED':'badge-danger'}[status] || 'badge-info';
+    }
+    function getStatusText(status) {
+        return {'PENDING':'Chờ xử lý','SHIPPED':'Đang giao','DELIVERED':'Giao thành công','CANCELLED':'Đã hủy'}[status] || status;
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+</script>
+</body>
+</html>

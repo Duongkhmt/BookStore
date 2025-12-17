@@ -171,6 +171,8 @@ public class UserService {
         response.setEmail(user.getEmail());
         response.setRole(user.getRole().name());
         response.setStatus(user.getStatus());
+        response.setAddress(user.getAddress());
+        response.setPhoneNumber(user.getPhoneNumber());
         return response;
     }
 
@@ -226,6 +228,9 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
+        user.setAddress(request.getAddress());
+        user.setPhoneNumber(request.getPhoneNumber());
+
         return toResponse(userRepository.save(user));
     }
 
@@ -267,6 +272,13 @@ public class UserService {
             user.setStatus(request.getStatus());
         }
 
+        // --- BỔ SUNG CẬP NHẬT ADDRESS & PHONE ---
+        if (request.getAddress() != null) {
+            user.setAddress(request.getAddress());
+        }
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber());
+        }
         return toResponse(userRepository.save(user));
     }
 

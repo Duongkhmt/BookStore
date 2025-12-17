@@ -27,12 +27,16 @@ public class EntityFinder {
     private final PublisherRepository publisherRepo;
     private final SupplierRepository supplierRepo;
 
+    private final TagRepository tagRepository;
+    private final TopicRepository topicRepository;
+
     public EntityFinder(BookRepository bookRepo, OrderRepository orderRepo,
                         PaymentRepository paymentRepo, UserRepository userRepo,
                         OrderTrackingRepository orderTrackingRepo,
                         // Bổ sung 2 repo này vào constructor
                         CategoryRepository categoryRepo,
-                        PublisherRepository publisherRepo, SupplierRepository supplierRepo) {
+                        PublisherRepository publisherRepo, SupplierRepository supplierRepo,
+                        TagRepository tagRepository, TopicRepository topicRepository) {
 
         this.bookRepo = bookRepo;
         this.orderRepo = orderRepo;
@@ -44,6 +48,9 @@ public class EntityFinder {
         this.categoryRepo = categoryRepo;
         this.publisherRepo = publisherRepo;
         this.supplierRepo = supplierRepo;
+
+        this.tagRepository = tagRepository;
+        this.topicRepository = topicRepository;
 
         log.info("EntityFinder initialized");
     }
@@ -123,5 +130,15 @@ public class EntityFinder {
                         "Không tìm thấy nhà cung cấp ID: " + id));
     }
 
+    // Thêm methods
+    public Tag findTagById(Long id) {
+        return tagRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.RESOURCE_NOT_FOUND, "Không tìm thấy Tag ID: " + id));
+    }
+
+    public Topic findTopicById(Long id) {
+        return topicRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.RESOURCE_NOT_FOUND, "Không tìm thấy Topic ID: " + id));
+    }
 }
 

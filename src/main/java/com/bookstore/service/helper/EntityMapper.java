@@ -170,6 +170,27 @@ public class EntityMapper {
     /**
      * Chuyển đổi Book entity sang BookResponse DTO.
      */
+//    public BookResponse toBookResponse(Book book) {
+//        BookResponse response = new BookResponse();
+//        response.setId(book.getId());
+//        response.setTitle(book.getTitle());
+//        response.setAuthor(book.getAuthor());
+//        response.setIsbn(book.getIsbn());
+//        response.setPrice(book.getPrice());
+//        response.setStockQuantity(book.getStockQuantity());
+//
+//        if (book.getCategory() != null) {
+//            response.setCategoryId(book.getCategory().getId());
+//            response.setCategoryName(book.getCategory().getName());
+//        }
+//
+//        if (book.getPublisher() != null) {
+//            response.setPublisherId(book.getPublisher().getId());
+//            response.setPublisherName(book.getPublisher().getName());
+//        }
+//        return response;
+//    }
+
     public BookResponse toBookResponse(Book book) {
         BookResponse response = new BookResponse();
         response.setId(book.getId());
@@ -178,22 +199,59 @@ public class EntityMapper {
         response.setIsbn(book.getIsbn());
         response.setPrice(book.getPrice());
         response.setStockQuantity(book.getStockQuantity());
+        response.setDifficultyLevel(book.getDifficultyLevel());
+        response.setSummary(book.getSummary());
+        response.setPublicationYear(book.getPublicationYear());
+        response.setPageCount(book.getPageCount());
 
         if (book.getCategory() != null) {
             response.setCategoryId(book.getCategory().getId());
             response.setCategoryName(book.getCategory().getName());
         }
-
         if (book.getPublisher() != null) {
             response.setPublisherId(book.getPublisher().getId());
             response.setPublisherName(book.getPublisher().getName());
         }
+
+        // Tags
+        response.setTags(book.getTags().stream()
+                .map(tag -> {
+                    TagResponse tr = new TagResponse();
+                    tr.setId(tag.getId());
+                    tr.setName(tag.getName());
+                    tr.setTagType(tag.getTagType());
+                    tr.setDescription(tag.getDescription());
+                    return tr;
+                }).toList());
+
+        // Topics
+        response.setTopics(book.getTopics().stream()
+                .map(topic -> {
+                    TopicResponse tr = new TopicResponse();
+                    tr.setId(topic.getId());
+                    tr.setName(topic.getName());
+                    tr.setDescription(topic.getDescription());
+                    return tr;
+                }).toList());
+
         return response;
     }
 
     /**
      * Tạo một Book entity mới từ CreateBookRequest.
      */
+//    public Book toBookEntity(CreateBookRequest request, Category category, Publisher publisher) {
+//        Book book = new Book();
+//        book.setTitle(request.getTitle());
+//        book.setAuthor(request.getAuthor());
+//        book.setIsbn(request.getIsbn());
+//        book.setPrice(request.getPrice());
+//        book.setStockQuantity(request.getStockQuantity());
+//        book.setCategory(category);
+//        book.setPublisher(publisher);
+//        return book;
+//    }
+
     public Book toBookEntity(CreateBookRequest request, Category category, Publisher publisher) {
         Book book = new Book();
         book.setTitle(request.getTitle());
@@ -201,6 +259,10 @@ public class EntityMapper {
         book.setIsbn(request.getIsbn());
         book.setPrice(request.getPrice());
         book.setStockQuantity(request.getStockQuantity());
+        book.setDifficultyLevel(request.getDifficultyLevel());
+        book.setSummary(request.getSummary());
+        book.setPublicationYear(request.getPublicationYear());
+        book.setPageCount(request.getPageCount());
         book.setCategory(category);
         book.setPublisher(publisher);
         return book;
@@ -214,6 +276,10 @@ public class EntityMapper {
         if (request.getAuthor() != null) book.setAuthor(request.getAuthor());
         if (request.getPrice() != null) book.setPrice(request.getPrice());
         if (request.getStockQuantity() != null) book.setStockQuantity(request.getStockQuantity());
+        if (request.getDifficultyLevel() != null) book.setDifficultyLevel(request.getDifficultyLevel());
+        if (request.getSummary() != null) book.setSummary(request.getSummary());
+        if (request.getPublicationYear() != null) book.setPublicationYear(request.getPublicationYear());
+        if (request.getPageCount() != null) book.setPageCount(request.getPageCount());
     }
 
     // ==========================================================

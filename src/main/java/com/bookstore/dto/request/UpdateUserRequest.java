@@ -23,4 +23,10 @@ public class UpdateUserRequest {
     // THÊM TRƯỜNG NÀY
     @NotNull(message = "Trạng thái không được để trống")
     private UserStatus status;
+
+    @NotNull(message = "Địa chỉ không được để trống")
+    private String address;
+
+    private String phoneNumber;
+
 }

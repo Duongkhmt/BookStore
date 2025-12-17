@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>🏢 Quản lý nhà xuất bản - BookStore Admin</title>
+
+    <style layout:fragment="styles">
+        :root {
+            /* Palette màu Dark Mode */
+            --dark-bg-main: #111827;
+            --dark-bg-card: #1f2937;
+            --dark-bg-input: #374151;
+            --dark-border: #4b5563;
+            --text-light: #f9fafb;
+            --text-gray: #9ca3af;
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --info-color: #0ea5e9;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        /* Bảng dữ liệu */
+        .table-container {
+            background: var(--dark-bg-card);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--dark-border);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th {
+            background: rgba(255,255,255,0.05);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 1px solid var(--dark-border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--dark-border);
+            color: var(--text-gray);
+            vertical-align: middle;
+        }
+
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* Custom cell content */
+        .contact-info { font-size: 0.85rem; color: var(--text-gray); margin-top: 0.25rem; }
+        .contact-info div { display: flex; align-items: center; gap: 0.5rem; margin-top: 2px; }
+        .contact-info i { width: 16px; text-align: center; color: var(--primary-color); opacity: 0.8; }
+
+        /* Buttons */
+        .action-buttons { display: flex; gap: 0.5rem; }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        .btn-danger:hover { background: #ef4444; color: white; }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--dark-border);
+        }
+        .btn-outline:hover {
+            background: var(--dark-bg-input);
+            border-color: var(--text-gray);
+        }
+
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.75rem; }
+
+        /* Badge */
+        .badge {
+            display: inline-block; padding: 0.3rem 0.7rem;
+            border-radius: 9999px; font-size: 0.75rem; font-weight: 600;
+            border: 1px solid transparent;
+        }
+        .badge-info { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); }
+
+        .loading { text-align: center; padding: 3rem; color: var(--text-gray); }
+
+        /* MODAL STYLES (Dark Mode) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal.active { display: flex; opacity: 1; }
+
+        .modal-content {
+            background: var(--dark-bg-card);
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--dark-border);
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        .modal.active .modal-content { transform: scale(1); }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--dark-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+        }
+        .modal-header h3 { margin: 0; color: var(--text-light); font-size: 1.25rem; }
+
+        .modal-close {
+            background: transparent; border: none; color: var(--text-gray);
+            font-size: 1.5rem; cursor: pointer; width: 36px; height: 36px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-close:hover { background-color: var(--dark-bg-input); color: var(--text-light); }
+
+        .modal-body { padding: 1.5rem; }
+
+        .form-group { margin-bottom: 1.25rem; }
+
+        .form-label {
+            display: block; margin-bottom: 0.5rem;
+            font-weight: 500; color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: var(--dark-bg-input);
+            border: 1px solid var(--dark-border);
+            color: var(--text-light);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control::placeholder { color: var(--text-gray); opacity: 0.6; }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: #404a5a;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        .modal-footer {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--dark-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            background: var(--dark-bg-main);
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div class="page-header">
+        <h2 class="page-title">
+            <i class="fas fa-building"></i> Quản lý nhà xuất bản
+        </h2>
+        <button class="btn btn-primary" onclick="showPublisherModal()">
+            <i class="fas fa-plus"></i> Thêm NXB
+        </button>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên NXB</th>
+                <th>Địa chỉ</th>
+                <th>Liên hệ</th>
+                <th>Số sách</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody id="publishersTableBody">
+            <tr><td colspan="6" class="loading">Đang tải dữ liệu...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="publisherModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 id="publisherModalTitle">Thêm nhà xuất bản</h3>
+                <button class="modal-close" onclick="closeModal('publisherModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="publisherForm">
+                    <input type="hidden" id="publisherId">
+                    <div class="form-group">
+                        <label class="form-label">Tên NXB *</label>
+                        <input type="text" id="publisherName" class="form-control" placeholder="Nhập tên nhà xuất bản..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Địa chỉ</label>
+                        <input type="text" id="publisherAddress" class="form-control" placeholder="Nhập địa chỉ trụ sở...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" id="publisherPhone" class="form-control" placeholder="Nhập số điện thoại liên hệ...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="publisherEmail" class="form-control" placeholder="example@publisher.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Website</label>
+                        <input type="text" id="publisherWebsite" class="form-control" placeholder="https://...">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('publisherModal')">Hủy bỏ</button>
+                <button class="btn btn-primary" onclick="savePublisher()">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="scripts" th:inline="none">
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadPublishers();
+    });
+
+    let publishers = [];
+    let editingPublisherId = null;
+
+    async function loadPublishers() {
+        try {
+            const response = await API.get('/api/publishers');
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+
+            const result = await response.json();
+            publishers = result.data || [];
+
+            await displayPublishers();
+
+        } catch (error) {
+            document.getElementById('publishersTableBody').innerHTML =
+                '<tr><td colspan="6" class="loading" style="color: #ef4444;">Lỗi tải dữ liệu: ' + error.message + '</td></tr>';
+            console.error('Lỗi loadPublishers:', error);
+        }
+    }
+
+    async function displayPublishers() {
+        const tbody = document.getElementById('publishersTableBody');
+
+        if (publishers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="loading">Chưa có NXB nào. Hãy thêm mới!</td></tr>';
+            return;
+        }
+
+        // Tải danh sách sách để đếm số lượng (Optional)
+        let books = [];
+        try {
+            const booksResponse = await API.get('/api/books');
+            if (booksResponse.ok) {
+                const booksResult = await booksResponse.json();
+                books = booksResult.data || [];
+            }
+        } catch (e) { console.warn("Lỗi tải sách:", e); }
+
+        tbody.innerHTML = publishers.map(publisher => {
+            const bookCount = books.filter(book => book.publisherId === publisher.id).length;
+
+            return `
+                <tr>
+                    <td style="color: var(--text-gray);">#${publisher.id}</td>
+                    <td>
+                        <div style="font-weight: 600; color: var(--text-light); font-size: 1rem;">${publisher.name}</div>
+                        ${publisher.website ? `<div class="contact-info"><a href="${publisher.website}" target="_blank" style="color: var(--primary-color); text-decoration: none;"><i class="fas fa-globe"></i> ${publisher.website}</a></div>` : ''}
+                    </td>
+                    <td style="color: var(--text-light);">${publisher.address || 'N/A'}</td>
+                    <td class="contact-info">
+                        ${publisher.phone ? `<div><i class="fas fa-phone"></i> ${publisher.phone}</div>` : ''}
+                        ${publisher.email ? `<div><i class="fas fa-envelope"></i> ${publisher.email}</div>` : ''}
+                    </td>
+                    <td>
+                        <span class="badge badge-info">${bookCount} sách</span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-outline btn-sm" onclick="editPublisher(${publisher.id})">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deletePublisher(${publisher.id})">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function showPublisherModal(publisher = null) {
+        editingPublisherId = publisher?.id || null;
+
+        document.getElementById('publisherModalTitle').textContent =
+            publisher ? 'Cập nhật nhà xuất bản' : 'Thêm nhà xuất bản mới';
+
+        document.getElementById('publisherForm').reset();
+
+        if (publisher) {
+            document.getElementById('publisherId').value = publisher.id;
+            document.getElementById('publisherName').value = publisher.name || '';
+            document.getElementById('publisherAddress').value = publisher.address || '';
+            document.getElementById('publisherPhone').value = publisher.phone || '';
+            document.getElementById('publisherEmail').value = publisher.email || '';
+            document.getElementById('publisherWebsite').value = publisher.website || '';
+        }
+
+        document.getElementById('publisherModal').classList.add('active');
+
+        // Focus vào ô tên
+        setTimeout(() => document.getElementById('publisherName').focus(), 100);
+    }
+
+    async function savePublisher() {
+        try {
+            const formData = {
+                name: document.getElementById('publisherName').value.trim(),
+                address: document.getElementById('publisherAddress').value.trim(),
+                phone: document.getElementById('publisherPhone').value.trim(),
+                email: document.getElementById('publisherEmail').value.trim(),
+                website: document.getElementById('publisherWebsite').value.trim()
+            };
+
+            if (!formData.name) {
+                alert('Vui lòng nhập tên nhà xuất bản');
+                return;
+            }
+
+            let response;
+
+            if (editingPublisherId) {
+                response = await API.put(`/api/publishers/${editingPublisherId}`, formData);
+            } else {
+                response = await API.post('/api/publishers', formData);
+            }
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Lỗi khi lưu dữ liệu');
+            }
+
+            const result = await response.json();
+
+            if (typeof Utils !== 'undefined' && Utils.showNotification) {
+                Utils.showNotification(result.message, 'success');
+            } else {
+                alert('Thành công!');
+            }
+
+            closeModal('publisherModal');
+            await loadPublishers();
+
+        } catch (error) {
+            console.error('Lỗi savePublisher:', error);
+            alert('❌ ' + error.message);
+        }
+    }
+
+    async function editPublisher(id) {
+        // Tìm trong mảng có sẵn cho nhanh
+        const publisher = publishers.find(p => p.id === id);
+        if (publisher) {
+            showPublisherModal(publisher);
+        } else {
+            try {
+                const response = await API.get(`/api/publishers/${id}`);
+                if (!response.ok) throw new Error('Không thể tải dữ liệu');
+                const result = await response.json();
+                showPublisherModal(result.data);
+            } catch (e) {
+                alert(e.message);
+            }
+        }
+    }
+
+    async function deletePublisher(id) {
+        if (!confirm('Bạn có chắc muốn xóa NXB này không?\n(Lưu ý: Không thể xóa nếu đang có sách thuộc NXB này)')) {
+            return;
+        }
+
+        try {
+            const response = await API.delete(`/api/publishers/${id}`);
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || 'Không thể xóa');
+            }
+
+            if (typeof Utils !== 'undefined' && Utils.showNotification) {
+                Utils.showNotification('Đã xóa thành công', 'success');
+            } else {
+                alert('Đã xóa thành công');
+            }
+
+            await loadPublishers();
+
+        } catch (error) {
+            alert('❌ Lỗi xóa: ' + error.message);
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+        editingPublisherId = null;
+    }
+
+    // Đóng modal khi click ra ngoài
+    window.onclick = function(event) {
+        const modal = document.getElementById('publisherModal');
+        if (event.target === modal) {
+            closeModal('publisherModal');
+        }
+    }
+</script>
+</body>
+</html>

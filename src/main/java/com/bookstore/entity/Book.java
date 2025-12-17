@@ -1,3 +1,4 @@
+// src/main/java/com/bookstore/entity/Book.java
 package com.bookstore.entity;
 
 import jakarta.persistence.*;
@@ -6,18 +7,22 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "books")
 @Data
-@EqualsAndHashCode(exclude = {"category", "publisher", "orderItems", "inventoryHistory"})
-@ToString(exclude = {"category", "publisher", "orderItems", "inventoryHistory"})
+@EqualsAndHashCode(exclude = {"category", "publisher", "tags", "topics", "reviews", "orderItems", "inventoryHistory"})
+@ToString(exclude = {"category", "publisher", "tags", "topics", "reviews", "orderItems", "inventoryHistory"})
 @NamedEntityGraph(
         name = "book-with-details",
         attributeNodes = {
                 @NamedAttributeNode("category"),
-                @NamedAttributeNode("publisher")
+                @NamedAttributeNode("publisher"),
+                @NamedAttributeNode("tags"),
+                @NamedAttributeNode("topics"),
+                @NamedAttributeNode("reviews")
         }
 )
 public class Book {
@@ -38,25 +43,54 @@ public class Book {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    // THÊM/GIỮ LẠI: Số lượng tồn kho hiện tại
     @Column(nullable = false)
     private Integer stockQuantity;
 
-    // SỬA: Thêm cascade PERSIST và MERGE
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    // Thông tin mở rộng
+    @Enumerated(EnumType.STRING)
+    @Column(name = "difficulty_level")
+    private DifficultyLevel difficultyLevel;
+
+    @Column(columnDefinition = "TEXT")
+    private String summary;
+
+    @Column(name = "publication_year")
+    private Integer publicationYear;
+
+    @Column(name = "page_count")
+    private Integer pageCount;
+
+    // Quan hệ
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id", nullable = false)
-    private Publisher publisher; //
+    private Publisher publisher;
 
-    // Mối quan hệ với OrderItem (Khi được đặt hàng)
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<OrderItem> orderItems;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "book_tags",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags = new HashSet<>();
 
-    // MỚI: Mối quan hệ với Inventory (Lịch sử tồn kho)
-    // Khi một Book bị xóa, các bản ghi Inventory liên quan cũng bị xóa (cascade)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "book_topics",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id")
+    )
+    private Set<Topic> topics = new HashSet<>();
+
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Inventory> inventoryHistory; // << THÊM TRƯỜNG NÀY
+    private Set<BookReview> reviews = new HashSet<>();
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<OrderItem> orderItems = new HashSet<>();
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Inventory> inventoryHistory = new HashSet<>();
 }

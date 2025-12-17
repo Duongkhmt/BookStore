@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>🏷️ Quản lý thể loại - BookStore Admin</title>
+
+    <style layout:fragment="styles">
+        :root {
+            /* Palette màu Dark Mode */
+            --dark-bg-main: #111827;
+            --dark-bg-card: #1f2937;
+            --dark-bg-input: #374151;
+            --dark-border: #4b5563;
+            --text-light: #f9fafb;
+            --text-gray: #9ca3af;
+            --primary-color: #3b82f6;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Card Thể loại - Dark Mode */
+        .category-card {
+            background: var(--dark-bg-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--dark-border);
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary-color);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .category-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .category-count {
+            background: var(--dark-bg-input);
+            color: var(--text-gray);
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--dark-border);
+        }
+
+        .category-description {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+            min-height: 3rem; /* Giữ chiều cao đều nhau */
+        }
+
+        /* Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        .btn-danger:hover { background: #ef4444; color: white; }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--dark-border);
+        }
+        .btn-outline:hover {
+            background: var(--dark-bg-input);
+            border-color: var(--text-gray);
+        }
+
+        .btn-sm { padding: 0.4rem 0.85rem; font-size: 0.8rem; }
+
+        .loading {
+            text-align: center; padding: 3rem; color: var(--text-gray);
+            grid-column: 1 / -1;
+        }
+
+        /* MODAL STYLES (Dark Mode) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--dark-bg-card);
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--dark-border);
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        .modal.active .modal-content { transform: scale(1); }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--dark-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+        }
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 1.25rem;
+        }
+
+        .modal-close {
+            background: transparent; border: none; color: var(--text-gray);
+            font-size: 1.5rem; cursor: pointer;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-close:hover {
+            background-color: var(--dark-bg-input); color: var(--text-light);
+        }
+
+        .modal-body { padding: 1.5rem; }
+
+        .form-group { margin-bottom: 1.25rem; }
+
+        .form-label {
+            display: block; margin-bottom: 0.5rem;
+            font-weight: 500; color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: var(--dark-bg-input);
+            border: 1px solid var(--dark-border);
+            color: var(--text-light);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control::placeholder { color: var(--text-gray); opacity: 0.6; }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: #404a5a;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        .modal-footer {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--dark-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            background: var(--dark-bg-main);
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div class="page-header">
+        <h2 class="page-title">
+            <i class="fas fa-tags"></i> Quản lý thể loại
+        </h2>
+        <button class="btn btn-primary" onclick="showCategoryModal()">
+            <i class="fas fa-plus"></i> Thêm thể loại
+        </button>
+    </div>
+
+    <div class="categories-grid" id="categoriesContainer">
+        <div class="loading">Đang tải dữ liệu...</div>
+    </div>
+
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="categoryModalTitle">Thêm thể loại</h3>
+                <button class="modal-close" onclick="closeModal('categoryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryId">
+                    <div class="form-group">
+                        <label class="form-label">Tên thể loại *</label>
+                        <input type="text" id="categoryName" class="form-control" placeholder="Ví dụ: Tiểu thuyết, Kinh tế..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mô tả</label>
+                        <textarea id="categoryDescription" class="form-control" rows="4" placeholder="Nhập mô tả ngắn gọn cho thể loại này..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('categoryModal')">Hủy bỏ</button>
+                <button class="btn btn-primary" onclick="saveCategory()">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="scripts" th:inline="none">
+    document.addEventListener('DOMContentLoaded', loadCategories);
+
+    let categories = [];
+    let editingCategoryId = null;
+
+    // --- 1. Tải danh sách thể loại ---
+    async function loadCategories() {
+        try {
+            const response = await API.get('/api/categories');
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+
+            const result = await response.json();
+            categories = result.data || [];
+
+            await displayCategories();
+
+        } catch (error) {
+            document.getElementById('categoriesContainer').innerHTML =
+                '<div class="loading" style="color: #ef4444;">Lỗi tải dữ liệu: ' + error.message + '</div>';
+            console.error('Lỗi loadCategories:', error);
+        }
+    }
+
+    // --- 2. Hiển thị lên giao diện ---
+    async function displayCategories() {
+        const container = document.getElementById('categoriesContainer');
+
+        if (categories.length === 0) {
+            container.innerHTML = '<div class="loading">Chưa có thể loại nào. Hãy thêm mới!</div>';
+            return;
+        }
+
+        // Tải thêm danh sách sách để đếm số lượng (Optional)
+        let books = [];
+        try {
+            const booksResponse = await API.get('/api/books');
+            if (booksResponse.ok) {
+                const booksResult = await booksResponse.json();
+                books = booksResult.data || [];
+            }
+        } catch (e) {
+            console.warn("Không thể tải số lượng sách", e);
+        }
+
+        container.innerHTML = categories.map(category => {
+            const bookCount = books.filter(book => book.categoryId === category.id).length;
+
+            return `
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-name">${category.name}</div>
+                        <div class="category-count">${bookCount} sách</div>
+                    </div>
+                    <div class="category-description">
+                        ${category.description || '<span style="opacity: 0.5; font-style: italic;">(Chưa có mô tả)</span>'}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline btn-sm" onclick="editCategory(${category.id})">
+                            <i class="fas fa-edit"></i> Sửa
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCategory(${category.id})">
+                            <i class="fas fa-trash"></i> Xóa
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // --- 3. Mở Modal (Thêm hoặc Sửa) ---
+    function showCategoryModal(category = null) {
+        editingCategoryId = category?.id || null;
+
+        document.getElementById('categoryModalTitle').textContent =
+            category ? 'Cập nhật thể loại' : 'Thêm thể loại mới';
+
+        // Reset form
+        document.getElementById('categoryForm').reset();
+
+        // Nếu là sửa, điền dữ liệu cũ vào
+        if (category) {
+            document.getElementById('categoryId').value = category.id;
+            document.getElementById('categoryName').value = category.name || '';
+            document.getElementById('categoryDescription').value = category.description || '';
+        }
+
+        // Hiện modal (thêm class active)
+        document.getElementById('categoryModal').classList.add('active');
+
+        // Focus vào ô nhập tên cho tiện
+        setTimeout(() => document.getElementById('categoryName').focus(), 100);
+    }
+
+    // --- 4. Lưu dữ liệu (Thêm hoặc Cập nhật) ---
+    async function saveCategory() {
+        try {
+            const nameInput = document.getElementById('categoryName');
+            const descInput = document.getElementById('categoryDescription');
+
+            const formData = {
+                name: nameInput.value.trim(),
+                description: descInput.value.trim()
+            };
+
+            if (!formData.name) {
+                alert('Vui lòng nhập tên thể loại!');
+                nameInput.focus();
+                return;
+            }
+
+            let response;
+            if (editingCategoryId) {
+                // Gọi API Sửa
+                response = await API.put(`/api/categories/${editingCategoryId}`, formData);
+            } else {
+                // Gọi API Thêm mới
+                response = await API.post('/api/categories', formData);
+            }
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Lỗi khi lưu dữ liệu');
+            }
+
+            const result = await response.json();
+
+            // Dùng Utils hiển thị thông báo (nếu có) hoặc alert
+            if (typeof Utils !== 'undefined' && Utils.showNotification) {
+                Utils.showNotification(result.message, 'success');
+            } else {
+                alert('Thành công!');
+            }
+
+            closeModal('categoryModal');
+            await loadCategories(); // Tải lại danh sách
+
+        } catch (error) {
+            console.error('Lỗi saveCategory:', error);
+            alert('❌ ' + error.message);
+        }
+    }
+
+    // --- 5. Xử lý nút Sửa ---
+    async function editCategory(id) {
+        // Tìm trong mảng categories có sẵn cho nhanh
+        const category = categories.find(c => c.id === id);
+        if (category) {
+            showCategoryModal(category);
+        } else {
+            // Nếu không thấy thì gọi API lấy chi tiết
+            try {
+                const response = await API.get(`/api/categories/${id}`);
+                if (!response.ok) throw new Error('Không thể tải dữ liệu');
+                const result = await response.json();
+                showCategoryModal(result.data);
+            } catch (e) {
+                alert(e.message);
+            }
+        }
+    }
+
+    // --- 6. Xử lý nút Xóa ---
+    async function deleteCategory(id) {
+        if (!confirm('Bạn có chắc muốn xóa thể loại này không?\n(Lưu ý: Không thể xóa nếu đang có sách thuộc thể loại này)')) {
+            return;
+        }
+
+        try {
+            const response = await API.delete(`/api/categories/${id}`);
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || 'Không thể xóa');
+            }
+
+            if (typeof Utils !== 'undefined' && Utils.showNotification) {
+                Utils.showNotification('Đã xóa thành công', 'success');
+            } else {
+                alert('Đã xóa thành công');
+            }
+
+            await loadCategories();
+
+        } catch (error) {
+            alert('❌ Lỗi xóa: ' + error.message);
+        }
+    }
+
+    // --- 7. Đóng Modal ---
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+        editingCategoryId = null;
+    }
+
+    // Đóng modal khi click ra ngoài vùng content (backdrop)
+    window.onclick = function(event) {
+        const modal = document.getElementById('categoryModal');
+        if (event.target === modal) {
+            closeModal('categoryModal');
+        }
+    }
+</script>
+</body>
+</html>

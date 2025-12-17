@@ -32,12 +32,13 @@ public class User {
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 
+    // --- PHẦN BỔ SUNG MỚI ---
+    private String address;
+
+    @Column(name = "phone_number") // Mapping với cột phone_number trong DB
+    private String phoneNumber;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Order> orders;
-
-    private String name;     // tên hiển thị từ Google
-    private String avatar;   // ảnh đại diện Google
-    @Enumerated(EnumType.STRING)
-    private AuthProvider provider;
 
 }
