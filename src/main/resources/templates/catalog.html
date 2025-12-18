@@ -1,3 +1,5 @@
+
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
@@ -5,7 +7,7 @@
 <div layout:fragment="content">
     <style>
         /* =========================================
-           1. CONFIG & VARIABLES
+           CONFIG & VARIABLES
            ========================================= */
         :root {
             --primary: #6366f1;       /* Indigo */
@@ -22,15 +24,10 @@
         body { background-color: var(--bg-body); font-family: 'Segoe UI', sans-serif; color: var(--text-main); }
         .container-fluid { max-width: 1280px; margin: 0 auto; padding: 40px 20px; }
 
-        /* =========================================
-           2. SEARCH SECTION (TOP)
-           ========================================= */
+        /* SEARCH SECTION */
         .search-section {
-            background: var(--white);
-            padding: 30px;
-            border-radius: var(--radius);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            margin-bottom: 40px;
+            background: var(--white); padding: 30px; border-radius: var(--radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 40px;
             display: flex; flex-direction: column; gap: 20px;
         }
         .search-header h2 { font-size: 1.5rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 10px; }
@@ -51,9 +48,7 @@
         .btn-all { background: white; color: var(--text-main); border: 2px solid #e5e7eb; }
         .btn-all:hover { background: #f9fafb; }
 
-        /* =========================================
-           3. DISPLAY SECTION (DYNAMIC GRID)
-           ========================================= */
+        /* DISPLAY SECTION */
         .section-header { display: flex; justify-content: space-between; align-items: end; margin-bottom: 25px; }
         .section-title {
             font-size: 2rem; font-weight: 900; margin: 0;
@@ -73,7 +68,7 @@
 
         .book-img-wrap {
             height: 280px; overflow: hidden; display: flex; justify-content: center; align-items: center;
-            background: #f3f4f6;
+            background: #f3f4f6; position: relative;
         }
         .book-cover {
             height: 85%; width: auto; object-fit: cover; transition: transform 0.5s ease;
@@ -98,14 +93,19 @@
         }
         .book-card:hover .btn-add-mini { background: var(--primary); color: white; }
 
+        /* Rating Badge */
+        .badge-rating {
+            position: absolute; top: 10px; right: 10px; background: rgba(255, 255, 255, 0.95);
+            color: #d97706; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 800;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 4px; z-index: 2;
+        }
+
         /* Loading / Empty */
         .state-msg { text-align: center; padding: 80px 20px; color: var(--text-sec); width: 100%; grid-column: 1 / -1; }
         .spinner { width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* =========================================
-           4. MODAL & RECOMMENDATIONS
-           ========================================= */
+        /* MODAL */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
             display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px);
@@ -142,35 +142,19 @@
         .rec-img { width: 100%; height: 160px; object-fit: cover; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 5px; }
         .rec-name { font-size: 0.85rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+        /* PAGINATION CONTROLS */
+        .pagination-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 30px; }
+        .btn-page { padding: 8px 16px; border: 1px solid #e5e7eb; background: white; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-main); transition: 0.2s; }
+        .btn-page:hover:not(:disabled) { background: #f3f4f6; }
+        .btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-info { font-weight: 600; color: var(--text-sec); }
+
         @media (max-width: 768px) {
             .search-controls { grid-template-columns: 1fr; }
             .modal-box { flex-direction: column; height: 100vh; max-height: none; border-radius: 0; }
             .modal-left { width: 100%; height: 250px; padding: 20px; }
             .modal-cover-large { height: 100%; width: auto; }
             .modal-right { width: 100%; padding: 20px; }
-        }
-
-        /* Thêm vào trong thẻ <style> của bạn */
-
-        .badge-rating {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.95);
-            color: #d97706; /* Màu vàng cam */
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 800;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            z-index: 2;
-        }
-
-        .book-img-wrap {
-            position: relative; /* Để badge-rating căn theo nó */
         }
     </style>
 
@@ -181,7 +165,7 @@
                 <p style="color:var(--text-sec)">Khám phá hàng ngàn đầu sách hấp dẫn ngay hôm nay.</p>
             </div>
             <div class="search-controls">
-                <input type="text" id="keyword" class="form-control" placeholder="Tìm kiếm sách, tác giả...">
+                <input type="text" id="keyword" class="form-control" placeholder="Tìm kiếm sách, tác giả..." />
                 <select id="category" class="form-select">
                     <option value="">Tất cả thể loại</option>
                 </select>
@@ -195,65 +179,141 @@
                 <h2 id="sectionTitle" class="section-title">🔥 Sách Nổi Bật</h2>
                 <span id="resultCount" class="result-count" style="display: none;">0 kết quả</span>
             </div>
+
             <div id="dynamicGrid" class="book-grid"></div>
+
+            <div id="paginationControls" class="pagination-controls" style="display: none;">
+                <button class="btn-page" onclick="changePage(-1)" id="btnPrev">❮ Trước</button>
+                <span class="page-info" id="pageInfo">Trang 1</span>
+                <button class="btn-page" onclick="changePage(1)" id="btnNext">Sau ❯</button>
+            </div>
         </div>
     </div>
 
-    <div id="detailModal" class="modal-overlay" onclick="closeModal(event)">
-    </div>
+    <div id="detailModal" class="modal-overlay" onclick="closeModal(event)"></div>
 </div>
 
 <th:block layout:fragment="script">
-    <script>
-        // CONFIG
+    <script th:inline="none">
         const API_BASE = '/api';
-
-        // CACHE TOÀN CỤC (Quan trọng để fix lỗi giỏ hàng)
         let allBooksCache = [];
+        let currentSearchUrl = '';
+        let currentPage = 0;
+        let totalPages = 1;
+        let currentFilter = {};
 
         document.addEventListener('DOMContentLoaded', () => {
             loadCategories();
             loadFeaturedBooks();
-
             document.getElementById('keyword').addEventListener('keypress', (e) => {
                 if(e.key === 'Enter') doSearch();
             });
         });
 
-        // --- 1. DATA LOADING (PHIÊN BẢN XỊN) ---
+        // 1. DATA LOADING
         async function loadFeaturedBooks() {
             updateUIState("🔥 Sách Nổi Bật & Đánh Giá Cao", false);
             setLoading(true);
+            togglePagination(false);
             try {
-                // GỌI API MỚI: /api/books/featured
                 const res = await API.get(`${API_BASE}/books/featured`);
                 const json = await res.json();
-
                 if(json.success && json.data) {
-                    // Render danh sách đặc biệt này
+                    allBooksCache = json.data;
                     renderGrid(json.data);
                 }
             } catch (e) { console.error(e); showError(); }
         }
 
-        // --- RENDER GRID (CÓ HIỂN THỊ SAO ⭐) ---
+        function doShowAll() {
+            document.getElementById('keyword').value = '';
+            document.getElementById('category').value = '';
+            updateUIState("📚 Tất cả sách", true);
+            currentPage = 0;
+            currentSearchUrl = `${API_BASE}/books`;
+            currentFilter = {};
+            fetchBooksPage();
+        }
+
+        function doSearch() {
+            const kw = document.getElementById('keyword').value.trim();
+            const cat = document.getElementById('category').value;
+            updateUIState("🔎 Kết quả tìm kiếm", true);
+            currentPage = 0;
+            currentFilter = { categoryId: cat };
+            const params = [];
+            if(kw) params.push(`keyword=${encodeURIComponent(kw)}`);
+            if (kw || cat) {
+                currentSearchUrl = `${API_BASE}/books/search?${params.join('&')}`;
+            } else {
+                currentSearchUrl = `${API_BASE}/books`;
+            }
+            fetchBooksPage();
+        }
+
+        async function fetchBooksPage() {
+            setLoading(true);
+            try {
+                const separator = currentSearchUrl.includes('?') ? '&' : '?';
+                const urlWithPage = `${currentSearchUrl}${separator}page=${currentPage}&size=12`;
+                const res = await API.get(urlWithPage);
+                const json = await res.json();
+                let books = [];
+                if (json.data && json.data.content) {
+                    books = json.data.content;
+                    totalPages = json.data.totalPages;
+                    togglePagination(true);
+                    updatePaginationUI();
+                } else if (Array.isArray(json.data)) {
+                    books = json.data;
+                    togglePagination(false);
+                }
+                if(currentFilter.categoryId && !currentSearchUrl.includes('filter')) {
+                    books = books.filter(b => String(b.categoryId || b.category?.id) === String(currentFilter.categoryId));
+                }
+                allBooksCache = books;
+                updateResultCount(json.data.totalElements || books.length);
+                if(books.length === 0) {
+                    document.getElementById('dynamicGrid').innerHTML = `
+                        <div class="state-msg">
+                            <div style="font-size:3rem">📭</div>
+                            <h3>Không tìm thấy sách nào</h3>
+                        </div>`;
+                    togglePagination(false);
+                } else {
+                    renderGrid(books);
+                }
+            } catch (e) { console.error(e); showError(); }
+        }
+
+        function changePage(delta) {
+            const newPage = currentPage + delta;
+            if (newPage >= 0 && newPage < totalPages) {
+                currentPage = newPage;
+                fetchBooksPage();
+                document.querySelector('.display-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function updatePaginationUI() {
+            document.getElementById('pageInfo').innerText = `Trang ${currentPage + 1} / ${totalPages}`;
+            document.getElementById('btnPrev').disabled = (currentPage === 0);
+            document.getElementById('btnNext').disabled = (currentPage >= totalPages - 1);
+        }
+        function togglePagination(show) { document.getElementById('paginationControls').style.display = show ? 'flex' : 'none'; }
+
         function renderGrid(books) {
             const grid = document.getElementById('dynamicGrid');
-
             grid.innerHTML = books.map(b => {
                 const cover = generateCover(b.title, b.author, b.categoryName);
-
-                // Logic hiển thị sao: Nếu chưa có rating thì ẩn hoặc hiện "Mới"
                 const ratingDisplay = (b.averageRating > 0)
                     ? `⭐ ${b.averageRating} <span style="font-size:0.7em; color:#6b7280; font-weight:normal;">(${b.totalReviews})</span>`
                     : `🆕 Mới`;
-
                 return `
             <div class="book-card" onclick="openDetail('${b.id}')">
                 <div class="book-img-wrap">
                     <div class="badge-rating">${ratingDisplay}</div>
-
-                    <img src="${cover}" class="book-cover" alt="${escapeHtml(b.title)}">
+                    <img src="${cover}" class="book-cover" alt="${escapeHtml(b.title)}" />
                 </div>
                 <div class="book-info">
                     <span class="book-tag">${escapeHtml(b.categoryName || 'General')}</span>
@@ -261,73 +321,19 @@
                     <div class="book-author">${escapeHtml(b.author)}</div>
                     <div class="book-footer">
                         <span class="book-price">${formatPrice(b.price)}</span>
-                        <button class="btn-add-mini" title="Thêm vào giỏ" onclick="addToCart(event, '${b.id}')">
-                            <span>+</span>
-                        </button>
+                        <button class="btn-add-mini" title="Thêm vào giỏ" onclick="addToCart(event, '${b.id}')"><span>+</span></button>
                     </div>
                 </div>
             </div>`;
             }).join('');
         }
-        function doShowAll() {
-            document.getElementById('keyword').value = '';
-            document.getElementById('category').value = '';
-            updateUIState("📚 Tất cả sách", true);
-            fetchBooks(`${API_BASE}/books`);
-        }
 
-        function doSearch() {
-            const kw = document.getElementById('keyword').value.trim();
-            const cat = document.getElementById('category').value;
-            updateUIState("🔎 Kết quả tìm kiếm", true);
-
-            const params = [];
-            if(kw) params.push(`keyword=${encodeURIComponent(kw)}`);
-
-            let url = (kw || cat)
-                ? `${API_BASE}/books/search?${params.join('&')}`
-                : `${API_BASE}/books`;
-
-            fetchBooks(url, { categoryId: cat });
-        }
-
-        async function fetchBooks(url, clientFilter = {}) {
-            setLoading(true);
-            try {
-                const res = await API.get(url);
-                const json = await res.json();
-                let books = json.data || [];
-
-                // CẬP NHẬT CACHE
-                allBooksCache = books;
-
-                if(clientFilter.categoryId && !url.includes('filter')) {
-                    books = books.filter(b => String(b.categoryId || b.category?.id) === String(clientFilter.categoryId));
-                }
-
-                updateResultCount(books.length);
-
-                if(books.length === 0) {
-                    document.getElementById('dynamicGrid').innerHTML = `
-                        <div class="state-msg">
-                            <div style="font-size:3rem">📭</div>
-                            <h3>Không tìm thấy sách nào</h3>
-                        </div>`;
-                } else {
-                    renderGrid(books);
-                }
-            } catch (e) { console.error(e); showError(); }
-        }
-
-        // 2. MODAL & RECOMMENDATIONS
         const modalOverlay = document.getElementById('detailModal');
-
         async function openDetail(bookId) {
             try {
                 document.body.style.cursor = 'wait';
                 const res = await API.get(`${API_BASE}/books/${bookId}`);
                 const json = await res.json();
-
                 if (json.success && json.data) {
                     renderModalContent(json.data);
                     modalOverlay.style.display = 'flex';
@@ -341,13 +347,10 @@
         function renderModalContent(book) {
             const cover = generateCover(book.title, book.author, book.categoryName);
             const desc = book.description ? escapeHtml(book.description) : 'Chưa có mô tả chi tiết.';
-
             modalOverlay.innerHTML = `
                 <div class="modal-box" onclick="event.stopPropagation()">
                     <button class="btn-close-modal" onclick="closeModal()">✕</button>
-                    <div class="modal-left">
-                        <img src="${cover}" class="modal-cover-large">
-                    </div>
+                    <div class="modal-left"><img src="${cover}" class="modal-cover-large" /></div>
                     <div class="modal-right">
                         <div>
                             <span class="modal-tag">${escapeHtml(book.categoryName || 'General')}</span>
@@ -356,16 +359,12 @@
                             <div class="modal-desc"><strong>Giới thiệu:</strong><br>${desc}</div>
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
                                 <div style="font-size:1.8rem; font-weight:800;">${formatPrice(book.price)}</div>
-                                <button class="btn-action btn-search" onclick="addToCart(event, '${book.id}')">
-                                    🛒 Thêm vào giỏ
-                                </button>
+                                <button class="btn-action btn-search" onclick="addToCart(event, '${book.id}')">🛒 Thêm vào giỏ</button>
                             </div>
                         </div>
                         <div class="rec-section">
                             <div class="rec-header">✨ Có thể bạn cũng thích</div>
-                            <div id="recListContainer" class="rec-list">
-                                <div class="spinner" style="width:30px; height:30px;"></div>
-                            </div>
+                            <div id="recListContainer" class="rec-list"><div class="spinner" style="width:30px; height:30px;"></div></div>
                         </div>
                     </div>
                 </div>`;
@@ -382,7 +381,7 @@
                         const cv = generateCover(b.title, b.author, 'Gen');
                         return `
                         <div class="rec-item" onclick="openDetail('${b.id}')" title="${escapeHtml(b.title)}">
-                            <img src="${cv}" class="rec-img">
+                            <img src="${cv}" class="rec-img" />
                             <div class="rec-name">${escapeHtml(b.title)}</div>
                         </div>`;
                     }).join('');
@@ -397,45 +396,20 @@
             document.body.style.overflow = '';
         }
 
-        // 3. ADD TO CART (FIXED)
         function addToCart(event, bookId) {
-            // Ngăn sự kiện nổi bọt để không mở modal khi bấm nút thêm giỏ
             if(event) event.stopPropagation();
-
-            if(!window.CartManager) {
-                alert("Giỏ hàng chưa sẵn sàng. Vui lòng tải lại trang.");
-                return;
-            }
-
-            // Tìm sách trong cache
+            if(!window.CartManager) { alert("Giỏ hàng chưa sẵn sàng. Vui lòng tải lại trang."); return; }
             let book = allBooksCache.find(b => String(b.id) === String(bookId));
-
-            // Fallback nếu không tìm thấy trong cache (tạo object tạm)
-            if(!book) {
-                book = { id: bookId, title: 'Sách đang chọn', price: 0 };
-            }
-
-            // Gọi CartManager
-            window.CartManager.addToCart(String(book.id), book.title, book.price, 1);
+            if(!book) { book = { id: bookId, title: 'Đang tải...', price: 0 }; }
+            window.CartManager.addToCart(String(bookId), book.title, book.price, 1);
             window.CartManager.updateCartBadge();
-
-            // Hiệu ứng nút (UI Feedback)
-            const btn = event.currentTarget; // Lấy đúng nút bấm
+            const btn = event.currentTarget;
             const originalHTML = btn.innerHTML;
             const originalBg = btn.style.background;
-
-            btn.innerHTML = '✔';
-            btn.style.background = '#10b981';
-            btn.style.color = 'white';
-
-            setTimeout(() => {
-                btn.innerHTML = originalHTML;
-                btn.style.background = originalBg;
-                btn.style.color = '';
-            }, 1000);
+            btn.innerHTML = '✔'; btn.style.background = '#10b981'; btn.style.color = 'white';
+            setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = originalBg; btn.style.color = ''; }, 1000);
         }
 
-        // 4. UTILS
         function updateUIState(title, showCount) {
             document.getElementById('sectionTitle').innerText = title;
             document.getElementById('resultCount').style.display = showCount ? 'inline-block' : 'none';
@@ -446,7 +420,6 @@
             if(isLoading) grid.innerHTML = '<div class="state-msg"><div class="spinner"></div><p>Đang tải dữ liệu...</p></div>';
         }
         function showError() { document.getElementById('dynamicGrid').innerHTML = '<div class="state-msg" style="color:red">⚠️ Lỗi kết nối</div>'; }
-
         async function loadCategories() {
             try {
                 const res = await API.get(`${API_BASE}/categories`);
@@ -458,40 +431,27 @@
                 });
             } catch(e) {}
         }
-
         function formatPrice(p) { return new Intl.NumberFormat('vi-VN', {style:'currency', currency:'VND'}).format(p || 0); }
         function escapeHtml(t) { return t ? t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ''; }
 
-        // GENERATE COLORFUL COVER
         function generateCover(title, author, category) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = 300; canvas.height = 450;
-
-            // Palette màu đẹp
-            const gradients = [
-                ['#4f46e5', '#818cf8'], ['#059669', '#34d399'], ['#dc2626', '#f87171'],
-                ['#d97706', '#fbbf24'], ['#7c3aed', '#a78bfa'], ['#0891b2', '#22d3ee'],
-                ['#db2777', '#f472b6'], ['#2563eb', '#60a5fa'], ['#0f172a', '#334155']
-            ];
-
-            let hash = 0;
-            const str = title + (category || '');
+            // Mảng màu gradient này chứa [[...]] gây lỗi cho Thymeleaf nếu không có th:inline="none"
+            const gradients = [['#4f46e5', '#818cf8'], ['#059669', '#34d399'], ['#dc2626', '#f87171'],['#d97706', '#fbbf24'], ['#7c3aed', '#a78bfa'], ['#0891b2', '#22d3ee'],['#db2777', '#f472b6'], ['#2563eb', '#60a5fa'], ['#0f172a', '#334155']];
+            let hash = 0; const str = title + (category || '');
             for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
             const colorIndex = Math.abs(hash) % gradients.length;
             const [c1, c2] = gradients[colorIndex];
-
             const grd = ctx.createLinearGradient(0, 0, 300, 450);
             grd.addColorStop(0, c1); grd.addColorStop(1, c2);
             ctx.fillStyle = grd; ctx.fillRect(0, 0, 300, 450);
-
             ctx.fillStyle = 'rgba(255,255,255,0.1)';
             ctx.beginPath(); ctx.arc(280, 430, 100, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(20, 20, 80, 0, Math.PI*2); ctx.fill();
-
             ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.font = 'bold 24px Arial';
-
             const words = (title || 'Book').split(' ');
             let line = '', lines = [];
             for(let i=0; i<words.length; i++) {
@@ -499,13 +459,10 @@
                 else line += words[i] + ' ';
             }
             lines.push(line);
-
             let startY = 225 - ((lines.length - 1) * 15);
             lines.forEach((l, i) => ctx.fillText(l.trim(), 150, startY + (i * 30)));
-
             ctx.font = 'italic 16px Arial'; ctx.fillStyle = 'rgba(255,255,255,0.8)';
             ctx.fillText((author || '').substring(0, 30), 150, 400);
-
             return canvas.toDataURL();
         }
     </script>

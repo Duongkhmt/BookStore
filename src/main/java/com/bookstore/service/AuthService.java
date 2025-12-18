@@ -61,6 +61,7 @@
 package com.bookstore.service;
 
 import com.bookstore.dto.request.AuthRequest;
+import com.bookstore.dto.request.CreateUserRequest;
 import com.bookstore.dto.request.RegisterRequest;
 import com.bookstore.dto.response.AuthResponse;
 import com.bookstore.entity.User;
@@ -135,6 +136,9 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setRole(UserRole.ROLE_USER);
         user.setStatus(UserStatus.ACTIVE); // MẶC ĐỊNH LÀ ACTIVE KHI ĐĂNG KÝ
+        user.setAddress(registerRequest.getAddress());
+        user.setPhoneNumber(registerRequest.getPhoneNumber());
+
 
         return userRepository.save(user);
     }

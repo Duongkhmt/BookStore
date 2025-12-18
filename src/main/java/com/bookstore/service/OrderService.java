@@ -168,34 +168,5 @@ public class OrderService {
             bookRepo.saveAll(booksToUpdate);
             invRepo.saveAll(inventoriesToCreate);
         }
-//    public boolean isOrderOwner(Long orderId, Object principal) {
-//        try {
-//            if (principal instanceof Authentication) {
-//                Authentication auth = (Authentication) principal;
-//                String username = auth.getName();
-//
-//                // Kiểm tra nếu user có role ADMIN thì cho phép truy cập
-//                boolean isAdmin = auth.getAuthorities().stream()
-//                        .anyMatch(grantedAuthority ->
-//                                grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-//
-//                if (isAdmin) {
-//                    return true;
-//                }
-//
-//                // Nếu không phải ADMIN, kiểm tra quyền sở hữu
-//                Order order = orderRepo.findWithUserById(orderId)
-//                        .orElseThrow(() -> new ApplicationException(ErrorCode.ORDER_NOT_FOUND,
-//                                "Không tìm thấy đơn hàng với ID: " + orderId));
-//
-//                return order.getUser().getUsername().equals(username);
-//            }
-//            return false;
-//        } catch (Exception e) {
-//            log.warn("Error checking order ownership for order {}: {}", orderId, e.getMessage());
-//            return false;
-//        }
-//    }
-
 }
 

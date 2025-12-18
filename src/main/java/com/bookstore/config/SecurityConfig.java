@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/inventory/**").permitAll()
                         .requestMatchers("/api/receipts/**").permitAll()
                         .requestMatchers("/api/suppliers/**").permitAll()
-                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/login","/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/me").authenticated()
 
                         // CATEGORY
