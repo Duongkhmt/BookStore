@@ -3,8 +3,10 @@ package com.bookstore.controller;
 import com.bookstore.dto.request.CreateInventoryRequest;
 import com.bookstore.dto.response.ApiResponse;
 import com.bookstore.dto.response.InventoryResponse;
+import com.bookstore.dto.response.InventoryStatsResponse;
 import com.bookstore.entity.InventoryType;
 import com.bookstore.service.InventoryService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/inventory")
-@PreAuthorize("hasRole('ADMIN')") // Toàn bộ module Inventory chỉ dành cho ADMIN
+@PreAuthorize("hasRole('ADMIN')")
 public class InventoryController {
 
     private final InventoryService inventoryService;
@@ -23,42 +25,50 @@ public class InventoryController {
         this.inventoryService = inventoryService;
     }
 
-    // API: Ghi nhận giao dịch tồn kho thủ công (Nhập hàng, kiểm kê,...)
+    // --- 1. API: Lấy thống kê nhanh (Dashboard) ---
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<InventoryStatsResponse>> getStats() {
+        InventoryStatsResponse stats = inventoryService.getInventoryStats();
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy thống kê thành công", stats));
+    }
+
+    // --- 2. API: Lấy lịch sử giao dịch (ĐÃ SỬA: PHÂN TRANG) ---
+    // Lưu ý: Chỉ giữ hàm này, XÓA hàm getAllInventoryRecords trả về List cũ đi
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<InventoryResponse>>> getAllInventoryRecords(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<InventoryResponse> records = inventoryService.getAllInventoryRecords(page, size);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thành công", records));
+    }
+
+    // --- 3. API: Ghi nhận giao dịch thủ công ---
     @PostMapping
     public ResponseEntity<ApiResponse<InventoryResponse>> createInventoryRecord(@RequestBody CreateInventoryRequest request) {
         InventoryResponse record = inventoryService.createInventoryRecord(request);
-        ApiResponse<InventoryResponse> response = new ApiResponse<>(true, "Ghi nhận giao dịch tồn kho thành công", record);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(new ApiResponse<>(true, "Ghi nhận thành công", record), HttpStatus.CREATED);
     }
 
-    // API: Xem lịch sử tồn kho của một cuốn sách
+    // --- 4. API: Xem lịch sử của 1 cuốn sách ---
     @GetMapping("/book/{bookId}")
     public ResponseEntity<ApiResponse<List<InventoryResponse>>> getInventoryHistoryByBook(@PathVariable Long bookId) {
         List<InventoryResponse> history = inventoryService.getInventoryHistoryByBook(bookId);
-        ApiResponse<List<InventoryResponse>> response = new ApiResponse<>(true, "Lấy lịch sử tồn kho thành công", history);
-        return ResponseEntity.ok(response);
-    }
-    // API: Lấy tất cả records inventory tracking
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<InventoryResponse>>> getAllInventoryRecords() {
-        List<InventoryResponse> records = inventoryService.getAllInventoryRecords();
-        ApiResponse<List<InventoryResponse>> response = new ApiResponse<>(true, "Lấy danh sách giao dịch tồn kho thành công", records);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy lịch sử tồn kho thành công", history));
     }
 
-    // API: Lấy chi tiết 1 record inventory tracking
+    // --- 5. API: Lấy chi tiết 1 record ---
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<InventoryResponse>> getInventoryRecordById(@PathVariable Long id) {
         InventoryResponse record = inventoryService.getInventoryRecordById(id);
-        ApiResponse<InventoryResponse> response = new ApiResponse<>(true, "Lấy chi tiết giao dịch tồn kho thành công", record);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy chi tiết thành công", record));
     }
 
-    // API: Lấy inventory records theo type (IN/OUT)
+    // --- 6. API: Lấy theo loại (IN/OUT) ---
+    // (Có thể giữ lại nếu cần dùng, nhưng Frontend hiện tại đang dùng API số 2 là đủ)
     @GetMapping("/type/{type}")
     public ResponseEntity<ApiResponse<List<InventoryResponse>>> getInventoryRecordsByType(@PathVariable InventoryType type) {
         List<InventoryResponse> records = inventoryService.getInventoryRecordsByType(type);
-        ApiResponse<List<InventoryResponse>> response = new ApiResponse<>(true, "Lấy giao dịch tồn kho theo loại thành công", records);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy theo loại thành công", records));
     }
 }

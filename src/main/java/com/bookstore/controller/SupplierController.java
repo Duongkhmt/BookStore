@@ -6,6 +6,7 @@ import com.bookstore.dto.response.SupplierResponse;
 import com.bookstore.service.SupplierService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,11 +33,12 @@ public class SupplierController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<SupplierResponse>>> getAllSuppliers() {
-        List<SupplierResponse> responses = supplierService.getAllSuppliers();
-        return ResponseEntity.ok(
-                new ApiResponse<>(true, "Lấy danh sách nhà cung cấp thành công", responses)
-        );
+    public ResponseEntity<ApiResponse<Page<SupplierResponse>>> getAllSuppliers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<SupplierResponse> responses = supplierService.getAllSuppliers(page, size);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thành công", responses));
     }
 
     @GetMapping("/active")

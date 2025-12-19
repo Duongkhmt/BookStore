@@ -6,6 +6,7 @@ import com.bookstore.dto.response.ApiResponse;
 import com.bookstore.dto.response.UserResponse;
 import com.bookstore.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,10 +26,15 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
-        List<UserResponse> users = userService.findAllUsers();
-        ApiResponse<List<UserResponse>> response = new ApiResponse<>(
-                true, "Lấy danh sách người dùng thành công", users);
+    public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<UserResponse> userPage = userService.findAllUsers(page, size);
+
+        // ApiResponse bây giờ chứa Page<UserResponse> thay vì List
+        ApiResponse<Page<UserResponse>> response = new ApiResponse<>(
+                true, "Lấy danh sách người dùng thành công", userPage);
         return ResponseEntity.ok(response);
     }
 

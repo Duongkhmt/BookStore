@@ -10,12 +10,6 @@ import java.util.Optional;
 @Repository
 public interface SupplierRepository extends JpaRepository<Supplier, Long> {
 
-    Optional<Supplier> findByName(String name);
     boolean existsByName(String name);
-
-    // Không cần @Query - Spring Data JPA tự generate
-    List<Supplier> findAllByOrderByName();
     List<Supplier> findByIsActiveTrueOrderByName();
-    List<Supplier> findByNameContainingIgnoreCase(String name);
-    List<Supplier> findByNameContainingIgnoreCaseAndIsActiveTrue(String name);
 }

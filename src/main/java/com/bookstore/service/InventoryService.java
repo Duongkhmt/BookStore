@@ -5,8 +5,13 @@ import com.bookstore.dto.response.InventoryResponse;
 import com.bookstore.entity.*;
 import com.bookstore.repository.*;
 import com.bookstore.service.helper.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.bookstore.dto.response.InventoryStatsResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +30,24 @@ public class InventoryService {
         this.bookRepo = bookRepo;
         this.finder = finder;
         this.mapper = mapper;
+    }
+
+    // --- API THỐNG KÊ (QUAN TRỌNG) ---
+    @Transactional(readOnly = true)
+    public InventoryStatsResponse getInventoryStats() {
+        return InventoryStatsResponse.builder()
+                .totalBooks(bookRepo.count())
+                .totalValue(invRepo.calculateTotalInventoryValue())
+                .lowStockCount(invRepo.countLowStockBooks())
+                .outOfStockCount(invRepo.countOutOfStockBooks())
+                .build();
+    }
+
+
+    @Transactional(readOnly = true)
+    public Page<InventoryResponse> getAllInventoryRecords(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
+        return invRepo.findAll(pageable).map(mapper::toInventoryResponse);
     }
 
     @Transactional

@@ -6,6 +6,7 @@ import com.bookstore.dto.response.ApiResponse;
 import com.bookstore.dto.response.PublisherResponse;
 import com.bookstore.service.PublisherService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,10 +25,12 @@ public class PublisherController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PublisherResponse>>> getAllPublishers() {
-        List<PublisherResponse> publishers = publisherService.findAllPublishers();
-        ApiResponse<List<PublisherResponse>> response = new ApiResponse<>(true, "Lấy danh sách nhà xuất bản thành công", publishers);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse<Page<PublisherResponse>>> getAllPublishers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<PublisherResponse> publishers = publisherService.findAllPublishers(page, size);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thành công", publishers));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

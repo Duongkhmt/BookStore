@@ -10,4 +10,6 @@ public class OrderItemResponse {
     private String bookTitle;
     private Integer quantity;
     private BigDecimal priceAtOrder; // Giá tại thời điểm đặt hàng
+    // Thêm cái này để hiển thị cột "Thành tiền"
+    private BigDecimal subtotal;
 }

@@ -6,7 +6,11 @@ import com.bookstore.dto.response.PublisherResponse;
 import com.bookstore.entity.Publisher;
 import com.bookstore.exception.ApplicationException;
 import com.bookstore.exception.ErrorCode;
+import com.bookstore.repository.BookRepository;
 import com.bookstore.repository.PublisherRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,9 +21,11 @@ import java.util.stream.Collectors;
 public class PublisherService {
 
     private final PublisherRepository publisherRepository;
+    private final BookRepository bookRepository; // Inject thêm
 
-    public PublisherService(PublisherRepository publisherRepository) {
+    public PublisherService(PublisherRepository publisherRepository, BookRepository bookRepository) {
         this.publisherRepository = publisherRepository;
+        this.bookRepository = bookRepository;
     }
 
     private PublisherResponse toResponse(Publisher publisher) {
@@ -28,13 +34,15 @@ public class PublisherService {
         response.setName(publisher.getName());
         response.setAddress(publisher.getAddress());
         response.setPhone(publisher.getPhone());
+        response.setBookCount(bookRepository.countByPublisherId(publisher.getId()));
         return response;
     }
 
-    public List<PublisherResponse> findAllPublishers() {
-        return publisherRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<PublisherResponse> findAllPublishers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return publisherRepository.findAll(pageable)
+                .map(this::toResponse);
     }
 
     public PublisherResponse createPublisher(CreatePublisherRequest request) {

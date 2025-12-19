@@ -4,187 +4,67 @@
       layout:decorate="~{admin/layout}">
 <head>
     <title>🚚 Quản lý nhà cung cấp - BookStore Admin</title>
-
     <style layout:fragment="styles">
-        :root {
-            /* Palette màu Dark Mode */
-            --dark-bg-main: #111827;
-            --dark-bg-card: #1f2937;
-            --dark-bg-input: #374151;
-            --dark-border: #4b5563;
-            --text-light: #f9fafb;
-            --text-gray: #9ca3af;
-            --primary-color: #3b82f6;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
-            --info-color: #0ea5e9;
-        }
+        /* --- COPY STYLE ĐỒNG BỘ --- */
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .page-title { font-size: 1.5rem; font-weight: 600; color: #1e293b; }
 
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-light);
-        }
-
-        /* Bảng dữ liệu */
         .table-container {
-            background: var(--dark-bg-card);
-            border-radius: 1rem;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--dark-border);
+            background: white; border-radius: 0.75rem; overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;
+            min-height: 300px;
         }
-
         table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 1rem; text-align: left; font-weight: 600; color: #1e293b; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+        td { padding: 1rem; border-bottom: 1px solid #e2e8f0; color: #334155; vertical-align: middle; }
+        tr:hover { background: #f8fafc; }
 
-        th {
-            background: rgba(255,255,255,0.05);
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-light);
-            border-bottom: 1px solid var(--dark-border);
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--dark-border);
-            color: var(--text-gray);
-            vertical-align: middle;
-        }
-
-        tr:hover { background: rgba(255,255,255,0.02); }
-
-        /* Custom cell content */
-        .contact-info { font-size: 0.85rem; color: var(--text-gray); margin-top: 0.25rem; }
+        .contact-info { font-size: 0.85rem; color: #64748b; margin-top: 0.25rem; }
         .contact-info div { display: flex; align-items: center; gap: 0.5rem; margin-top: 2px; }
-        .contact-info i { width: 16px; text-align: center; color: var(--primary-color); opacity: 0.8; }
+        .contact-info i { width: 16px; text-align: center; color: #3b82f6; opacity: 0.8; }
 
         .supplier-stats { display: flex; gap: 0.5rem; flex-wrap: wrap; }
         .stat-badge {
-            background: var(--dark-bg-input); color: var(--text-light);
+            background: #f1f5f9; color: #0f172a;
             padding: 0.25rem 0.6rem; border-radius: 9999px;
             font-size: 0.75rem; font-weight: 600;
-            border: 1px solid var(--dark-border);
+            border: 1px solid #e2e8f0;
         }
 
-        /* Buttons */
         .action-buttons { display: flex; gap: 0.5rem; }
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-outline { background: white; color: #3b82f6; border: 1px solid #3b82f6; }
+        .btn-outline:hover { background: #eff6ff; }
+        .btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
 
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none; border-radius: 0.5rem;
-            font-weight: 600; cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.875rem;
-            display: inline-flex; align-items: center; gap: 0.5rem;
-        }
+        /* Pagination */
+        .pagination-controls { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem; padding-bottom: 2rem; }
+        .page-info { font-weight: 600; color: #475569; }
 
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
-        }
-        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
-
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444;
-        }
-        .btn-danger:hover { background: #ef4444; color: white; }
-
-        .btn-outline {
-            background: transparent; color: var(--text-light);
-            border: 1px solid var(--dark-border);
-        }
-        .btn-outline:hover {
-            background: var(--dark-bg-input); border-color: var(--text-gray);
-        }
-
-        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.75rem; }
-
-        .loading { text-align: center; padding: 3rem; color: var(--text-gray); }
-
-        /* MODAL STYLES (Dark Mode) */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
-            z-index: 1000; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.3s ease;
-        }
-        .modal.active { display: flex; opacity: 1; }
-
-        .modal-content {
-            background: var(--dark-bg-card); border-radius: 1rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--dark-border);
-            width: 90%; max-width: 500px;
-            transform: scale(0.95); transition: transform 0.3s ease;
-            overflow: hidden;
-        }
-        .modal.active .modal-content { transform: scale(1); }
-
-        .modal-header {
-            padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--dark-border);
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.03);
-        }
-        .modal-header h3 { margin: 0; color: var(--text-light); font-size: 1.25rem; }
-
-        .modal-close {
-            background: transparent; border: none; color: var(--text-gray);
-            font-size: 1.5rem; cursor: pointer; width: 36px; height: 36px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-        }
-        .modal-close:hover { background-color: var(--dark-bg-input); color: var(--text-light); }
-
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 0.75rem; width: 95%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { padding: 1.5rem; }
+        .modal-footer { padding: 1.25rem 1.5rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.75rem; background: #f8fafc; }
 
-        .form-group { margin-bottom: 1.25rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #1e293b; }
+        .form-control { width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; font-size: 0.95rem; }
+        .form-control:focus { outline: none; border-color: #3b82f6; }
 
-        .form-label {
-            display: block; margin-bottom: 0.5rem;
-            font-weight: 500; color: var(--text-light); font-size: 0.95rem;
-        }
-
-        .form-control {
-            width: 100%; padding: 0.75rem 1rem;
-            background-color: var(--dark-bg-input);
-            border: 1px solid var(--dark-border);
-            color: var(--text-light);
-            border-radius: 0.5rem;
-            font-size: 1rem; transition: all 0.3s ease;
-        }
-        .form-control::placeholder { color: var(--text-gray); opacity: 0.6; }
-        .form-control:focus {
-            outline: none; border-color: var(--primary-color);
-            background-color: #404a5a;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-        }
-
-        .modal-footer {
-            padding: 1.25rem 1.5rem; border-top: 1px solid var(--dark-border);
-            display: flex; justify-content: flex-end; gap: 1rem;
-            background: var(--dark-bg-main);
-        }
+        .loading { text-align: center; padding: 3rem; color: #64748b; font-style: italic; }
     </style>
 </head>
 <body>
-
 <div layout:fragment="content">
 
     <div class="page-header">
-        <h2 class="page-title">
-            <i class="fas fa-truck"></i> Quản lý nhà cung cấp
-        </h2>
+        <h2 class="page-title"><i class="fas fa-truck"></i> Quản lý nhà cung cấp</h2>
         <button class="btn btn-primary" onclick="showSupplierModal()">
             <i class="fas fa-plus"></i> Thêm NCC
         </button>
@@ -194,25 +74,35 @@
         <table>
             <thead>
             <tr>
-                <th>ID</th>
+                <th style="width: 50px;">ID</th>
                 <th>Tên NCC</th>
                 <th>Địa chỉ</th>
                 <th>Liên hệ</th>
-                <th>Thống kê</th>
-                <th>Thao tác</th>
+                <th>Thống kê nhập hàng</th>
+                <th style="width: 120px;">Thao tác</th>
             </tr>
             </thead>
             <tbody id="suppliersTableBody">
-            <tr><td colspan="6" class="loading">Đang tải dữ liệu...</td></tr>
+            <tr><td colspan="6" class="loading"><i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>
             </tbody>
         </table>
     </div>
 
+    <div id="pagination" class="pagination-controls" style="display: none;">
+        <button class="btn btn-outline" id="btnPrev" onclick="changePage(-1)">
+            <i class="fas fa-chevron-left"></i> Trước
+        </button>
+        <span id="pageInfo" class="page-info">Trang 1 / 1</span>
+        <button class="btn btn-outline" id="btnNext" onclick="changePage(1)">
+            Sau <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
     <div id="supplierModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3 id="supplierModalTitle">Thêm nhà cung cấp</h3>
-                <button class="modal-close" onclick="closeModal('supplierModal')">&times;</button>
+                <h3 id="supplierModalTitle" style="margin:0; font-size:1.25rem;">Thêm nhà cung cấp</h3>
+                <button onclick="closeModal('supplierModal')" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#64748b;">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="supplierForm">
@@ -222,240 +112,223 @@
                         <input type="text" id="supplierName" class="form-control" placeholder="Công ty TNHH..." required>
                     </div>
                     <div class="form-group">
+                        <label class="form-label">Người liên hệ</label>
+                        <input type="text" id="contactPerson" class="form-control" placeholder="Tên người đại diện...">
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Địa chỉ</label>
-                        <input type="text" id="supplierAddress" class="form-control" placeholder="Nhập địa chỉ...">
+                        <input type="text" id="supplierAddress" class="form-control" placeholder="Địa chỉ...">
+                    </div>
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="text" id="supplierPhone" class="form-control" placeholder="0987...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="supplierEmail" class="form-control" placeholder="contact@supplier.com">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Số điện thoại</label>
-                        <input type="text" id="supplierPhone" class="form-control" placeholder="0987...">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" id="supplierEmail" class="form-control" placeholder="contact@supplier.com">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Mã số thuế</label>
-                        <input type="text" id="supplierTaxCode" class="form-control" placeholder="MST...">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Ghi chú</label>
-                        <textarea id="supplierNote" class="form-control" rows="2" placeholder="Ghi chú thêm..."></textarea>
+                        <label class="form-label">Mô tả / Ghi chú</label>
+                        <textarea id="supplierDescription" class="form-control" rows="2"></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('supplierModal')">Hủy bỏ</button>
-                <button class="btn btn-primary" onclick="saveSupplier()">Lưu lại</button>
+                <button class="btn btn-primary" onclick="saveSupplier()">
+                    <i class="fas fa-save"></i> Lưu lại
+                </button>
             </div>
         </div>
     </div>
 </div>
-<script layout:fragment="scripts" th:inline="none">
-    document.addEventListener('DOMContentLoaded', async function() {
-        await loadSuppliers();
-    });
 
-    let suppliers = [];
+<script layout:fragment="scripts" th:inline="none">
+    // --- VARIABLES ---
+    let currentPage = 0;
+    const pageSize = 10;
+    let totalPages = 1;
     let editingSupplierId = null;
 
+    document.addEventListener('DOMContentLoaded', loadSuppliers);
+
+    // --- 1. LOAD DATA (Server-side Pagination) ---
     async function loadSuppliers() {
+        const tbody = document.getElementById('suppliersTableBody');
+        tbody.innerHTML = '<tr><td colspan="6" class="loading"><i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>';
+
         try {
-            const response = await API.get('/api/suppliers');
-            if (!response.ok) throw new Error('HTTP ' + response.status);
+            // Gọi API phân trang, KHÔNG gọi API receipts nữa
+            const response = await API.get(`/api/suppliers?page=${currentPage}&size=${pageSize}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
             const result = await response.json();
-            suppliers = result.data || [];
+            const suppliers = result.data.content;
+            totalPages = result.data.totalPages;
 
-            await displaySuppliers();
+            if (!suppliers || suppliers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem; color:#64748b;">Chưa có NCC nào</td></tr>';
+                document.getElementById('pagination').style.display = 'none';
+            } else {
+                renderTable(suppliers);
+                updatePaginationUI();
+                document.getElementById('pagination').style.display = 'flex';
+            }
 
         } catch (error) {
-            document.getElementById('suppliersTableBody').innerHTML =
-                '<tr><td colspan="6" class="loading" style="color: #ef4444;">Lỗi tải dữ liệu: ' + error.message + '</td></tr>';
-            console.error('Lỗi loadSuppliers:', error);
+            console.error(error);
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; padding:2rem;">⚠️ Lỗi: ${error.message}</td></tr>`;
         }
     }
 
-    async function displaySuppliers() {
+    // --- 2. RENDER TABLE ---
+    function renderTable(suppliers) {
         const tbody = document.getElementById('suppliersTableBody');
-
-        if (suppliers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="loading">Chưa có NCC nào. Hãy thêm mới!</td></tr>';
-            return;
-        }
-
-        // Load thống kê phiếu nhập (Optional)
-        let receipts = [];
-        try {
-            const receiptsResponse = await API.get('/api/receipts');
-            if(receiptsResponse.ok) {
-                const receiptsResult = await receiptsResponse.json();
-                receipts = receiptsResult.data || [];
-            }
-        } catch (e) { console.warn("Lỗi tải phiếu nhập:", e); }
-
-        tbody.innerHTML = suppliers.map(supplier => {
-            const supplierReceipts = receipts.filter(r => r.supplierId === supplier.id);
-            const receiptCount = supplierReceipts.length;
-            const totalAmount = supplierReceipts.reduce((sum, r) => sum + (r.totalAmount || 0), 0);
-
-            return `
-                <tr>
-                    <td style="color: var(--text-gray);">#${supplier.id}</td>
-                    <td>
-                        <div style="font-weight: 600; color: var(--text-light); font-size: 1rem;">${supplier.name}</div>
-                        ${supplier.taxCode ? `<div class="contact-info"><i class="fas fa-id-card"></i> MST: ${supplier.taxCode}</div>` : ''}
-                        ${supplier.note ? `<div class="contact-info"><i class="fas fa-sticky-note"></i> ${supplier.note}</div>` : ''}
-                    </td>
-                    <td style="color: var(--text-light);">${supplier.address || 'N/A'}</td>
-                    <td class="contact-info">
-                        ${supplier.phone ? `<div><i class="fas fa-phone"></i> ${supplier.phone}</div>` : ''}
-                        ${supplier.email ? `<div><i class="fas fa-envelope"></i> ${supplier.email}</div>` : ''}
-                    </td>
-                    <td>
-                        <div class="supplier-stats">
-                            <span class="stat-badge">${receiptCount} phiếu</span>
-                            <span class="stat-badge" style="color: #34d399;">${Utils.formatPrice(totalAmount)}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-outline btn-sm" onclick="editSupplier(${supplier.id})">
-                                <i class="fas fa-edit"></i> Sửa
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteSupplier(${supplier.id})">
-                                <i class="fas fa-trash"></i> Xóa
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
+        tbody.innerHTML = suppliers.map(s => `
+            <tr>
+                <td>#${s.id}</td>
+                <td>
+                    <strong>${escapeHtml(s.name)}</strong>
+                    ${s.contactPerson ? `<div class="contact-info"><i class="fas fa-user"></i> ${escapeHtml(s.contactPerson)}</div>` : ''}
+                </td>
+                <td>${escapeHtml(s.address || '-')}</td>
+                <td class="contact-info">
+                    ${s.phone ? `<div><i class="fas fa-phone"></i> ${escapeHtml(s.phone)}</div>` : ''}
+                    ${s.email ? `<div><i class="fas fa-envelope"></i> ${escapeHtml(s.email)}</div>` : ''}
+                </td>
+                <td>
+                    <div class="supplier-stats">
+                        <span class="stat-badge">${s.receiptCount || 0} phiếu</span>
+                        <span class="stat-badge" style="color: #10b981; border-color: #10b981;">
+                            ${formatMoney(s.totalImportAmount)}
+                        </span>
+                    </div>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline btn-sm" onclick="prepareEdit('${s.id}', '${escapeJs(s.name)}', '${escapeJs(s.contactPerson)}', '${escapeJs(s.address)}', '${escapeJs(s.phone)}', '${escapeJs(s.email)}', '${escapeJs(s.description)}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSupplier(${s.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    function showSupplierModal(supplier = null) {
-        editingSupplierId = supplier?.id || null;
+    // Helper for Money
+    function formatMoney(amount) {
+        if (!amount) return '0₫';
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    }
 
-        document.getElementById('supplierModalTitle').textContent =
-            supplier ? 'Cập nhật nhà cung cấp' : 'Thêm nhà cung cấp mới';
+    // Helper for Edit
+    window.prepareEdit = function(id, name, contact, address, phone, email, desc) {
+        showSupplierModal({
+            id: id,
+            name: name,
+            contactPerson: (contact === 'undefined' || contact === 'null') ? '' : contact,
+            address: (address === 'undefined' || address === 'null') ? '' : address,
+            phone: (phone === 'undefined' || phone === 'null') ? '' : phone,
+            email: (email === 'undefined' || email === 'null') ? '' : email,
+            description: (desc === 'undefined' || desc === 'null') ? '' : desc
+        });
+    }
 
+    // --- 3. PAGINATION ---
+    function changePage(delta) {
+        const newPage = currentPage + delta;
+        if (newPage >= 0 && newPage < totalPages) {
+            currentPage = newPage;
+            loadSuppliers();
+        }
+    }
+
+    function updatePaginationUI() {
+        document.getElementById('pageInfo').innerText = `Trang ${currentPage + 1} / ${totalPages}`;
+        document.getElementById('btnPrev').disabled = (currentPage === 0);
+        document.getElementById('btnNext').disabled = (currentPage >= totalPages - 1);
+    }
+
+    // --- 4. CRUD OPERATIONS ---
+    function showSupplierModal(s = null) {
+        editingSupplierId = s?.id || null;
+        const title = document.getElementById('supplierModalTitle');
         document.getElementById('supplierForm').reset();
 
-        if (supplier) {
-            document.getElementById('supplierId').value = supplier.id;
-            document.getElementById('supplierName').value = supplier.name || '';
-            document.getElementById('supplierAddress').value = supplier.address || '';
-            document.getElementById('supplierPhone').value = supplier.phone || '';
-            document.getElementById('supplierEmail').value = supplier.email || '';
-            document.getElementById('supplierTaxCode').value = supplier.taxCode || '';
-            document.getElementById('supplierNote').value = supplier.note || '';
+        if (s) {
+            title.textContent = 'Cập nhật nhà cung cấp';
+            document.getElementById('supplierId').value = s.id;
+            document.getElementById('supplierName').value = s.name || '';
+            document.getElementById('contactPerson').value = s.contactPerson || '';
+            document.getElementById('supplierAddress').value = s.address || '';
+            document.getElementById('supplierPhone').value = s.phone || '';
+            document.getElementById('supplierEmail').value = s.email || '';
+            document.getElementById('supplierDescription').value = s.description || '';
+        } else {
+            title.textContent = 'Thêm nhà cung cấp';
         }
 
         document.getElementById('supplierModal').classList.add('active');
-
-        // Focus vào ô tên
         setTimeout(() => document.getElementById('supplierName').focus(), 100);
     }
 
     async function saveSupplier() {
+        const data = {
+            name: document.getElementById('supplierName').value.trim(),
+            contactPerson: document.getElementById('contactPerson').value.trim(),
+            address: document.getElementById('supplierAddress').value.trim(),
+            phone: document.getElementById('supplierPhone').value.trim(),
+            email: document.getElementById('supplierEmail').value.trim(),
+            description: document.getElementById('supplierDescription').value.trim()
+        };
+
+        if (!data.name) { alert('Vui lòng nhập tên NCC'); return; }
+
         try {
-            const formData = {
-                name: document.getElementById('supplierName').value.trim(),
-                address: document.getElementById('supplierAddress').value.trim(),
-                phone: document.getElementById('supplierPhone').value.trim(),
-                email: document.getElementById('supplierEmail').value.trim(),
-                taxCode: document.getElementById('supplierTaxCode').value.trim(),
-                note: document.getElementById('supplierNote').value.trim()
-            };
-
-            if (!formData.name) {
-                alert('Vui lòng nhập tên nhà cung cấp');
-                return;
-            }
-
-            let response;
-
+            let res;
             if (editingSupplierId) {
-                response = await API.put(`/api/suppliers/${editingSupplierId}`, formData);
+                res = await API.put(`/api/suppliers/${editingSupplierId}`, data);
             } else {
-                response = await API.post('/api/suppliers', formData);
+                res = await API.post('/api/suppliers', data);
             }
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Lỗi khi lưu dữ liệu');
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Lỗi lưu dữ liệu');
             }
 
-            const result = await response.json();
-
-            if (typeof Utils !== 'undefined' && Utils.showNotification) {
-                Utils.showNotification(result.message, 'success');
-            } else {
-                alert('Thành công!');
-            }
+            const result = await res.json();
+            if(typeof Utils !== 'undefined') Utils.showNotification(result.message, 'success');
+            else alert('Thành công');
 
             closeModal('supplierModal');
-            await loadSuppliers();
+            loadSuppliers();
 
-        } catch (error) {
-            console.error('Lỗi saveSupplier:', error);
-            alert('❌ ' + error.message);
-        }
-    }
-
-    async function editSupplier(id) {
-        // Tìm trong mảng có sẵn
-        const supplier = suppliers.find(s => s.id === id);
-        if (supplier) {
-            showSupplierModal(supplier);
-        } else {
-            try {
-                const response = await API.get(`/api/suppliers/${id}`);
-                if (!response.ok) throw new Error('Không thể tải dữ liệu');
-                const result = await response.json();
-                showSupplierModal(result.data);
-            } catch (e) {
-                alert(e.message);
-            }
-        }
+        } catch (e) { alert('❌ ' + e.message); }
     }
 
     async function deleteSupplier(id) {
-        if (!confirm('Bạn có chắc muốn xóa NCC này không?\n(Lưu ý: Không thể xóa nếu đã có phiếu nhập từ NCC này)')) {
-            return;
-        }
-
+        if(!confirm('Bạn có chắc chắn muốn xóa NCC này không?')) return;
         try {
-            const response = await API.delete(`/api/suppliers/${id}`);
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || 'Không thể xóa');
+            const res = await API.delete(`/api/suppliers/${id}`);
+            if(!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Lỗi xóa');
             }
-
-            if (typeof Utils !== 'undefined' && Utils.showNotification) {
-                Utils.showNotification('Đã xóa thành công', 'success');
-            } else {
-                alert('Đã xóa thành công');
-            }
-
-            await loadSuppliers();
-
-        } catch (error) {
-            alert('❌ Lỗi xóa: ' + error.message);
-        }
+            if(typeof Utils !== 'undefined') Utils.showNotification('Đã xóa thành công', 'success');
+            loadSuppliers();
+        } catch(e) { alert(e.message); }
     }
 
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.remove('active');
-        editingSupplierId = null;
-    }
-
-    // Đóng modal khi click ra ngoài
-    window.onclick = function(event) {
-        const modal = document.getElementById('supplierModal');
-        if (event.target === modal) {
-            closeModal('supplierModal');
-        }
-    }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); editingSupplierId = null; }
+    window.onclick = function(event) { if (event.target.id === 'supplierModal') closeModal('supplierModal'); }
+    function escapeHtml(text) { return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ''; }
+    function escapeJs(text) { return text ? text.replace(/'/g, "\\'").replace(/"/g, '&quot;') : ''; }
 </script>
 </body>
 </html>

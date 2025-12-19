@@ -9,6 +9,10 @@ import com.bookstore.service.helper.EntityFinder;
 import com.bookstore.service.helper.EntityMapper;
 import com.bookstore.service.helper.RecordFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,17 +99,40 @@ public class ReceiptService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReceiptResponse> getAllReceipts() {
-        return receiptRepo.findAllByOrderByReceiptDateDesc().stream()
-                .map(mapper::toReceiptResponse)
-                .collect(Collectors.toList());
+    public Page<ReceiptResponse> getAllReceipts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("receiptDate").descending());
+
+        return receiptRepo.findAll(pageable).map(receipt -> {
+            // Map từ Entity sang DTO
+            ReceiptResponse response = mapper.toReceiptResponse(receipt);
+
+            // TÍNH TOÁN NHANH:
+            if (receipt.getItems() != null) {
+                response.setItemCount(receipt.getItems().size()); // Lấy số lượng để hiện ra bảng
+            }
+
+            // QUAN TRỌNG: Xóa chi tiết để JSON nhẹ, tải nhanh
+            response.setItems(null);
+
+            return response;
+        });
     }
 
+    // 2. API LẤY CHI TIẾT (GIỮ NGUYÊN: TRẢ VỀ ĐẦY ĐỦ ITEMS)
     @Transactional(readOnly = true)
     public ReceiptResponse getReceiptById(Long id) {
         Receipt receipt = receiptRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Phiếu nhập kho không tồn tại"));
-        return mapper.toReceiptResponse(receipt);
+
+        // Map đầy đủ (bao gồm cả items)
+        ReceiptResponse response = mapper.toReceiptResponse(receipt);
+
+        // Vẫn set itemCount cho đồng bộ
+        if (receipt.getItems() != null) {
+            response.setItemCount(receipt.getItems().size());
+        }
+
+        return response;
     }
 
     @Transactional

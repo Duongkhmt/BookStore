@@ -6,6 +6,7 @@ import com.bookstore.dto.response.ApiResponse;
 import com.bookstore.dto.response.OrderResponse;
 import com.bookstore.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -72,9 +73,11 @@ public class OrderController {
     // API: Lấy tất cả đơn hàng (chỉ ADMIN)
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> getAllOrders() {
-        List<OrderResponse> orders = orderService.getAllOrders();
-        ApiResponse<List<OrderResponse>> response = new ApiResponse<>(true, "Lấy danh sách tất cả đơn hàng thành công", orders);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getAllOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<OrderResponse> orders = orderService.getAllOrders(page, size);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thành công", orders));
     }
 }

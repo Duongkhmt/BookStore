@@ -1,275 +1,55 @@
-
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layout}">
 <head>
     <title>📊 Quản lý tồn kho - BookStore Admin</title>
-
     <style layout:fragment="styles">
-        :root {
-            /* Palette màu Dark Mode */
-            --dark-bg-main: #111827;
-            --dark-bg-card: #1f2937;
-            --dark-bg-input: #374151;
-            --dark-border: #4b5563;
-            --text-light: #f9fafb;
-            --text-gray: #9ca3af;
-            --primary-color: #3b82f6;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-        }
+        /* --- STYLE ĐỒNG BỘ --- */
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .page-title { font-size: 1.5rem; font-weight: 600; color: #1e293b; }
 
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; text-align: center; }
+        .stat-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .stat-label { font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: #1e293b; }
 
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-light);
-        }
-
-        /* Thống kê nhanh */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--dark-bg-card);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--dark-border);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-        .stat-card:hover { transform: translateY(-4px); border-color: var(--primary-color); }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            opacity: 0.9;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--text-gray);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 600;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-light);
-        }
-
-        /* Bộ lọc */
-        .filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            align-items: center;
-            background: var(--dark-bg-card);
-            padding: 1rem;
-            border-radius: 0.75rem;
-            border: 1px solid var(--dark-border);
-        }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .filter-label {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            white-space: nowrap;
-            font-weight: 500;
-        }
-
-        /* Bảng dữ liệu */
-        .table-container {
-            background: var(--dark-bg-card);
-            border-radius: 1rem;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--dark-border);
-        }
-
+        /* Table */
+        .table-container { background: white; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; min-height: 300px; }
         table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 1rem; text-align: left; font-weight: 600; color: #1e293b; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+        td { padding: 1rem; border-bottom: 1px solid #e2e8f0; color: #334155; vertical-align: middle; }
+        tr:hover { background: #f8fafc; }
 
-        th {
-            background: rgba(255,255,255,0.05);
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-light);
-            border-bottom: 1px solid var(--dark-border);
-            white-space: nowrap;
-        }
+        /* Pagination */
+        .pagination-controls { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem; padding-bottom: 2rem; }
+        .page-info { font-weight: 600; color: #475569; }
 
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--dark-border);
-            color: var(--text-gray);
-            vertical-align: middle;
-        }
+        /* Badges */
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
 
-        tr:hover { background: rgba(255,255,255,0.02); }
-
-        /* Buttons */
-        .action-buttons { display: flex; gap: 0.5rem; }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.875rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
-        }
-        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--text-light);
-            border: 1px solid var(--dark-border);
-        }
-        .btn-outline:hover {
-            background: var(--dark-bg-input);
-            border-color: var(--text-gray);
-        }
-
-        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.75rem; }
-
-        /* Badge trạng thái */
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-        .badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .badge-info { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
-
-        .stock-warning { color: var(--danger-color); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
-        .stock-ok { color: var(--success-color); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
-
-        .loading { text-align: center; padding: 3rem; color: var(--text-gray); }
-
-        /* MODAL STYLES (Dark Mode) */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .modal.active { display: flex; opacity: 1; }
-
-        .modal-content {
-            background: var(--dark-bg-card);
-            border-radius: 1rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--dark-border);
-            width: 90%;
-            max-width: 500px;
-            transform: scale(0.95);
-            transition: transform 0.3s ease;
-            overflow: hidden;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal.active .modal-content { transform: scale(1); }
-
-        .modal-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--dark-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.03);
-        }
-        .modal-header h3 { margin: 0; color: var(--text-light); font-size: 1.25rem; }
-
-        .modal-close {
-            background: transparent; border: none; color: var(--text-gray);
-            font-size: 1.5rem; cursor: pointer; width: 36px; height: 36px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-        }
-        .modal-close:hover { background-color: var(--dark-bg-input); color: var(--text-light); }
-
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 0.75rem; width: 95%; max-width: 600px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .modal-header { padding: 1.25rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { padding: 1.5rem; }
+        .modal-footer { padding: 1.25rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.75rem; background: #f8fafc; }
 
-        .form-group { margin-bottom: 1.25rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #1e293b; }
+        .form-control { width: 100%; padding: 0.625rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; }
 
-        .form-label {
-            display: block; margin-bottom: 0.5rem;
-            font-weight: 500; color: var(--text-light);
-            font-size: 0.95rem;
-        }
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; font-weight: 500; cursor: pointer; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #3b82f6; }
 
-        .form-control {
-            width: 100%; padding: 0.75rem 1rem;
-            background-color: var(--dark-bg-input);
-            border: 1px solid var(--dark-border);
-            color: var(--text-light);
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        .form-control::placeholder { color: var(--text-gray); opacity: 0.6; }
-        .form-control:focus {
-            outline: none; border-color: var(--primary-color);
-            background-color: #404a5a;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-        }
-        .form-control:read-only { background-color: #2d3748; cursor: not-allowed; }
-
-        .modal-footer {
-            padding: 1.25rem 1.5rem;
-            border-top: 1px solid var(--dark-border);
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            background: var(--dark-bg-main);
-        }
+        .loading { text-align: center; padding: 3rem; color: #64748b; font-style: italic; }
     </style>
 </head>
 <body>
@@ -277,12 +57,10 @@
 <div layout:fragment="content">
 
     <div class="page-header">
-        <h2 class="page-title">
-            <i class="fas fa-boxes"></i> Quản lý tồn kho
-        </h2>
+        <h2 class="page-title"><i class="fas fa-boxes"></i> Quản lý tồn kho</h2>
         <div class="action-buttons">
-            <button class="btn btn-outline" onclick="showInventoryAdjustModal()">
-                <i class="fas fa-exchange-alt"></i> Điều chỉnh tồn kho
+            <button class="btn btn-primary" onclick="showInventoryAdjustModal()">
+                <i class="fas fa-exchange-alt"></i> Điều chỉnh kho
             </button>
             <button class="btn btn-outline" onclick="showInventoryHistoryModal()">
                 <i class="fas fa-history"></i> Lịch sử giao dịch
@@ -293,49 +71,23 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon">📚</div>
-            <div class="stat-label">Tổng sách trong kho</div>
-            <div class="stat-value" id="totalBooksCount">0</div>
+            <div class="stat-label">Tổng sách</div>
+            <div class="stat-value" id="totalBooksCount">...</div>
         </div>
         <div class="stat-card">
             <div class="stat-icon">💰</div>
-            <div class="stat-label">Tổng giá trị tồn kho</div>
-            <div class="stat-value" id="totalInventoryValue" style="color: #34d399;">0₫</div>
+            <div class="stat-label">Tổng giá trị kho</div>
+            <div class="stat-value" id="totalInventoryValue" style="color: #10b981;">...</div>
         </div>
         <div class="stat-card">
             <div class="stat-icon">⚠️</div>
-            <div class="stat-label">Sách sắp hết hàng</div>
-            <div class="stat-value" id="lowStockCount" style="color: #fbbf24;">0</div>
+            <div class="stat-label">Sắp hết hàng (<10)</div>
+            <div class="stat-value" id="lowStockCount" style="color: #f59e0b;">...</div>
         </div>
         <div class="stat-card">
             <div class="stat-icon">❌</div>
-            <div class="stat-label">Sách hết hàng</div>
-            <div class="stat-value" id="outOfStockCount" style="color: #f87171;">0</div>
-        </div>
-    </div>
-
-    <div class="filters">
-        <div class="filter-group">
-            <span class="filter-label">Tìm kiếm:</span>
-            <input type="text" id="searchInventory" class="form-control" style="width: 250px;"
-                   placeholder="Tên sách, tác giả, ISBN..." onkeyup="searchInventory(this.value)">
-        </div>
-
-        <div class="filter-group">
-            <span class="filter-label">Trạng thái:</span>
-            <select id="stockStatusFilter" class="form-control" style="width: 150px;" onchange="filterInventory()">
-                <option value="">Tất cả</option>
-                <option value="out">Hết hàng</option>
-                <option value="low">Sắp hết</option>
-                <option value="normal">Bình thường</option>
-                <option value="high">Dồi dào</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <span class="filter-label">Thể loại:</span>
-            <select id="categoryFilter" class="form-control" style="width: 150px;" onchange="filterInventory()">
-                <option value="">Tất cả thể loại</option>
-            </select>
+            <div class="stat-label">Hết hàng (0)</div>
+            <div class="stat-value" id="outOfStockCount" style="color: #ef4444;">...</div>
         </div>
     </div>
 
@@ -345,108 +97,74 @@
             <tr>
                 <th>Sách</th>
                 <th>Thể loại</th>
-                <th>Tồn kho</th>
                 <th>Giá bán</th>
-                <th>Giá trị tồn kho</th>
+                <th>Tồn kho</th>
                 <th>Trạng thái</th>
-                <th>Thao tác</th>
             </tr>
             </thead>
             <tbody id="inventoryTableBody">
-            <tr><td colspan="7" class="loading">Đang tải dữ liệu...</td></tr>
+            <tr><td colspan="5" class="loading">Đang tải dữ liệu...</td></tr>
             </tbody>
         </table>
     </div>
 
+    <div id="pagination" class="pagination-controls">
+        <button class="btn btn-outline" id="btnPrev" onclick="changePage(-1)">❮ Trước</button>
+        <span id="pageInfo" class="page-info">Trang 1</span>
+        <button class="btn btn-outline" id="btnNext" onclick="changePage(1)">Sau ❯</button>
+    </div>
+
     <div id="inventoryAdjustModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>📝 Điều chỉnh tồn kho</h3>
-                <button class="modal-close" onclick="closeModal('inventoryAdjustModal')">&times;</button>
-            </div>
+        <div class="modal-content">
+            <div class="modal-header"><h3>Điều chỉnh tồn kho</h3><span onclick="closeModal('inventoryAdjustModal')" style="cursor:pointer">&times;</span></div>
             <div class="modal-body">
-                <form id="inventoryAdjustForm">
+                <form id="adjustForm">
                     <div class="form-group">
-                        <label class="form-label">Chọn sách *</label>
-                        <select id="adjustBook" class="form-control" required onchange="onAdjustBookChange()">
-                            <option value="">Chọn sách...</option>
+                        <label class="form-label">Chọn sách</label>
+                        <select id="adjustBook" class="form-control"><option>Đang tải...</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Loại giao dịch</label>
+                        <select id="adjustType" class="form-control">
+                            <option value="IN">Nhập thêm (+)</option>
+                            <option value="OUT">Xuất bớt (-)</option>
                         </select>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                        <div class="form-group">
-                            <label class="form-label">Tồn kho hiện tại</label>
-                            <input type="text" id="currentStock" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Loại giao dịch *</label>
-                            <select id="adjustType" class="form-control" required onchange="onAdjustTypeChange()">
-                                <option value="IN">Nhập kho (+)</option>
-                                <option value="OUT">Xuất kho (-)</option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Số lượng</label>
+                        <input type="number" id="adjustQty" class="form-control" min="1" value="1">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Số lượng *</label>
-                        <input type="number" id="adjustQuantity" class="form-control" min="1" placeholder="Nhập số lượng..." required>
-                        <small id="stockWarning" style="color: #ef4444; display: none; margin-top: 5px;">
-                            ⚠️ Số lượng xuất vượt quá tồn kho hiện tại
-                        </small>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Lý do *</label>
-                        <textarea id="adjustReason" class="form-control" rows="3" placeholder="Nhập lý do điều chỉnh (VD: Hàng hỏng, Kiểm kê...)" required></textarea>
+                        <label class="form-label">Lý do</label>
+                        <textarea id="adjustReason" class="form-control" rows="2" placeholder="VD: Kiểm kê, Hàng lỗi..."></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('inventoryAdjustModal')">Hủy bỏ</button>
-                <button class="btn btn-primary" onclick="saveInventoryAdjustment()">
-                    <i class="fas fa-save"></i> Lưu điều chỉnh
-                </button>
+                <button class="btn btn-outline" onclick="closeModal('inventoryAdjustModal')">Hủy</button>
+                <button class="btn btn-primary" onclick="saveAdjustment()">Lưu</button>
             </div>
         </div>
     </div>
 
     <div id="inventoryHistoryModal" class="modal">
-        <div class="modal-content" style="max-width: 1000px;">
-            <div class="modal-header">
-                <h3>📋 Lịch sử giao dịch tồn kho</h3>
-                <button class="modal-close" onclick="closeModal('inventoryHistoryModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--dark-border);">
-                    <select id="historyFilterType" class="form-control" style="width: auto;" onchange="loadInventoryHistory()">
-                        <option value="">Tất cả loại</option>
-                        <option value="IN">Nhập kho</option>
-                        <option value="OUT">Xuất kho</option>
-                    </select>
-                    <input type="date" id="historyFilterDate" class="form-control" style="width: auto;" onchange="loadInventoryHistory()">
-                    <select id="historyFilterBook" class="form-control" style="width: auto;" onchange="loadInventoryHistory()">
-                        <option value="">Tất cả sách</option>
-                    </select>
-                    <button class="btn btn-outline" onclick="exportInventoryHistory()" style="margin-left: auto;">
-                        <i class="fas fa-download"></i> Xuất Excel
-                    </button>
-                </div>
-
-                <div class="table-container" style="max-height: 500px; overflow-y: auto;">
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Thời gian</th>
-                            <th>Sách</th>
-                            <th>Loại</th>
-                            <th>Số lượng</th>
-                            <th>Tồn sau</th>
-                            <th>Lý do</th>
-                            <th>Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody id="inventoryHistoryTableBody">
-                        <tr><td colspan="7" class="loading">Đang tải dữ liệu...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header"><h3>Lịch sử giao dịch kho</h3><span onclick="closeModal('inventoryHistoryModal')" style="cursor:pointer">&times;</span></div>
+            <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                <table style="width:100%; border-collapse: collapse;">
+                    <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
+                        <th style="padding: 0.5rem;">Thời gian</th>
+                        <th style="padding: 0.5rem;">Sách</th>
+                        <th style="padding: 0.5rem;">Loại</th>
+                        <th style="padding: 0.5rem;">Số lượng</th>
+                        <th style="padding: 0.5rem;">Lý do</th>
+                    </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                    <tr><td colspan="5" class="loading">Đang tải...</td></tr>
+                    </tbody>
+                </table>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('inventoryHistoryModal')">Đóng</button>
@@ -454,427 +172,121 @@
         </div>
     </div>
 </div>
+
 <script layout:fragment="scripts" th:inline="none">
-    document.addEventListener('DOMContentLoaded', async function() {
-        await loadInventory();
-        await loadCategoriesForFilter();
-        await loadBooksForAdjust();
+    let currentPage = 0;
+    const pageSize = 10;
+    let totalPages = 1;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStats();
+        loadInventory();
+        loadBooksForDropdown();
     });
 
-    let inventoryBooks = [];
-    let filteredBooks = [];
-    let categories = [];
-    let allBooks = [];
-    let inventoryHistory = [];
+    // 1. Load Stats
+    async function loadStats() {
+        try {
+            const res = await API.get('/api/inventory/stats');
+            const stats = (await res.json()).data;
+            document.getElementById('totalBooksCount').textContent = stats.totalBooks;
+            document.getElementById('totalInventoryValue').textContent = formatMoney(stats.totalValue);
+            document.getElementById('lowStockCount').textContent = stats.lowStockCount;
+            document.getElementById('outOfStockCount').textContent = stats.outOfStockCount;
+        } catch(e) {}
+    }
 
-    // --- 1. Tải dữ liệu tồn kho ---
+    // 2. Load Inventory (Thực chất là load Books có phân trang)
     async function loadInventory() {
-        try {
-            const response = await API.get('/api/books');
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-
-            const result = await response.json();
-            inventoryBooks = result.data || [];
-            filteredBooks = [...inventoryBooks];
-
-            updateInventoryStats();
-            displayInventory();
-
-        } catch (error) {
-            document.getElementById('inventoryTableBody').innerHTML =
-                '<tr><td colspan="7" class="loading" style="color: #ef4444;">Lỗi tải dữ liệu: ' + error.message + '</td></tr>';
-            console.error('Lỗi loadInventory:', error);
-        }
-    }
-
-    // --- 2. Tải danh mục cho bộ lọc ---
-    async function loadCategoriesForFilter() {
-        try {
-            const response = await API.get('/api/categories');
-            if (!response.ok) return;
-
-            const result = await response.json();
-            categories = result.data || [];
-
-            const select = document.getElementById('categoryFilter');
-            select.innerHTML = '<option value="">Tất cả thể loại</option>' +
-                categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
-
-        } catch (error) {
-            console.error('Lỗi load categories:', error);
-        }
-    }
-
-    // --- 3. Tải danh sách sách cho Modal điều chỉnh ---
-    async function loadBooksForAdjust() {
-        try {
-            const response = await API.get('/api/books');
-            if (!response.ok) return;
-
-            const result = await response.json();
-            allBooks = result.data || [];
-
-            const select = document.getElementById('adjustBook');
-            select.innerHTML = '<option value="">Chọn sách...</option>' +
-                allBooks.map(book =>
-                    `<option value="${book.id}" data-stock="${book.stockQuantity}">
-                        ${book.title} (Tồn: ${book.stockQuantity})
-                    </option>`
-                ).join('');
-
-        } catch (error) {
-            console.error('Lỗi load books:', error);
-        }
-    }
-
-    // --- 4. Cập nhật thống kê nhanh ---
-    function updateInventoryStats() {
-        let totalValue = 0;
-        let lowStockCount = 0;
-        let outOfStockCount = 0;
-
-        inventoryBooks.forEach(book => {
-            const bookValue = (book.price || 0) * (book.stockQuantity || 0);
-            totalValue += bookValue;
-
-            if (book.stockQuantity === 0) {
-                outOfStockCount++;
-            } else if (book.stockQuantity < 10) {
-                lowStockCount++;
-            }
-        });
-
-        document.getElementById('totalBooksCount').textContent = inventoryBooks.length;
-        document.getElementById('totalInventoryValue').textContent = Utils.formatPrice(totalValue);
-        document.getElementById('lowStockCount').textContent = lowStockCount;
-        document.getElementById('outOfStockCount').textContent = outOfStockCount;
-    }
-
-    // --- 5. Hiển thị bảng tồn kho ---
-    function displayInventory() {
         const tbody = document.getElementById('inventoryTableBody');
+        tbody.innerHTML = '<tr><td colspan="5" class="loading"><i class="fas fa-spinner fa-spin"></i> Đang tải...</td></tr>';
 
-        if (filteredBooks.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="loading">Không tìm thấy sách nào</td></tr>';
-            return;
-        }
+        try {
+            const res = await API.get(`/api/books?page=${currentPage}&size=${pageSize}`);
+            const data = (await res.json()).data;
+            const books = data.content;
+            totalPages = data.totalPages;
 
-        tbody.innerHTML = filteredBooks.map(book => {
-            const inventoryValue = (book.price || 0) * (book.stockQuantity || 0);
-            const stockStatus = getStockStatus(book.stockQuantity);
-            const stockBadge = getStockBadge(book.stockQuantity);
-            const statusText = getStockStatusText(book.stockQuantity);
-
-            return `
+            tbody.innerHTML = books.map(b => `
                 <tr>
-                    <td>
-                        <div style="font-weight: 500; color: var(--text-light);">${book.title}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-gray);">
-                            ${book.author || 'Chưa rõ tác giả'}
-                            ${book.isbn ? ` · ISBN: ${book.isbn}` : ''}
-                        </div>
-                    </td>
-                    <td>${book.categoryName || 'N/A'}</td>
-                    <td>
-                        <span class="badge ${stockBadge}" style="font-size: 0.9rem;">
-                            ${book.stockQuantity}
-                        </span>
-                    </td>
-                    <td style="color: var(--text-light);">${Utils.formatPrice(book.price)}</td>
-                    <td>
-                        <div style="font-weight: 600; color: #34d399;">
-                            ${Utils.formatPrice(inventoryValue)}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="${stockStatus === 'out' ? 'stock-warning' : stockStatus === 'low' ? 'stock-warning' : 'stock-ok'}">
-                            ${stockStatus === 'out' ? '❌' : stockStatus === 'low' ? '⚠️' : '✅'}
-                            ${statusText}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-outline btn-sm" onclick="adjustBookInventory(${book.id})">
-                                <i class="fas fa-exchange-alt"></i> Điều chỉnh
-                            </button>
-                            <button class="btn btn-outline btn-sm" onclick="viewBookHistory(${book.id})">
-                                <i class="fas fa-history"></i> Lịch sử
-                            </button>
-                        </div>
-                    </td>
+                    <td><strong>${escapeHtml(b.title)}</strong></td>
+                    <td>${escapeHtml(b.categoryName || '-')}</td>
+                    <td>${formatMoney(b.price)}</td>
+                    <td><span class="badge ${getStockBadge(b.stockQuantity)}">${b.stockQuantity}</span></td>
+                    <td>${getStockText(b.stockQuantity)}</td>
                 </tr>
-            `;
-        }).join('');
+            `).join('');
+
+            updatePagination();
+        } catch(e) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red">Lỗi tải dữ liệu</td></tr>'; }
     }
 
-    // --- Các hàm hỗ trợ lọc ---
-    function searchInventory(query) {
-        if (!query) {
-            filteredBooks = [...inventoryBooks];
-        } else {
-            const lowerQuery = query.toLowerCase();
-            filteredBooks = inventoryBooks.filter(book =>
-                book.title.toLowerCase().includes(lowerQuery) ||
-                (book.author && book.author.toLowerCase().includes(lowerQuery)) ||
-                (book.isbn && book.isbn.toLowerCase().includes(lowerQuery))
-            );
-        }
-        displayInventory();
+    // 3. Load History
+    async function showInventoryHistoryModal() {
+        document.getElementById('inventoryHistoryModal').classList.add('active');
+        const tbody = document.getElementById('historyTableBody');
+        tbody.innerHTML = '<tr><td colspan="5" class="loading">Đang tải...</td></tr>';
+
+        try {
+            // Load 20 giao dịch gần nhất
+            const res = await API.get('/api/inventory?page=0&size=20');
+            const history = (await res.json()).data.content;
+
+            tbody.innerHTML = history.map(h => `
+                <tr style="border-bottom:1px solid #f1f5f9">
+                    <td style="padding:0.5rem; color:#64748b">${formatDate(h.timestamp)}</td>
+                    <td style="padding:0.5rem">${escapeHtml(h.bookTitle)}</td>
+                    <td style="padding:0.5rem"><span class="badge ${h.type === 'IN' ? 'badge-success' : 'badge-danger'}">${h.type}</span></td>
+                    <td style="padding:0.5rem; font-weight:bold">${h.quantityChange}</td>
+                    <td style="padding:0.5rem; color:#64748b">${escapeHtml(h.reason)}</td>
+                </tr>
+            `).join('');
+        } catch(e) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Lỗi tải lịch sử</td></tr>'; }
     }
 
-    function filterInventory() {
-        const statusFilter = document.getElementById('stockStatusFilter').value;
-        const categoryFilter = document.getElementById('categoryFilter').value;
-
-        filteredBooks = inventoryBooks.filter(book => {
-            if (statusFilter) {
-                const bookStatus = getStockStatus(book.stockQuantity);
-                if (statusFilter !== bookStatus &&
-                    !(statusFilter === 'normal' && bookStatus === 'high')) {
-                    // Logic đơn giản: high cũng coi là normal nếu muốn, tùy bạn
-                    if(statusFilter === 'normal' && bookStatus !== 'normal') return false;
-                    if(statusFilter === 'high' && bookStatus !== 'high') return false;
-                    if(statusFilter === 'low' && bookStatus !== 'low') return false;
-                    if(statusFilter === 'out' && bookStatus !== 'out') return false;
-                }
-            }
-            if (categoryFilter && book.categoryId != categoryFilter) {
-                return false;
-            }
-            return true;
-        });
-        displayInventory();
+    // 4. Adjust Logic
+    async function loadBooksForDropdown() {
+        try {
+            const res = await API.get('/api/books?page=0&size=100'); // Demo 100 cuốn
+            const books = (await res.json()).data.content;
+            document.getElementById('adjustBook').innerHTML = books.map(b => `<option value="${b.id}">${escapeHtml(b.title)} (Tồn: ${b.stockQuantity})</option>`).join('');
+        } catch(e){}
     }
 
-    function getStockStatus(stock) {
-        if (stock === 0) return 'out';
-        if (stock < 10) return 'low';
-        if (stock < 50) return 'normal';
-        return 'high';
-    }
-
-    function getStockBadge(stock) {
-        if (stock === 0) return 'badge-danger';
-        if (stock < 10) return 'badge-warning';
-        if (stock < 50) return 'badge-info';
-        return 'badge-success';
-    }
-
-    function getStockStatusText(stock) {
-        if (stock === 0) return 'Hết hàng';
-        if (stock < 10) return 'Sắp hết';
-        if (stock < 50) return 'Đủ hàng';
-        return 'Dồi dào';
-    }
-
-    // --- Logic Modal Điều chỉnh ---
     function showInventoryAdjustModal() {
-        document.getElementById('inventoryAdjustForm').reset();
-        document.getElementById('stockWarning').style.display = 'none';
         document.getElementById('inventoryAdjustModal').classList.add('active');
     }
 
-    function onAdjustBookChange() {
-        const bookSelect = document.getElementById('adjustBook');
-        const selectedOption = bookSelect.options[bookSelect.selectedIndex];
-        const currentStock = selectedOption ? selectedOption.getAttribute('data-stock') : 0;
-
-        document.getElementById('currentStock').value = currentStock;
-        onAdjustTypeChange();
-    }
-
-    function onAdjustTypeChange() {
-        const type = document.getElementById('adjustType').value;
-        const currentStock = parseInt(document.getElementById('currentStock').value) || 0;
-        const warningElement = document.getElementById('stockWarning');
-
-        if (type === 'OUT' && currentStock === 0) {
-            warningElement.textContent = '⚠️ Sách này đã hết hàng, không thể xuất kho';
-            warningElement.style.display = 'block';
-        } else {
-            warningElement.style.display = 'none';
-        }
-    }
-
-    async function saveInventoryAdjustment() {
+    async function saveAdjustment() {
         try {
-            const bookId = document.getElementById('adjustBook').value;
-            const type = document.getElementById('adjustType').value;
-            const quantity = parseInt(document.getElementById('adjustQuantity').value);
-            const reason = document.getElementById('adjustReason').value.trim();
-
-            if (!bookId) { alert('Vui lòng chọn sách'); return; }
-            if (!quantity || quantity <= 0) { alert('Số lượng phải lớn hơn 0'); return; }
-            if (!reason) { alert('Vui lòng nhập lý do điều chỉnh'); return; }
-
-            if (type === 'OUT') {
-                const currentStock = parseInt(document.getElementById('currentStock').value) || 0;
-                if (quantity > currentStock) {
-                    alert(`Số lượng xuất (${quantity}) vượt quá tồn kho hiện tại (${currentStock})`);
-                    return;
-                }
-            }
-
-            const data = {
-                bookId: parseInt(bookId),
-                quantityChange: quantity,
-                type: type,
-                reason: reason
-            };
-
-            const response = await API.post('/api/inventory', data);
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Lỗi khi điều chỉnh tồn kho');
-            }
-
-            const result = await response.json();
-            if (typeof Utils !== 'undefined' && Utils.showNotification) {
-                Utils.showNotification(result.message, 'success');
-            } else {
-                alert('Thành công!');
-            }
-
-            closeModal('inventoryAdjustModal');
-            await loadInventory();
-            await loadBooksForAdjust();
-
-        } catch (error) {
-            console.error('Lỗi điều chỉnh tồn kho:', error);
-            alert('❌ ' + error.message);
-        }
+            const res = await API.post('/api/inventory', {
+                bookId: document.getElementById('adjustBook').value,
+                type: document.getElementById('adjustType').value,
+                quantityChange: document.getElementById('adjustQty').value,
+                reason: document.getElementById('adjustReason').value
+            });
+            if(res.ok) {
+                alert('Thành công');
+                closeModal('inventoryAdjustModal');
+                loadInventory();
+                loadStats();
+            } else alert('Lỗi');
+        } catch(e) { alert(e.message); }
     }
 
-    function adjustBookInventory(bookId) {
-        const book = allBooks.find(b => b.id === bookId);
-        if (book) {
-            showInventoryAdjustModal();
-            document.getElementById('adjustBook').value = bookId;
-            onAdjustBookChange();
-        }
+    // Utils
+    function changePage(d) { currentPage += d; if(currentPage>=0 && currentPage<totalPages) loadInventory(); }
+    function updatePagination() {
+        document.getElementById('pageInfo').innerText = `Trang ${currentPage + 1}`;
+        document.getElementById('btnPrev').disabled = currentPage === 0;
+        document.getElementById('btnNext').disabled = currentPage >= totalPages - 1;
     }
-
-    // --- Logic Modal Lịch sử ---
-    async function showInventoryHistoryModal() {
-        await loadBooksForHistoryFilter();
-        await loadInventoryHistory();
-        document.getElementById('inventoryHistoryModal').classList.add('active');
-    }
-
-    async function loadBooksForHistoryFilter() {
-        try {
-            const response = await API.get('/api/books');
-            if (!response.ok) return;
-            const result = await response.json();
-            const books = result.data || [];
-            const select = document.getElementById('historyFilterBook');
-            select.innerHTML = '<option value="">Tất cả sách</option>' +
-                books.map(book => `<option value="${book.id}">${book.title}</option>`).join('');
-        } catch (error) { console.error('Lỗi load books for filter:', error); }
-    }
-
-    async function loadInventoryHistory() {
-        try {
-            const typeFilter = document.getElementById('historyFilterType').value;
-            const dateFilter = document.getElementById('historyFilterDate').value;
-            const bookFilter = document.getElementById('historyFilterBook').value;
-
-            let url = '/api/inventory';
-            if (typeFilter) url = `/api/inventory/type/${typeFilter}`;
-
-            const response = await API.get(url);
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-
-            const result = await response.json();
-            let history = result.data || [];
-
-            if (dateFilter) {
-                history = history.filter(record => {
-                    const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
-                    return recordDate === dateFilter;
-                });
-            }
-            if (bookFilter) {
-                history = history.filter(record => record.bookId == bookFilter);
-            }
-
-            history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            history = history.slice(0, 50); // Lấy 50 cái mới nhất
-
-            displayInventoryHistory(history);
-
-        } catch (error) {
-            document.getElementById('inventoryHistoryTableBody').innerHTML =
-                '<tr><td colspan="7" class="loading" style="color: #ef4444;">Lỗi tải dữ liệu</td></tr>';
-            console.error('Lỗi loadInventoryHistory:', error);
-        }
-    }
-
-    function displayInventoryHistory(history) {
-        const tbody = document.getElementById('inventoryHistoryTableBody');
-        if (history.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="loading">Không có giao dịch nào</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = history.map(record => {
-            const typeBadge = record.type === 'IN' ? 'badge-success' : 'badge-danger';
-            const typeText = record.type === 'IN' ? 'NHẬP' : 'XUẤT';
-            const quantityColor = record.type === 'IN' ? '#34d399' : '#f87171';
-            const quantitySign = record.type === 'IN' ? '+' : '-';
-
-            return `
-                <tr>
-                    <td style="color: var(--text-gray);">${Utils.formatDateTime(record.timestamp)}</td>
-                    <td>
-                        <div style="font-weight: 500; color: var(--text-light);">${record.bookTitle || 'N/A'}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-gray);">ID: ${record.bookId}</div>
-                    </td>
-                    <td><span class="badge ${typeBadge}">${typeText}</span></td>
-                    <td style="color: ${quantityColor}; font-weight: 600; font-size: 1rem;">
-                        ${quantitySign}${record.quantityChange}
-                    </td>
-                    <td style="font-weight: 600; color: var(--text-light);">${record.stockAfter || 'N/A'}</td>
-                    <td>${record.reason || 'Không có lý do'}</td>
-                    <td>
-                        <button class="btn btn-outline btn-sm" onclick="alert('Chi tiết: ' + '${record.reason}')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    async function viewBookHistory(bookId) {
-        try {
-            const response = await API.get(`/api/inventory/book/${bookId}`);
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            const result = await response.json();
-
-            showInventoryHistoryModal();
-            document.getElementById('historyFilterBook').value = bookId;
-            // API trên trả về data, ta cần hiển thị nó hoặc reload lại hàm chung
-            await loadInventoryHistory();
-        } catch (error) {
-            alert('Lỗi khi tải lịch sử sách: ' + error.message);
-        }
-    }
-
-    function exportInventoryHistory() {
-        alert('📤 Tính năng xuất Excel đang được phát triển');
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.remove('active');
-    }
-
-    // Đóng modal khi click ra ngoài
-    window.onclick = function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.target.classList.remove('active');
-        }
-    }
+    function getStockBadge(s) { return s===0?'badge-danger':(s<10?'badge-warning':'badge-success'); }
+    function getStockText(s) { return s===0?'Hết hàng':(s<10?'Sắp hết':'Sẵn sàng'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function formatMoney(m) { return new Intl.NumberFormat('vi-VN', {style:'currency', currency:'VND'}).format(m || 0); }
+    function formatDate(d) { return new Date(d).toLocaleString('vi-VN'); }
+    function escapeHtml(t) { return t ? t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ''; }
 </script>
 </body>
 </html>

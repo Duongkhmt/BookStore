@@ -9,6 +9,10 @@ import com.bookstore.exception.ErrorCode;
 import com.bookstore.repository.*;
 import com.bookstore.service.helper.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -117,14 +121,22 @@ public class OrderService {
                     .collect(Collectors.toList());
         }
 
-        @Transactional(readOnly = true)
-        public List<OrderResponse> getAllOrders() {
-            log.info("Getting all orders");
-            return orderRepo.findAllByOrderByOrderDateDesc()
-                    .stream()
-                    .map(mapper::toOrderResponse)
-                    .collect(Collectors.toList());
-        }
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> getAllOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
+        return orderRepo.findAll(pageable).map(order -> {
+            OrderResponse res = mapper.toOrderResponse(order);
+
+            // Tối ưu: Đếm số lượng để hiện ra bảng
+            if (order.getOrderItems() != null) {
+                res.setItemCount(order.getOrderItems().size());
+            }
+
+            // QUAN TRỌNG: Set items = null để giảm tải JSON
+            res.setItems(null);
+            return res;
+        });
+    }
 
         @Transactional
         public OrderResponse updateOrderStatus(Long orderId, UpdateOrderStatusRequest req) {

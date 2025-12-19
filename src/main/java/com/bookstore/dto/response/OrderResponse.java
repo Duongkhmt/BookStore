@@ -20,9 +20,9 @@ public class OrderResponse {
     private String status;
     private BigDecimal totalAmount;
     private String shippingAddress;
-//    private Set<OrderItemResponse> items;
-//    private List<OrderTrackingResponse> trackingHistory;
-private List<OrderItemResponse> items = new ArrayList<>();
+
+    private int itemCount;
+    private List<OrderItemResponse> items = new ArrayList<>();
     private List<OrderTrackingResponse> trackingHistory = new ArrayList<>();
     // THÊM: Chi tiết thanh toán (Dùng DTO đã tạo)
     private PaymentResponse payment;

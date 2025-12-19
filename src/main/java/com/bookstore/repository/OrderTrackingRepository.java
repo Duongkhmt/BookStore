@@ -8,5 +8,4 @@ import java.util.List;
 
 @Repository
 public interface OrderTrackingRepository extends JpaRepository<OrderTracking, Long> {
-    List<OrderTracking> findByOrderIdOrderByTimestampDesc(Long orderId);
 }

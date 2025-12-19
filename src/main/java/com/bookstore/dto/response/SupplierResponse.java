@@ -1,6 +1,8 @@
 package com.bookstore.dto.response;
 
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -15,4 +17,7 @@ public class SupplierResponse {
     private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private long receiptCount;          // Số lượng phiếu nhập
+    private BigDecimal totalImportAmount;
 }

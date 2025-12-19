@@ -9,12 +9,17 @@ import com.bookstore.entity.UserStatus;
 import com.bookstore.exception.ApplicationException;
 import com.bookstore.exception.ErrorCode;
 import com.bookstore.repository.UserRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+
 
 @Service
 public class UserService {
@@ -49,10 +54,12 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserResponse> findAllUsers() {
-        return userRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+    public Page<UserResponse> findAllUsers(int page, int size) {
+        // Tạo đối tượng phân trang, sắp xếp theo ID giảm dần (người mới nhất lên đầu)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        // Repository trả về Page<User>, ta map sang Page<UserResponse>
+        return userRepository.findAll(pageable).map(this::toResponse);
     }
 
     @Transactional(readOnly = true)

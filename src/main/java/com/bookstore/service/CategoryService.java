@@ -5,35 +5,39 @@ import com.bookstore.dto.response.CategoryResponse;
 import com.bookstore.entity.Category;
 import com.bookstore.exception.ApplicationException;
 import com.bookstore.exception.ErrorCode;
+import com.bookstore.repository.BookRepository;
 import com.bookstore.repository.CategoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final BookRepository bookRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, BookRepository bookRepository) {
         this.categoryRepository = categoryRepository;
+        this.bookRepository = bookRepository;
     }
-
     // Mapping: Entity to Response DTO
     private CategoryResponse toResponse(Category category) {
         CategoryResponse response = new CategoryResponse();
         response.setId(category.getId());
         response.setName(category.getName());
         response.setDescription(category.getDescription());
+        response.setBookCount(bookRepository.countByCategoryId(category.getId()));
         return response;
     }
 
-    public List<CategoryResponse> findAllCategories() {
-        return categoryRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<CategoryResponse> findAllCategories(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return categoryRepository.findAll(pageable)
+                .map(this::toResponse);
     }
 
     public CategoryResponse createCategory(String name) {

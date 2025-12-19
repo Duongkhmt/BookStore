@@ -5,10 +5,14 @@ import com.bookstore.dto.response.SupplierResponse;
 import com.bookstore.entity.Supplier;
 import com.bookstore.exception.ApplicationException;
 import com.bookstore.exception.ErrorCode;
+import com.bookstore.repository.ReceiptRepository;
 import com.bookstore.repository.SupplierRepository;
 import com.bookstore.service.helper.EntityMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +26,16 @@ public class SupplierService {
 
     private final SupplierRepository supplierRepository;
     private final EntityMapper mapper;
+    private final ReceiptRepository receiptRepository;
+
+    // Helper map dữ liệu kèm thống kê
+    private SupplierResponse toResponseWithStats(Supplier supplier) {
+        SupplierResponse response = mapper.toSupplierResponse(supplier);
+        // Gọi SQL Count và Sum cực nhanh
+        response.setReceiptCount(receiptRepository.countBySupplierId(supplier.getId()));
+        response.setTotalImportAmount(receiptRepository.sumTotalImportBySupplierId(supplier.getId()));
+        return response;
+    }
 
     @Transactional
     public SupplierResponse createSupplier(CreateSupplierRequest request) {
@@ -47,12 +61,12 @@ public class SupplierService {
         return mapper.toSupplierResponse(savedSupplier);
     }
 
+    // --- SỬA LOGIC NÀY: Trả về Page ---
     @Transactional(readOnly = true)
-    public List<SupplierResponse> getAllSuppliers() {
-        List<Supplier> suppliers = supplierRepository.findAllByOrderByName();
-        return suppliers.stream()
-                .map(mapper::toSupplierResponse)
-                .collect(Collectors.toList());
+    public Page<SupplierResponse> getAllSuppliers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return supplierRepository.findAll(pageable)
+                .map(this::toResponseWithStats); // Map kèm thống kê
     }
 
     @Transactional(readOnly = true)

@@ -5,6 +5,7 @@ import com.bookstore.dto.response.ApiResponse;
 import com.bookstore.dto.response.CategoryResponse;
 import com.bookstore.service.CategoryService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,11 +25,15 @@ public class CategoryController {
     }
 
     // Public endpoint: Lấy danh sách danh mục
+    // --- SỬA API GET: Nhận page, size và trả về Page ---
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
-        List<CategoryResponse> categories = categoryService.findAllCategories();
-        ApiResponse<List<CategoryResponse>> response = new ApiResponse<>(true, "Lấy danh sách danh mục thành công", categories);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse<Page<CategoryResponse>>> getAllCategories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<CategoryResponse> categories = categoryService.findAllCategories(page, size);
+        // ApiResponse bây giờ chứa Page<CategoryResponse>
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thành công", categories));
     }
 
     // Admin endpoint: Thêm danh mục mới

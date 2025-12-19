@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,6 +46,7 @@ public class EntityMapper {
         res.setOrderDate(order.getOrderDate());
         res.setStatus(order.getStatus().name());
 
+
         // Payment - xử lý cẩn thận
         if (order.getPayment() != null) {
             try {
@@ -54,17 +57,22 @@ public class EntityMapper {
             }
         }
 
-        // Order Items - xử lý cẩn thận
+        // --- SỬA ĐOẠN NÀY ---
         if (order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
+            // 1. Luôn đếm số lượng để hiển thị ra bảng (Table)
+            res.setItemCount(order.getOrderItems().size());
+
+            // 2. Map chi tiết (Service sẽ quyết định có giữ lại list này hay xóa đi tùy API)
             try {
                 res.setItems(order.getOrderItems().stream()
                         .map(this::toOrderItemResponse)
                         .collect(Collectors.toList()));
             } catch (Exception e) {
-                log.warn("Error mapping order items for order {}: {}", order.getId(), e.getMessage());
+                log.warn("Error mapping items: {}", e.getMessage());
                 res.setItems(new ArrayList<>());
             }
         } else {
+            res.setItemCount(0); // Không có item nào
             res.setItems(new ArrayList<>());
         }
 
@@ -99,12 +107,28 @@ public class EntityMapper {
     }
 
     public OrderItemResponse toOrderItemResponse(OrderItem item) {
+        if (item == null) return null;
+
         OrderItemResponse res = new OrderItemResponse();
         res.setId(item.getId());
-        res.setBookId(item.getBook().getId());
-        res.setBookTitle(item.getBook().getTitle());
+
+        if (item.getBook() != null) {
+            res.setBookId(item.getBook().getId());
+            res.setBookTitle(item.getBook().getTitle());
+        }
+
         res.setQuantity(item.getQuantity());
+
+        // ✅ MAP DỮ LIỆU:
         res.setPriceAtOrder(item.getPriceAtOrder());
+
+        // ✅ TÍNH SUBTOTAL (Quan trọng):
+        if (item.getPriceAtOrder() != null) {
+            res.setSubtotal(item.getPriceAtOrder().multiply(BigDecimal.valueOf(item.getQuantity())));
+        } else {
+            res.setSubtotal(BigDecimal.ZERO);
+        }
+
         return res;
     }
 
@@ -126,28 +150,34 @@ public class EntityMapper {
         response.setId(receipt.getId());
         response.setReceiptCode(receipt.getReceiptCode());
         response.setReceiptDate(receipt.getReceiptDate());
-
-        // ✅ SỬA: Lấy tên supplier thay vì entity
-        if (receipt.getSupplier() != null) {
-            response.setSupplier(receipt.getSupplier().getName()); // Lấy tên nhà cung cấp
-        } else {
-            response.setSupplier(null); // hoặc giá trị mặc định
-        }
-
         response.setNote(receipt.getNote());
         response.setTotalAmount(receipt.getTotalAmount());
 
-        // Set createdByUsername
+        // 1. Map thông tin Supplier (Tên & ID)
+        if (receipt.getSupplier() != null) {
+            response.setSupplier(receipt.getSupplier().getName());
+            response.setSupplierId(receipt.getSupplier().getId()); // Thêm dòng này
+        }
+
+        // 2. Map người tạo
         if (receipt.getCreatedBy() != null) {
             response.setCreatedByUsername(receipt.getCreatedBy().getUsername());
         }
 
-        // Map receipt items
+        // 3. Xử lý Items (QUAN TRỌNG)
         if (receipt.getItems() != null && !receipt.getItems().isEmpty()) {
-            Set<ReceiptItemResponse> itemResponses = receipt.getItems().stream()
+            // Luôn set số lượng để hiển thị ra bảng
+            response.setItemCount(receipt.getItems().size());
+
+            // Map chi tiết sang List (Lưu ý: Dùng Collectors.toList())
+            List<ReceiptItemResponse> itemResponses = receipt.getItems().stream()
                     .map(this::toReceiptItemResponse)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
+
             response.setItems(itemResponses);
+        } else {
+            response.setItemCount(0);
+            response.setItems(new ArrayList<>());
         }
 
         return response;
@@ -166,30 +196,6 @@ public class EntityMapper {
 
     // ===== CÁC PHƯƠNG THỨC MAP CỦA BOOK (MỚI THÊM VÀO) =====
     // ==========================================================
-
-    /**
-     * Chuyển đổi Book entity sang BookResponse DTO.
-     */
-//    public BookResponse toBookResponse(Book book) {
-//        BookResponse response = new BookResponse();
-//        response.setId(book.getId());
-//        response.setTitle(book.getTitle());
-//        response.setAuthor(book.getAuthor());
-//        response.setIsbn(book.getIsbn());
-//        response.setPrice(book.getPrice());
-//        response.setStockQuantity(book.getStockQuantity());
-//
-//        if (book.getCategory() != null) {
-//            response.setCategoryId(book.getCategory().getId());
-//            response.setCategoryName(book.getCategory().getName());
-//        }
-//
-//        if (book.getPublisher() != null) {
-//            response.setPublisherId(book.getPublisher().getId());
-//            response.setPublisherName(book.getPublisher().getName());
-//        }
-//        return response;
-//    }
 
     public BookResponse toBookResponse(Book book) {
         BookResponse response = new BookResponse();
@@ -240,18 +246,6 @@ public class EntityMapper {
     /**
      * Tạo một Book entity mới từ CreateBookRequest.
      */
-//    public Book toBookEntity(CreateBookRequest request, Category category, Publisher publisher) {
-//        Book book = new Book();
-//        book.setTitle(request.getTitle());
-//        book.setAuthor(request.getAuthor());
-//        book.setIsbn(request.getIsbn());
-//        book.setPrice(request.getPrice());
-//        book.setStockQuantity(request.getStockQuantity());
-//        book.setCategory(category);
-//        book.setPublisher(publisher);
-//        return book;
-//    }
-
     public Book toBookEntity(CreateBookRequest request, Category category, Publisher publisher) {
         Book book = new Book();
         book.setTitle(request.getTitle());

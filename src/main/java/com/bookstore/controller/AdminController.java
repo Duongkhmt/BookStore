@@ -1,44 +1,24 @@
 package com.bookstore.controller;
 
 import com.bookstore.dto.response.ApiResponse;
-import com.bookstore.dto.response.BookResponse;
-import com.bookstore.dto.response.RevenueReportResponse;
-import com.bookstore.entity.OrderStatus;
-import com.bookstore.repository.BookRepository;
-import com.bookstore.repository.OrderRepository;
-import com.bookstore.repository.UserRepository;
+import com.bookstore.dto.response.AdvancedDashboardResponse; // Import DTO mới
 import com.bookstore.service.ReportService;
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN')") // Tất cả endpoints trong controller này đều yêu cầu vai trò ADMIN
+@PreAuthorize("hasRole('ADMIN')")
+@RequiredArgsConstructor
 public class AdminController {
 
     private final ReportService reportService;
-
-    public AdminController(ReportService reportService) {
-        this.reportService = reportService;
-    }
-
-    @GetMapping("/reports/revenue")
-    public ResponseEntity<ApiResponse<RevenueReportResponse>> getRevenueReport(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-
-        RevenueReportResponse report = reportService.generateRevenueReport(startDate, endDate);
-        ApiResponse<RevenueReportResponse> response = new ApiResponse<>(true, "Lấy báo cáo doanh thu thành công", report);
-        return ResponseEntity.ok(response);
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse<AdvancedDashboardResponse>> getAdvancedDashboard() {
+        // Gọi 1 hàm duy nhất, lấy toàn bộ số liệu đã tính toán
+        AdvancedDashboardResponse stats = reportService.getAdvancedDashboard();
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy dữ liệu dashboard thành công", stats));
     }
 }

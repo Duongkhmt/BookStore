@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -200,17 +199,21 @@
         let currentSearchUrl = '';
         let currentPage = 0;
         let totalPages = 1;
-        let currentFilter = {};
+        const pageSize = 12; // Số lượng sách mỗi trang
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadCategories();
-            loadFeaturedBooks();
+            loadCategories(); // Load danh mục
+            loadFeaturedBooks(); // Mặc định load sách nổi bật
+
+            // Enter key to search
             document.getElementById('keyword').addEventListener('keypress', (e) => {
                 if(e.key === 'Enter') doSearch();
             });
         });
 
-        // 1. DATA LOADING
+        // 1. DATA LOADING LOGIC
+
+        // Load sách nổi bật (API này trả về List, không phải Page)
         async function loadFeaturedBooks() {
             updateUIState("🔥 Sách Nổi Bật & Đánh Giá Cao", false);
             setLoading(true);
@@ -218,61 +221,73 @@
             try {
                 const res = await API.get(`${API_BASE}/books/featured`);
                 const json = await res.json();
-                if(json.success && json.data) {
+
+                // API Featured trả về List trực tiếp trong data
+                if(json.success && Array.isArray(json.data)) {
                     allBooksCache = json.data;
                     renderGrid(json.data);
+                } else {
+                    renderGrid([]);
                 }
             } catch (e) { console.error(e); showError(); }
         }
 
+        // Xem tất cả (Gọi API phân trang)
         function doShowAll() {
             document.getElementById('keyword').value = '';
             document.getElementById('category').value = '';
             updateUIState("📚 Tất cả sách", true);
+
             currentPage = 0;
-            currentSearchUrl = `${API_BASE}/books`;
-            currentFilter = {};
+            currentSearchUrl = `${API_BASE}/books`; // API gốc
             fetchBooksPage();
         }
 
+        // Tìm kiếm & Lọc (Gọi API phân trang kèm tham số)
         function doSearch() {
-            const kw = document.getElementById('keyword').value.trim();
-            const cat = document.getElementById('category').value;
             updateUIState("🔎 Kết quả tìm kiếm", true);
             currentPage = 0;
-            currentFilter = { categoryId: cat };
-            const params = [];
-            if(kw) params.push(`keyword=${encodeURIComponent(kw)}`);
-            if (kw || cat) {
-                currentSearchUrl = `${API_BASE}/books/search?${params.join('&')}`;
-            } else {
-                currentSearchUrl = `${API_BASE}/books`;
-            }
+
+            // Xây dựng URL cơ sở, các tham số sẽ được thêm trong fetchBooksPage
+            currentSearchUrl = `${API_BASE}/books`;
             fetchBooksPage();
         }
 
+        // Hàm gọi API chung cho trang chủ (Xử lý Page)
         async function fetchBooksPage() {
             setLoading(true);
+
+            // Lấy tham số từ UI
+            const kw = document.getElementById('keyword').value.trim();
+            const cat = document.getElementById('category').value;
+
+            // Xây dựng Query String
+            // Backend mới hỗ trợ: /api/books?keyword=...&categoryId=...&page=...&size=...
+            let url = `${currentSearchUrl}?page=${currentPage}&size=${pageSize}`;
+
+            if (kw) url += `&keyword=${encodeURIComponent(kw)}`;
+            if (cat) url += `&categoryId=${cat}`;
+
             try {
-                const separator = currentSearchUrl.includes('?') ? '&' : '?';
-                const urlWithPage = `${currentSearchUrl}${separator}page=${currentPage}&size=12`;
-                const res = await API.get(urlWithPage);
+                const res = await API.get(url);
                 const json = await res.json();
+
+                // Xử lý dữ liệu trả về dạng Page
                 let books = [];
                 if (json.data && json.data.content) {
                     books = json.data.content;
                     totalPages = json.data.totalPages;
+                    updateResultCount(json.data.totalElements);
                     togglePagination(true);
                     updatePaginationUI();
-                } else if (Array.isArray(json.data)) {
-                    books = json.data;
+                } else {
+                    // Fallback nếu API lỗi hoặc trả về rỗng
+                    books = [];
                     togglePagination(false);
                 }
-                if(currentFilter.categoryId && !currentSearchUrl.includes('filter')) {
-                    books = books.filter(b => String(b.categoryId || b.category?.id) === String(currentFilter.categoryId));
-                }
+
                 allBooksCache = books;
-                updateResultCount(json.data.totalElements || books.length);
+
                 if(books.length === 0) {
                     document.getElementById('dynamicGrid').innerHTML = `
                         <div class="state-msg">
@@ -286,6 +301,7 @@
             } catch (e) { console.error(e); showError(); }
         }
 
+        // 2. UI HELPERS
         function changePage(delta) {
             const newPage = currentPage + delta;
             if (newPage >= 0 && newPage < totalPages) {
@@ -328,6 +344,26 @@
             }).join('');
         }
 
+        // 3. LOAD CATEGORIES (Cập nhật để xử lý Page)
+        async function loadCategories() {
+            try {
+                // API categories trả về Page, cần lấy .content
+                const res = await API.get(`${API_BASE}/categories?page=0&size=100`);
+                const json = await res.json();
+
+                const select = document.getElementById('category');
+
+                // Kiểm tra cấu trúc trả về (Page hay List)
+                const categories = json.data.content || json.data || [];
+
+                categories.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id; opt.textContent = c.name; select.appendChild(opt);
+                });
+            } catch(e) { console.error("Lỗi load categories", e); }
+        }
+
+        // 4. MODAL & CART LOGIC (Giữ nguyên, chỉ sửa API Detail nếu cần)
         const modalOverlay = document.getElementById('detailModal');
         async function openDetail(bookId) {
             try {
@@ -374,6 +410,7 @@
             const container = document.getElementById('recListContainer');
             if(!container) return;
             try {
+                // API Recommendation vẫn trả về List (không đổi)
                 const res = await API.get(`${API_BASE}/books/${bookId}/recommendations`);
                 const json = await res.json();
                 if(json.success && json.data && json.data.length > 0) {
@@ -410,6 +447,7 @@
             setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = originalBg; btn.style.color = ''; }, 1000);
         }
 
+        // --- UTILS ---
         function updateUIState(title, showCount) {
             document.getElementById('sectionTitle').innerText = title;
             document.getElementById('resultCount').style.display = showCount ? 'inline-block' : 'none';
@@ -420,17 +458,6 @@
             if(isLoading) grid.innerHTML = '<div class="state-msg"><div class="spinner"></div><p>Đang tải dữ liệu...</p></div>';
         }
         function showError() { document.getElementById('dynamicGrid').innerHTML = '<div class="state-msg" style="color:red">⚠️ Lỗi kết nối</div>'; }
-        async function loadCategories() {
-            try {
-                const res = await API.get(`${API_BASE}/categories`);
-                const json = await res.json();
-                const select = document.getElementById('category');
-                (json.data || []).forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c.id; opt.textContent = c.name; select.appendChild(opt);
-                });
-            } catch(e) {}
-        }
         function formatPrice(p) { return new Intl.NumberFormat('vi-VN', {style:'currency', currency:'VND'}).format(p || 0); }
         function escapeHtml(t) { return t ? t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ''; }
 
@@ -438,7 +465,6 @@
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = 300; canvas.height = 450;
-            // Mảng màu gradient này chứa [[...]] gây lỗi cho Thymeleaf nếu không có th:inline="none"
             const gradients = [['#4f46e5', '#818cf8'], ['#059669', '#34d399'], ['#dc2626', '#f87171'],['#d97706', '#fbbf24'], ['#7c3aed', '#a78bfa'], ['#0891b2', '#22d3ee'],['#db2777', '#f472b6'], ['#2563eb', '#60a5fa'], ['#0f172a', '#334155']];
             let hash = 0; const str = title + (category || '');
             for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);

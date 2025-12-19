@@ -153,13 +153,25 @@ public class BookController {
 
     // --- 1. API CƠ BẢN (ĐÃ CẬP NHẬT PHÂN TRANG) ---
 
+//    @GetMapping
+//    public ResponseEntity<ApiResponse<Page<BookResponse>>> getAllBooks(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "12") int size // Mặc định 12 cuốn (dễ chia cột 3, 4)
+//    ) {
+//        Page<BookResponse> books = bookService.findAllBooks(page, size);
+//        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách sách thành công", books));
+//    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<Page<BookResponse>>> getAllBooks(
+            @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long publisherId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size // Mặc định 12 cuốn (dễ chia cột 3, 4)
+            @RequestParam(defaultValue = "10") int size
     ) {
-        Page<BookResponse> books = bookService.findAllBooks(page, size);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách sách thành công", books));
+        Page<BookResponse> books = bookService.getAllBooksWithFilter(keyword, categoryId, publisherId, page, size);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Tải dữ liệu thành công", books));
     }
 
     @GetMapping("/{id}")
@@ -170,31 +182,31 @@ public class BookController {
 
     // --- 2. API MỚI: TÌM KIẾM & LỌC (ĐÃ CẬP NHẬT PHÂN TRANG) ---
 
-    // Tìm kiếm chung (Title, Author, Category)
-    @GetMapping("/search")
-    public ResponseEntity<ApiResponse<Page<BookResponse>>> searchBooks(
-            @RequestParam(required = false, defaultValue = "") String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size
-    ) {
-        // Service đã xử lý map sang DTO và Page, Controller chỉ việc gọi
-        Page<BookResponse> books = bookService.searchBooks(keyword, keyword, keyword, page, size);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Kết quả tìm kiếm", books));
-    }
-
-    // Lọc nâng cao (Level, Tag, Topic)
-    @GetMapping("/filter")
-    public ResponseEntity<ApiResponse<Page<BookResponse>>> filterBooks(
-            @RequestParam(required = false) DifficultyLevel level,
-            @RequestParam(required = false) Long tagId,
-            @RequestParam(required = false) Long topicId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size
-    ) {
-        // Service trả về Page<BookResponse> trực tiếp, không cần map thủ công ở đây nữa
-        Page<BookResponse> books = bookService.filterBooks(level, tagId, topicId, page, size);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Kết quả lọc sách", books));
-    }
+//    // Tìm kiếm chung (Title, Author, Category)
+//    @GetMapping("/search")
+//    public ResponseEntity<ApiResponse<Page<BookResponse>>> searchBooks(
+//            @RequestParam(required = false, defaultValue = "") String keyword,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "12") int size
+//    ) {
+//        // Service đã xử lý map sang DTO và Page, Controller chỉ việc gọi
+//        Page<BookResponse> books = bookService.searchBooks(keyword, keyword, keyword, page, size);
+//        return ResponseEntity.ok(new ApiResponse<>(true, "Kết quả tìm kiếm", books));
+//    }
+//
+////     Lọc nâng cao (Level, Tag, Topic)
+//    @GetMapping("/filter")
+//    public ResponseEntity<ApiResponse<Page<BookResponse>>> filterBooks(
+//            @RequestParam(required = false) DifficultyLevel level,
+//            @RequestParam(required = false) Long tagId,
+//            @RequestParam(required = false) Long topicId,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "12") int size
+//    ) {
+//        // Service trả về Page<BookResponse> trực tiếp, không cần map thủ công ở đây nữa
+//        Page<BookResponse> books = bookService.filterBooks(level, tagId, topicId, page, size);
+//        return ResponseEntity.ok(new ApiResponse<>(true, "Kết quả lọc sách", books));
+//    }
 
     // --- 3. API GỢI Ý & NỔI BẬT (GIỮ NGUYÊN LIST VÌ SỐ LƯỢNG ÍT) ---
 
